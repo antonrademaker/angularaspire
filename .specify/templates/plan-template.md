@@ -25,6 +25,7 @@
 **Project Type**: [aspire-multi - determines source structure with .NET APIs and Angular apps]  
 **Architecture Method**: [IDesign - business service boundaries, avoid functional decomposition, or NEEDS CLARIFICATION]  
 **Service Boundaries**: [business capabilities identified, e.g., EventManagement, Registration, SessionManagement, or NEEDS CLARIFICATION]  
+**Code Generation**: [C# interfaces to .proto generation, TypeScript model generation from C#, or NEEDS CLARIFICATION]  
 **Observability**: [e.g., OpenTelemetry tracing, Prometheus metrics, structured logging, or NEEDS CLARIFICATION]  
 **Performance Goals**: [domain-specific, e.g., 1000 req/s APIs, <3s initial load, 90+ Lighthouse score, or NEEDS CLARIFICATION]  
 **Constraints**: [domain-specific, e.g., <200ms p95 API response, <2MB bundle size, gRPC compatibility, or NEEDS CLARIFICATION]  
@@ -94,13 +95,13 @@ src/
 └── SharedUI/               # Pure UI component library (NO business services)
     └── src/lib/
 
-protos/                     # gRPC Business Service Contracts
-├── EventManagement.proto    # Event lifecycle service contract
-├── Registration.proto       # Registration workflow service contract
-├── SessionManagement.proto  # Session management service contract
-├── UserManagement.proto     # User management service contract
-└── Notifications.proto      # Notification service contract
-└── common.proto
+protos/                     # Generated gRPC Service Contracts (from C# interfaces)
+├── EventManagement.proto    # Generated from IEventManagementService.cs
+├── Registration.proto       # Generated from IRegistrationService.cs
+├── SessionManagement.proto  # Generated from ISessionManagementService.cs
+├── UserManagement.proto     # Generated from IUserManagementService.cs
+└── Notifications.proto      # Generated from INotificationService.cs
+└── Common.proto             # Generated shared types and enums
 
 tests/
 ├── PublicApi.Tests/        # Public API tests

@@ -1,10 +1,10 @@
 <!--
 Sync Impact Report:
-- Version change: 2.1.0 → 2.2.0
-- New principle added: VII. IDesign Method - Design for Change
-- Architecture enhancement: Service boundaries based on business capabilities, volatile/stable separation
-- Enhanced sections: None
-- Templates requiring updates: ✅ All reviewed and aligned
+- Version change: 2.2.0 → 2.3.0
+- New principle added: VIII. Code Generation and Type Safety - C# to TypeScript model generation
+- Modified sections: Service-First Architecture principle updated to use C# interfaces instead of .proto files
+- Enhanced sections: gRPC Services section updated with C# interface approach
+- Templates requiring updates: ✅ Plan template updated with C# interface workflow
 - Follow-up TODOs: None
 -->
 
@@ -15,13 +15,13 @@ Sync Impact Report:
 ### I. Service-First Architecture (NON-NEGOTIABLE)
 Every feature starts as a well-defined service contract with clear API boundaries.
 All services MUST be:
-- Contract-first with gRPC definitions as source of truth
+- Contract-first with C# interfaces as source of truth, generating .proto files via code generation
 - Independently deployable and testable
 - Versioned with backward compatibility guarantees
 - Documented with comprehensive API specifications
 
 **Projects affected**: Public .NET API, Private .NET API, Shared gRPC Services
-**Rationale**: Ensures consistent data contracts across all clients and enables independent service evolution.
+**Rationale**: C# interfaces provide strong typing and IntelliSense support while automatically generating compatible .proto files, ensuring consistent contracts across all clients and enabling independent service evolution.
 
 ### II. API Contract Consistency
 All API endpoints MUST maintain strict contract consistency across public and private APIs.
@@ -99,6 +99,27 @@ Requirements:
 **Projects affected**: All projects - fundamental architecture principle affecting service boundaries and code organization
 **Rationale**: IDesign method ensures systems can adapt to changing business requirements with minimal architectural impact, reducing maintenance costs and enabling rapid feature development.
 
+### VIII. Code Generation and Type Safety (NON-NEGOTIABLE)
+All data models MUST be generated from a single source of truth to ensure type consistency across the full stack.
+Requirements:
+- **C# as Source of Truth**: All data models defined as C# classes with appropriate attributes
+- **Automatic .proto Generation**: gRPC .proto files generated from C# interfaces using protobuf-net.Grpc or similar tools
+- **TypeScript Model Generation**: TypeScript interfaces and models automatically generated from C# models
+- **Build Integration**: Code generation integrated into CI/CD pipeline with automatic updates on model changes
+- **Type Validation**: Generated models include runtime validation compatible across C# and TypeScript
+- **Documentation Generation**: API documentation generated from C# XML comments and attributes
+- **Version Compatibility**: Generated artifacts maintain backward compatibility through versioned generation
+
+**Technical Implementation**:
+- **C# Service Contracts**: Define gRPC services as C# interfaces with [ServiceContract] attributes
+- **Model Generation Tools**: Use NSwag, protobuf-net.Grpc, or similar tools for automatic generation
+- **Build Process**: Generate TypeScript models during .NET build process and copy to Angular projects
+- **Validation**: Shared validation attributes generate compatible client and server-side validators
+- **Testing**: Generated models include test data builders and type-safe mocking support
+
+**Projects affected**: All projects - ensures type safety from C# backend through Angular frontend
+**Rationale**: Single source of truth eliminates type mismatches, reduces manual synchronization errors, and provides IntelliSense support across the entire technology stack.
+
 ## Code Quality Standards
 
 All projects must maintain enterprise-grade code quality:
@@ -122,12 +143,13 @@ All projects must maintain enterprise-grade code quality:
 
 ### gRPC Services
 - **Business Service Design**: Each gRPC service represents ONE complete business capability
-- **Contract-First Development**: .proto files define business contracts before implementation
-- **Schema Management**: Centralized .proto files with semantic versioning organized by business domain
+- **Contract-First Development**: C# interfaces define business contracts with automatic .proto generation
+- **Schema Management**: Centralized C# service interfaces with automated .proto generation organized by business domain
+- **Type Safety**: Strong typing in C# with automatic TypeScript model generation for frontend clients
 - **Service Boundaries**: Avoid cross-service data dependencies; each service owns its complete business workflow
 - **Error Handling**: Structured error responses with proper gRPC status codes
 - **Performance**: Connection pooling, streaming for large datasets
-- **Documentation**: Service documentation generated from proto definitions with business context
+- **Documentation**: Service documentation generated from C# XML comments and attributes
 
 ### IDesign Service Organization
 - **EventManagementService**: Complete event lifecycle (create, update, publish, archive)
@@ -179,12 +201,13 @@ Comprehensive testing across all solution components:
 
 Multi-project feature development requires coordinated workflow:
 
-1. **Service Design**: Define gRPC contracts and API specifications first
-2. **Contract Validation**: Generate client code and validate integration points
-3. **Parallel Development**: API and UI development proceed simultaneously
-4. **Integration Testing**: Verify end-to-end functionality across all components
-5. **Staged Deployment**: Deploy services first, then client applications
-6. **Monitoring**: Post-deployment verification of performance and functionality
+1. **Service Design**: Define C# interfaces for gRPC contracts and API specifications first
+2. **Code Generation**: Generate .proto files and TypeScript models from C# definitions
+3. **Contract Validation**: Generate client code and validate integration points
+4. **Parallel Development**: API and UI development proceed simultaneously using generated types
+5. **Integration Testing**: Verify end-to-end functionality across all components
+6. **Staged Deployment**: Deploy services first, then client applications
+7. **Monitoring**: Post-deployment verification of performance and functionality
 
 ## Governance
 
@@ -202,4 +225,4 @@ This constitution supersedes all other development practices and standards.
 - Cross-cutting changes require approval from both .NET and Angular team leads
 - Use `.specify/` templates and workflows for consistent multi-project development practices
 
-**Version**: 2.2.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2025-12-30
+**Version**: 2.3.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2025-12-30

@@ -1,0 +1,927 @@
+openapi: 3.0.3
+info:
+  title: Event Management Public API
+  description: Public API for event discovery and registration
+  version: 1.0.0
+  contact:
+    name: Event Management Team
+    email: support@eventmanagement.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.eventmanagement.com/api/v1
+    description: Production server
+  - url: https://staging-api.eventmanagement.com/api/v1
+    description: Staging server
+
+security:
+  - BearerAuth: []
+  - {}  # Some endpoints are public
+
+paths:
+  # Event Discovery (Public)
+  /events:
+    get:
+      summary: List published events
+      description: Retrieve a paginated list of published events with filtering options
+      tags: [Events]
+      security: []  # Public endpoint
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/EventType'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/EventStatus'
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /events/{id}:
+    get:
+      summary: Get event details
+      description: Retrieve detailed information about a specific event
+      tags: [Events]
+      security: []  # Public endpoint
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Event details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /events/{id}/sessions:
+    get:
+      summary: List event sessions
+      description: Retrieve all sessions for a specific event
+      tags: [Sessions]
+      security: []  # Public endpoint
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: trackId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: skillLevel
+          in: query
+          schema:
+            $ref: '#/components/schemas/SkillLevel'
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /events/{id}/tracks:
+    get:
+      summary: List event tracks
+      description: Retrieve all tracks for a specific event
+      tags: [Events]
+      security: []  # Public endpoint
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of tracks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrackResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /events/{id}/speakers:
+    get:
+      summary: List event speakers
+      description: Retrieve all speakers for a specific event
+      tags: [Events]
+      security: []  # Public endpoint
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of speakers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpeakerResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Registration (Authenticated)
+  /events/{id}/registrations:
+    post:
+      summary: Register for event
+      description: Create a new registration for the specified event
+      tags: [Registrations]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRegistrationRequest'
+      responses:
+        '201':
+          description: Registration created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Registration conflict (already registered, capacity reached)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /registrations/my:
+    get:
+      summary: Get user's registrations
+      description: Retrieve all registrations for the authenticated user
+      tags: [Registrations]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/RegistrationStatus'
+        - name: upcoming
+          in: query
+          schema:
+            type: boolean
+          description: Filter for upcoming events only
+      responses:
+        '200':
+          description: User's registrations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RegistrationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /registrations/{id}:
+    put:
+      summary: Update registration
+      description: Update an existing registration (sessions, preferences, etc.)
+      tags: [Registrations]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRegistrationRequest'
+      responses:
+        '200':
+          description: Registration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Cancel registration
+      description: Cancel an existing registration
+      tags: [Registrations]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  maxLength: 500
+                  description: Optional cancellation reason
+      responses:
+        '204':
+          description: Registration cancelled successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Event Schemas
+    EventResponse:
+      type: object
+      required: [id, title, type, status, startDate, endDate]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/EventType'
+        status:
+          $ref: '#/components/schemas/EventStatus'
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        timeZone:
+          type: string
+          example: "America/New_York"
+        location:
+          $ref: '#/components/schemas/Location'
+        virtualLocation:
+          $ref: '#/components/schemas/VirtualLocation'
+        registrationSettings:
+          $ref: '#/components/schemas/RegistrationSettings'
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrackResponse'
+        organizers:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizerResponse'
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    EventListResponse:
+      type: object
+      required: [events, pagination]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResponse'
+        pagination:
+          $ref: '#/components/schemas/PaginationResponse'
+
+    EventType:
+      type: string
+      enum: [Conference, Workshop, Webinar, Meetup, Training, Hybrid]
+
+    EventStatus:
+      type: string
+      enum: [Draft, Published, RegistrationOpen, RegistrationClosed, InProgress, Completed, Cancelled, Archived]
+
+    # Registration Schemas
+    CreateRegistrationRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          $ref: '#/components/schemas/RegistrationType'
+        sessionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        socialEventIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        customFields:
+          type: object
+          additionalProperties: true
+
+    UpdateRegistrationRequest:
+      type: object
+      properties:
+        sessionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        socialEventIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        customFields:
+          type: object
+          additionalProperties: true
+
+    RegistrationResponse:
+      type: object
+      required: [id, eventId, userId, status, type, registeredAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/RegistrationStatus'
+        type:
+          $ref: '#/components/schemas/RegistrationType'
+        registeredAt:
+          type: string
+          format: date-time
+        sessionRegistrations:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionRegistrationResponse'
+        socialEventRegistrations:
+          type: array
+          items:
+            $ref: '#/components/schemas/SocialEventRegistrationResponse'
+        customFields:
+          type: object
+          additionalProperties: true
+        event:
+          $ref: '#/components/schemas/EventResponse'
+
+    RegistrationStatus:
+      type: string
+      enum: [Pending, Confirmed, CheckedIn, NoShow, Cancelled, Waitlisted]
+
+    RegistrationType:
+      type: string
+      enum: [Speaker, Attendee, VIP, Staff, Sponsor]
+
+    # Session Schemas
+    SessionResponse:
+      type: object
+      required: [id, eventId, trackId, title, type, format, startTime, endTime]
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        trackId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/SessionType'
+        format:
+          $ref: '#/components/schemas/SessionFormat'
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        roomName:
+          type: string
+        maxCapacity:
+          type: integer
+          minimum: 1
+        speakers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionSpeakerResponse'
+        skillLevel:
+          $ref: '#/components/schemas/SkillLevel'
+        prerequisites:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        registeredCount:
+          type: integer
+          minimum: 0
+        checkedInCount:
+          type: integer
+          minimum: 0
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionResourceResponse'
+        metadata:
+          type: object
+          additionalProperties: true
+
+    SessionListResponse:
+      type: object
+      required: [sessions]
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionResponse'
+
+    SessionType:
+      type: string
+      enum: [Presentation, Workshop, Panel, Keynote, BreakoutSession, Demo, QnA]
+
+    SessionFormat:
+      type: string
+      enum: [InPerson, Virtual, Hybrid]
+
+    SkillLevel:
+      type: string
+      enum: [Beginner, Intermediate, Advanced, Expert]
+
+    # Supporting Schemas
+    Location:
+      type: object
+      required: [name, address]
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        stateProvince:
+          type: string
+        country:
+          type: string
+        postalCode:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+
+    VirtualLocation:
+      type: object
+      required: [platform, accessLink]
+      properties:
+        platform:
+          type: string
+        accessLink:
+          type: string
+          format: uri
+        accessInstructions:
+          type: string
+        platformSettings:
+          type: object
+          additionalProperties: true
+
+    RegistrationSettings:
+      type: object
+      properties:
+        openDate:
+          type: string
+          format: date-time
+        closeDate:
+          type: string
+          format: date-time
+        maxCapacity:
+          type: integer
+          minimum: 1
+        requireApproval:
+          type: boolean
+          default: false
+        allowWaitlist:
+          type: boolean
+          default: false
+        registrationFee:
+          type: number
+          format: decimal
+          minimum: 0
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: 'USD'
+        customFieldDefinitions:
+          type: object
+          additionalProperties: true
+
+    TrackResponse:
+      type: object
+      required: [id, eventId, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        displayOrder:
+          type: integer
+
+    SpeakerResponse:
+      type: object
+      required: [id, firstName, lastName]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        companyName:
+          type: string
+        jobTitle:
+          type: string
+        biography:
+          type: string
+        profileImageUrl:
+          type: string
+          format: uri
+        socialLinks:
+          type: object
+          additionalProperties:
+            type: string
+            format: uri
+
+    OrganizerResponse:
+      type: object
+      required: [userId, role]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        role:
+          $ref: '#/components/schemas/OrganizerRole'
+        contactInformation:
+          type: string
+        user:
+          $ref: '#/components/schemas/SpeakerResponse'
+
+    OrganizerRole:
+      type: string
+      enum: [Primary, Secondary, Technical, Marketing]
+
+    SessionRegistrationResponse:
+      type: object
+      required: [sessionId, status, registeredAt]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/SessionRegistrationStatus'
+        registeredAt:
+          type: string
+          format: date-time
+        checkedInAt:
+          type: string
+          format: date-time
+        session:
+          $ref: '#/components/schemas/SessionResponse'
+
+    SessionRegistrationStatus:
+      type: string
+      enum: [Registered, CheckedIn, NoShow, Cancelled]
+
+    SocialEventRegistrationResponse:
+      type: object
+      required: [socialEventId, status, registeredAt]
+      properties:
+        socialEventId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/SocialEventRegistrationStatus'
+        registeredAt:
+          type: string
+          format: date-time
+
+    SocialEventRegistrationStatus:
+      type: string
+      enum: [Registered, Confirmed, Declined, NoShow]
+
+    SessionSpeakerResponse:
+      type: object
+      required: [speakerId, role]
+      properties:
+        speakerId:
+          type: string
+          format: uuid
+        role:
+          $ref: '#/components/schemas/SpeakerRole'
+        biography:
+          type: string
+        displayOrder:
+          type: integer
+        speaker:
+          $ref: '#/components/schemas/SpeakerResponse'
+
+    SpeakerRole:
+      type: string
+      enum: [Primary, CoSpeaker, Moderator, Panelist]
+
+    SessionResourceResponse:
+      type: object
+      required: [id, type, title, url]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/ResourceType'
+        title:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+          format: uri
+        downloadable:
+          type: boolean
+          default: false
+
+    ResourceType:
+      type: string
+      enum: [Slides, Document, Video, Code, Link, Other]
+
+    # Common Response Schemas
+    PaginationResponse:
+      type: object
+      required: [page, size, totalPages, totalCount]
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+        totalPages:
+          type: integer
+          minimum: 0
+        totalCount:
+          type: integer
+          minimum: 0
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+            timestamp:
+              type: string
+              format: date-time
+            traceId:
+              type: string
+
+    ValidationErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, validationErrors]
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_FAILED"
+            message:
+              type: string
+              example: "Request validation failed"
+            validationErrors:
+              type: array
+              items:
+                type: object
+                required: [field, code, message]
+                properties:
+                  field:
+                    type: string
+                  code:
+                    type: string
+                  message:
+                    type: string
+
+  responses:
+    BadRequest:
+      description: Bad request - validation error or malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "UNAUTHORIZED"
+              message: "Authentication required"
+              timestamp: "2025-12-30T10:00:00Z"
+
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "FORBIDDEN"
+              message: "Insufficient permissions to access this resource"
+              timestamp: "2025-12-30T10:00:00Z"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "NOT_FOUND"
+              message: "The requested resource was not found"
+              timestamp: "2025-12-30T10:00:00Z"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "INTERNAL_SERVER_ERROR"
+              message: "An unexpected error occurred"
+              timestamp: "2025-12-30T10:00:00Z"
+              traceId: "abc123def456"

@@ -1,7 +1,8 @@
 <!--
 Sync Impact Report:
-- Version change: 2.0.0 → 2.1.0
-- New principle added: VI. Observability with OpenTelemetry
+- Version change: 2.1.0 → 2.2.0
+- New principle added: VII. IDesign Method - Design for Change
+- Architecture enhancement: Service boundaries based on business capabilities, volatile/stable separation
 - Enhanced sections: None
 - Templates requiring updates: ✅ All reviewed and aligned
 - Follow-up TODOs: None
@@ -77,29 +78,64 @@ Requirements:
 **Projects affected**: All .NET APIs, Angular applications, and gRPC services
 **Rationale**: Observability is essential for diagnosing issues, understanding system behavior, and maintaining service reliability in a distributed architecture.
 
+### VII. IDesign Method - Design for Change (NON-NEGOTIABLE)
+All system architecture MUST follow IDesign methodology principles to ensure adaptability and maintainability.
+Requirements:
+- **Business-Driven Service Boundaries**: Services defined by business capabilities, NOT technical functions or data entities
+- **Volatile/Stable Separation**: Separate frequently changing business logic from stable infrastructure and utilities
+- **Service-Oriented Design**: Each service encapsulates complete business capability with clear contracts
+- **Avoid Functional Decomposition**: Do NOT organize code by technical layers (controllers, services, repositories) but by business domains
+- **Change-Resilient Architecture**: Design assumes requirements will change; minimize ripple effects across service boundaries
+- **Contract-First Development**: Define service interfaces before implementation; contracts drive the architecture
+- **Business Service Identification**: Services represent complete business workflows, not technical operations
+
+**Architecture Impact**:
+- **Public API**: Organized by business capabilities (Event Management, User Management, Registration Services)
+- **Private API**: Same business service boundaries, different access controls and client interfaces
+- **gRPC Services**: Each service represents one business capability with complete workflow encapsulation
+- **Angular Apps**: Feature modules aligned with backend service boundaries for consistency
+- **Database Design**: Schema follows service boundaries with minimal cross-service data dependencies
+
+**Projects affected**: All projects - fundamental architecture principle affecting service boundaries and code organization
+**Rationale**: IDesign method ensures systems can adapt to changing business requirements with minimal architectural impact, reducing maintenance costs and enabling rapid feature development.
+
 ## Code Quality Standards
 
 All projects must maintain enterprise-grade code quality:
 
 ### .NET API Projects
 - **Static Analysis**: Enable all compiler warnings, use StyleCop and SonarAnalyzer
-- **Architecture**: Clean Architecture with clear separation of concerns
+- **IDesign Architecture**: Organize by business services, NOT technical layers (avoid Controllers/Services/Repositories folders)
+- **Business Service Structure**: Each service represents complete business capability (EventManagementService, UserRegistrationService)
+- **Volatile/Stable Separation**: Business logic in volatile assemblies, infrastructure utilities in stable assemblies
 - **Security**: Input validation, output encoding, dependency injection for testability
 - **Logging**: Structured logging with correlation IDs for request tracing
 - **Configuration**: Environment-specific settings with secrets management
 
 ### Angular Applications
-- **Architecture**: Feature modules with lazy loading, shared component libraries
-- **State Management**: NgRx for complex state, services for simple state
+- **IDesign Feature Organization**: Feature modules aligned with backend business service boundaries
+- **Business Capability Modules**: Organize by business domains (event-management, user-registration) not technical functions
+- **State Management**: NgRx for complex cross-service state, services for single-capability state
 - **Performance**: Bundle analysis, tree shaking, OnPush change detection
 - **Security**: Content Security Policy, sanitization of user inputs
 - **Accessibility**: Screen reader support, keyboard navigation, focus management
 
 ### gRPC Services
-- **Schema Management**: Centralized .proto files with semantic versioning
+- **Business Service Design**: Each gRPC service represents ONE complete business capability
+- **Contract-First Development**: .proto files define business contracts before implementation
+- **Schema Management**: Centralized .proto files with semantic versioning organized by business domain
+- **Service Boundaries**: Avoid cross-service data dependencies; each service owns its complete business workflow
 - **Error Handling**: Structured error responses with proper gRPC status codes
 - **Performance**: Connection pooling, streaming for large datasets
-- **Documentation**: Service documentation generated from proto definitions
+- **Documentation**: Service documentation generated from proto definitions with business context
+
+### IDesign Service Organization
+- **EventManagementService**: Complete event lifecycle (create, update, publish, archive)
+- **RegistrationService**: Complete registration workflow (subscribe, confirm, cancel, waitlist)
+- **SessionService**: Complete session management (schedule, assign speakers, track attendance)
+- **UserService**: Complete user management (authentication, profiles, preferences)
+- **NotificationService**: Complete communication workflow (templates, delivery, tracking)
+- **NO Technical Services**: Avoid generic services like DataService, LoggingService, ValidationService
 
 ## Performance Requirements
 
@@ -166,4 +202,4 @@ This constitution supersedes all other development practices and standards.
 - Cross-cutting changes require approval from both .NET and Angular team leads
 - Use `.specify/` templates and workflows for consistent multi-project development practices
 
-**Version**: 2.1.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2025-12-30
+**Version**: 2.2.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2025-12-30

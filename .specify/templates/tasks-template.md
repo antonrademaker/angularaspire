@@ -20,13 +20,25 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Public .NET API**: `src/PublicApi/`, tests in `tests/PublicApi.Tests/`
-- **Private .NET API**: `src/PrivateApi/`, tests in `tests/PrivateApi.Tests/`
-- **Shared gRPC Services**: `src/Shared/`, proto files in `protos/`, tests in `tests/Shared.Tests/`
-- **Public Angular App**: `src/PublicApp/src/app/`, tests in `src/PublicApp/src/tests/`, e2e in `src/PublicApp/e2e/`
-- **Private Angular App**: `src/PrivateApp/src/app/`, tests in `src/PrivateApp/src/tests/`, e2e in `src/PrivateApp/e2e/`
-- **Shared Angular Components**: `src/SharedUI/`, tests in `src/SharedUI/src/tests/`
-- Paths shown below assume Aspire multi-project structure - adjust based on plan.md
+### IDesign Service Organization (Business Capabilities)
+- **EventManagementService**: `src/Shared/EventManagement/`, `protos/EventManagement.proto`
+- **RegistrationService**: `src/Shared/Registration/`, `protos/Registration.proto`  
+- **SessionService**: `src/Shared/SessionManagement/`, `protos/SessionManagement.proto`
+- **UserService**: `src/Shared/UserManagement/`, `protos/UserManagement.proto`
+- **NotificationService**: `src/Shared/Notifications/`, `protos/Notifications.proto`
+
+### Project Structure (Implementation)
+- **Public .NET API**: `src/PublicApi/` (business service endpoints, NOT technical layers)
+- **Private .NET API**: `src/PrivateApi/` (same business services, different access)
+- **Public Angular App**: `src/PublicApp/src/app/` (feature modules by business capability)
+- **Private Angular App**: `src/PrivateApp/src/app/` (feature modules by business capability)
+- **Shared Angular Components**: `src/SharedUI/` (UI components, NOT business logic)
+
+### Avoid Technical Layer Organization
+- ❌ `Controllers/`, `Services/`, `Repositories/` folders
+- ❌ `services/`, `components/`, `models/` Angular folders
+- ✅ Business capability folders with complete functionality
+- Paths shown below assume IDesign business service structure - adjust based on plan.md
 
 <!-- 
   ============================================================================

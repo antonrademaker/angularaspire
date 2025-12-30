@@ -23,6 +23,8 @@
 **Testing**: [e.g., xUnit, Jest, Playwright, gRPC testing tools, or NEEDS CLARIFICATION]  
 **Target Platform**: [e.g., Docker containers, Azure Container Apps, Kubernetes, or NEEDS CLARIFICATION]
 **Project Type**: [aspire-multi - determines source structure with .NET APIs and Angular apps]  
+**Architecture Method**: [IDesign - business service boundaries, avoid functional decomposition, or NEEDS CLARIFICATION]  
+**Service Boundaries**: [business capabilities identified, e.g., EventManagement, Registration, SessionManagement, or NEEDS CLARIFICATION]  
 **Observability**: [e.g., OpenTelemetry tracing, Prometheus metrics, structured logging, or NEEDS CLARIFICATION]  
 **Performance Goals**: [domain-specific, e.g., 1000 req/s APIs, <3s initial load, 90+ Lighthouse score, or NEEDS CLARIFICATION]  
 **Constraints**: [domain-specific, e.g., <200ms p95 API response, <2MB bundle size, gRPC compatibility, or NEEDS CLARIFICATION]  
@@ -52,40 +54,52 @@ specs/[###-feature]/
 <!--
   ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
   for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., src/PublicApi, src/PrivateApp/src/app/features). The delivered plan must
+  real business service paths following IDesign principles. The delivered plan must
   not include Option labels.
 -->
 
 ```text
-# Aspire Multi-Project Structure
+# IDesign Service-Oriented Structure (Business Capabilities)
 src/
-├── PublicApi/                 # Public .NET API
-│   ├── Controllers/
-│   ├── Services/
+├── PublicApi/                 # Public .NET API endpoints
+│   ├── EventManagement/       # Event lifecycle endpoints (NOT Controllers folder)
+│   ├── Registration/          # Registration workflow endpoints
+│   ├── SessionManagement/     # Session scheduling endpoints
+│   ├── UserManagement/        # User profile endpoints
 │   └── Program.cs
-├── PrivateApi/               # Private .NET API  
-│   ├── Controllers/
-│   ├── Services/
+├── PrivateApi/               # Private .NET API endpoints (same business services)
+│   ├── EventManagement/       # Admin event management
+│   ├── Registration/          # Admin registration management
+│   ├── SessionManagement/     # Admin session management
+│   ├── UserManagement/        # Admin user management
 │   └── Program.cs
-├── Shared/                   # Shared .NET libraries
-│   ├── Models/
-│   ├── Services/
-│   └── Contracts/
+├── Shared/                   # Business Services (gRPC implementations)
+│   ├── EventManagement/       # Complete event business service
+│   ├── Registration/          # Complete registration business service
+│   ├── SessionManagement/     # Complete session business service
+│   ├── UserManagement/        # Complete user business service
+│   └── Notifications/         # Complete notification business service
 ├── PublicApp/               # Public Angular application
 │   └── src/app/
-│       ├── features/
-│       ├── shared/
-│       └── core/
+│       ├── event-management/   # Event discovery and details (business capability)
+│       ├── registration/       # Registration workflow (business capability)
+│       ├── session-management/ # Session browsing and subscription
+│       └── shared-ui/         # UI components only (NO business logic)
 ├── PrivateApp/             # Private Angular application
 │   └── src/app/
-│       ├── features/
-│       ├── shared/
-│       └── core/
-└── SharedUI/               # Shared Angular component library
+│       ├── event-management/   # Event creation and admin
+│       ├── registration/       # Registration administration  
+│       ├── session-management/ # Session administration
+│       └── shared-ui/         # UI components only
+└── SharedUI/               # Pure UI component library (NO business services)
     └── src/lib/
 
-protos/                     # gRPC service definitions
-├── [service-name].proto
+protos/                     # gRPC Business Service Contracts
+├── EventManagement.proto    # Event lifecycle service contract
+├── Registration.proto       # Registration workflow service contract
+├── SessionManagement.proto  # Session management service contract
+├── UserManagement.proto     # User management service contract
+└── Notifications.proto      # Notification service contract
 └── common.proto
 
 tests/

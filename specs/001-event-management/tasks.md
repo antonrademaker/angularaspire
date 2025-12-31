@@ -50,17 +50,17 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 **Goal**: Configure Aspire to orchestrate all services and dependencies  
 **Independent Test**: `dotnet run --project src/AppHost` starts all services, Aspire dashboard accessible
 
-- [ ] T013 Configure Aspire AppHost in src/AppHost/Program.cs with PostgreSQL container
-- [ ] T014 [P] Configure Redis container for queue management in src/AppHost/Program.cs
-- [ ] T015 [P] Configure Azure Blob Storage emulator in src/AppHost/Program.cs
-- [ ] T016 Register PublicApi project in Aspire orchestration with health checks
-- [ ] T017 [P] Register PrivateApi project in Aspire orchestration with health checks
-- [ ] T018 Configure PublicApp as JavaScript resource with proxy configuration
-- [ ] T019 [P] Configure PrivateApp as JavaScript resource with proxy configuration
-- [ ] T020 [P] Create Angular proxy.conf.js for PublicApp reading Aspire environment variables
-- [ ] T021 [P] Create Angular proxy.conf.js for PrivateApp reading Aspire environment variables
-- [ ] T022 Configure ServiceDefaults with OpenTelemetry tracing and health checks
-- [ ] T023 [P] Add NuGet packages for Entity Framework Core, SignalR, FluentValidation to ServiceDefaults
+- [X] T013 Configure Aspire AppHost in src/AppHost/Program.cs with PostgreSQL container
+- [X] T014 [P] Configure Redis container for queue management in src/AppHost/Program.cs
+- [X] T015 [P] Configure Azure Blob Storage emulator in src/AppHost/Program.cs
+- [X] T016 Register PublicApi project in Aspire orchestration with health checks
+- [X] T017 [P] Register PrivateApi project in Aspire orchestration with health checks
+- [X] T018 Configure PublicApp as JavaScript resource with proxy configuration
+- [X] T019 [P] Configure PrivateApp as JavaScript resource with proxy configuration
+- [X] T020 [P] Create Angular proxy.conf.js for PublicApp reading Aspire environment variables
+- [X] T021 [P] Create Angular proxy.conf.js for PrivateApp reading Aspire environment variables
+- [X] T022 Configure ServiceDefaults with OpenTelemetry tracing and health checks
+- [X] T023 [P] Add NuGet packages for Entity Framework Core, SignalR, FluentValidation to ServiceDefaults
 
 ---
 

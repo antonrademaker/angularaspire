@@ -341,13 +341,13 @@ public class RegistrationController : ControllerBase
     /// <param name="id">Registration ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Registration details</returns>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType<RegistrationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetRegistrationAsync(
-        int id,
+        Guid id,
         CancellationToken cancellationToken = default)
     {
         try
@@ -441,13 +441,13 @@ public class RegistrationController : ControllerBase
     /// <param name="reason">Optional cancellation reason</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Success result</returns>
-    [HttpPost("{id:int}/cancel")]
+    [HttpPost("{id:guid}/cancel")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CancelRegistrationAsync(
-        int id,
+        Guid id,
         [FromBody] string? reason = null,
         CancellationToken cancellationToken = default)
     {
@@ -496,13 +496,13 @@ public class RegistrationController : ControllerBase
     /// <param name="request">Update request</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Updated registration</returns>
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType<RegistrationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateRegistrationAsync(
-        int id,
+        Guid id,
         [FromBody] UpdateRegistrationRequest request,
         CancellationToken cancellationToken = default)
     {

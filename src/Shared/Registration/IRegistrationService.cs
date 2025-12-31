@@ -263,7 +263,7 @@ public interface IRegistrationService
     /// <param name="reason">Optional cancellation reason</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if cancelled successfully</returns>
-    Task<bool> CancelRegistrationAsync(int registrationId, Guid userId, string? reason = null, CancellationToken cancellationToken = default);
+    Task<bool> CancelRegistrationAsync(Guid registrationId, Guid userId, string? reason = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get registration by ID with full details
@@ -273,7 +273,7 @@ public interface IRegistrationService
     /// <param name="includeEvent">Include event details</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Registration details or null if not found</returns>
-    Task<Registration?> GetRegistrationAsync(int registrationId, bool includeUser = true, bool includeEvent = true, CancellationToken cancellationToken = default);
+    Task<Registration?> GetRegistrationAsync(Guid registrationId, bool includeUser = true, bool includeEvent = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get user's registration for a specific event
@@ -356,7 +356,7 @@ public interface IRegistrationService
     /// <param name="checkedInAt">Check-in timestamp (defaults to now)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if marked successfully</returns>
-    Task<bool> MarkAsAttendedAsync(int registrationId, Guid checkedInBy, DateTime? checkedInAt = null, CancellationToken cancellationToken = default);
+    Task<bool> MarkAsAttendedAsync(Guid registrationId, Guid checkedInBy, DateTime? checkedInAt = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Mark registration as no-show
@@ -365,7 +365,7 @@ public interface IRegistrationService
     /// <param name="markedBy">User ID who marked as no-show</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if marked successfully</returns>
-    Task<bool> MarkAsNoShowAsync(int registrationId, Guid markedBy, CancellationToken cancellationToken = default);
+    Task<bool> MarkAsNoShowAsync(Guid registrationId, Guid markedBy, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Clean up expired registrations
@@ -401,7 +401,7 @@ public interface IRegistrationService
     /// <param name="registrationData">Updated registration data</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if updated successfully</returns>
-    Task<bool> UpdateRegistrationDataAsync(int registrationId, Guid userId, Dictionary<string, object> registrationData, CancellationToken cancellationToken = default);
+    Task<bool> UpdateRegistrationDataAsync(Guid registrationId, Guid userId, Dictionary<string, object> registrationData, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Validate if user can register for event
@@ -411,7 +411,7 @@ public interface IRegistrationService
     /// <param name="eventId">Event ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Validation result with details</returns>
-    Task<RegistrationValidationResult> ValidateRegistrationAsync(Guid userId, int eventId, CancellationToken cancellationToken = default);
+    Task<RegistrationValidationResult> ValidateRegistrationAsync(Guid userId, Guid eventId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

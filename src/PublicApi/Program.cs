@@ -3,6 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Shared.UserManagement;
 using Shared.EventManagement;
+using Shared.Registration;
+using Shared.Notifications;
+using PublicApi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +40,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
                 logger.LogWarning("JWT authentication failed: {Error}", context.Exception.Message);
                 return Task.CompletedTask;
+            },
+            OnMessageReceived = context =>
+            {
+                // Support SignalR authentication via query string token
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                
+                return Task.CompletedTask;
             }
         };
     });
@@ -61,6 +77,12 @@ builder.Services.AddUserManagement();
 // Add event management services
 builder.Services.AddEventManagement();
 
+// Add registration services
+builder.Services.AddRegistrationServices(builder.Configuration);
+
+// Add email notification services
+builder.Services.AddEmailService(builder.Configuration);
+
 // Add CORS for Angular applications
 builder.Services.AddCors(options =>
 {
@@ -74,8 +96,25 @@ builder.Services.AddCors(options =>
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials();
+            .AllowCredentials(); // Required for SignalR
     });
+});
+
+// Add SignalR for real-time notifications
+builder.Services.AddSignalR(options =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableDetailedErrors = true;
+    }
+    
+    // Configure message size limits
+    options.MaximumReceiveMessageSize = 32 * 1024; // 32KB
+    options.StreamBufferCapacity = 10;
+    
+    // Client timeout settings
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
 });
 
 // Add controllers and API services
@@ -116,6 +155,9 @@ app.MapDefaultEndpoints();
 
 // Map controllers
 app.MapControllers();
+
+// Map SignalR hubs
+app.MapHub<RegistrationHub>("/hubs/registration");
 
 // Test endpoint (remove in production)
 if (app.Environment.IsDevelopment())

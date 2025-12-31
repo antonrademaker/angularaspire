@@ -93,7 +93,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 
 ### Real-time Notifications
 - [ ] T040 [US1] Create SignalR hub for registration updates in src/PublicApi/Hubs/RegistrationHub.cs
-- [ ] T041 [P] [US1] Create email notification service in src/Shared/Notifications/EmailService.cs
+- [X] T041 [P] [US1] Create email notification service in src/Shared/Notifications/EmailService.cs
 - [ ] T042 [P] [US1] Create SignalR client service in src/PublicApp/src/app/shared/signalr.service.ts
 - [ ] T043 [P] [US1] Integrate SignalR notifications in registration components
 

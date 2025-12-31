@@ -165,6 +165,9 @@ public static class UserDbContextExtensions
         // Register TokenService
         services.AddScoped<ITokenService, TokenService>();
 
+        // Register UserService
+        services.AddScoped<IUserService, UserService>();
+
         return services;
     }
 }

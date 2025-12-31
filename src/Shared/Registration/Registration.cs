@@ -149,6 +149,19 @@ public class Registration
     public DateTime? ExpiresAt { get; set; }
 
     /// <summary>
+    /// When the registration was cancelled (null if not cancelled)
+    /// </summary>
+    [Column("cancelled_at")]
+    public DateTime? CancelledAt { get; set; }
+
+    /// <summary>
+    /// Reason for cancellation (null if not cancelled)
+    /// </summary>
+    [Column("cancellation_reason")]
+    [MaxLength(500)]
+    public string? CancellationReason { get; set; }
+
+    /// <summary>
     /// Registration confirmation token for email verification
     /// </summary>
     [Column("confirmation_token")]
@@ -360,12 +373,15 @@ public class Registration
     /// <summary>
     /// Cancel the registration
     /// </summary>
-    public void Cancel()
+    /// <param name="reason">Optional reason for cancellation</param>
+    public void Cancel(string? reason = null)
     {
         if (!CanBeCancelled)
             throw new InvalidOperationException($"Cannot cancel registration in status: {Status}");
 
         Status = RegistrationStatus.Cancelled;
+        CancelledAt = DateTime.UtcNow;
+        CancellationReason = reason;
         UpdatedAt = DateTime.UtcNow;
         QueuePosition = null;
     }

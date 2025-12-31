@@ -145,6 +145,11 @@ public class Event
     public JsonDocument? CustomFields { get; set; }
 
     /// <summary>
+    /// Maximum number of attendees for the event (null for unlimited)
+    /// </summary>
+    public int? MaxCapacity { get; set; }
+
+    /// <summary>
     /// Tags for categorization and filtering (stored as JSON array)
     /// Examples: ["technology", "conference", "workshops", "networking"]
     /// </summary>

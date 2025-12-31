@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Shared.UserManagement;
+using Shared.EventManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,9 @@ builder.Services.AddAuthorization(options =>
 
 // Add user management services
 builder.Services.AddUserManagement();
+
+// Add event management services
+builder.Services.AddEventManagement();
 
 // Add CORS for Angular applications
 builder.Services.AddCors(options =>

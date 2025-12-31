@@ -70,18 +70,18 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 **Independent Test**: Create event, search for it, register successfully, receive SignalR + email confirmation
 
 ### Authentication & User Management
-- [ ] T024 [US1] Create OAuth 2.0 configuration in src/PrivateApi/Program.cs
-- [ ] T025 [P] [US1] Create JWT token service in src/Shared/UserManagement/TokenService.cs
-- [ ] T026 [P] [US1] Create User entity with OAuth fields in src/Shared/UserManagement/User.cs
-- [ ] T027 [P] [US1] Create UserDbContext with PostgreSQL configuration in src/Shared/UserManagement/UserDbContext.cs
+- [X] T024 [US1] Create OAuth 2.0 configuration in src/PrivateApi/Program.cs
+- [X] T025 [P] [US1] Create JWT token service in src/Shared/UserManagement/TokenService.cs
+- [X] T026 [P] [US1] Create User entity with OAuth fields in src/Shared/UserManagement/User.cs
+- [X] T027 [P] [US1] Create UserDbContext with PostgreSQL configuration in src/Shared/UserManagement/UserDbContext.cs
 
 ### Event Discovery
-- [ ] T028 [P] [US1] Create Event entity with JSON custom fields in src/Shared/EventManagement/Event.cs
-- [ ] T029 [P] [US1] Create EventDbContext in src/Shared/EventManagement/EventDbContext.cs
-- [ ] T030 [US1] Create IEventService interface in src/Shared/EventManagement/IEventService.cs
-- [ ] T031 [P] [US1] Create EventService implementation in src/Shared/EventManagement/EventService.cs
-- [ ] T032 [P] [US1] Create event search endpoints in src/PublicApi/EventManagement/EventsController.cs
-- [ ] T033 [P] [US1] Create event display components in src/PublicApp/src/app/event-management/event-list.component.ts
+- [X] T028 [P] [US1] Create Event entity with JSON custom fields in src/Shared/EventManagement/Event.cs
+- [X] T029 [P] [US1] Create EventDbContext in src/Shared/EventManagement/EventDbContext.cs
+- [X] T030 [US1] Create IEventService interface in src/Shared/EventManagement/IEventService.cs
+- [X] T031 [P] [US1] Create EventService implementation in src/Shared/EventManagement/EventService.cs
+- [X] T032 [P] [US1] Create event search endpoints in src/PublicApi/EventManagement/EventsController.cs
+- [X] T033 [P] [US1] Create event display components in src/PublicApp/src/app/event-management/event-list.component.ts
 
 ### Registration with Queue Processing
 - [ ] T034 [P] [US1] Create Registration entity in src/Shared/Registration/Registration.cs

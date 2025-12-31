@@ -88,8 +88,8 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 - [X] T035 [P] [US1] Create RegistrationDbContext in src/Shared/Registration/RegistrationDbContext.cs
 - [X] T036 [US1] Create IRegistrationService with queue processing in src/Shared/Registration/IRegistrationService.cs
 - [X] T037 [US1] Create Redis queue service for capacity management in src/Shared/Registration/QueueService.cs
-- [ ] T038 [P] [US1] Create registration endpoints in src/PublicApi/Registration/RegistrationController.cs
-- [ ] T039 [P] [US1] Create registration form component in src/PublicApp/src/app/registration/registration-form.component.ts
+- [X] T038 [P] [US1] Create registration endpoints in src/PublicApi/Registration/RegistrationController.cs
+- [X] T039 [P] [US1] Create registration form component in src/PublicApp/src/app/registration/registration-form.component.ts
 
 ### Real-time Notifications
 - [ ] T040 [US1] Create SignalR hub for registration updates in src/PublicApi/Hubs/RegistrationHub.cs

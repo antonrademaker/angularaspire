@@ -614,7 +614,7 @@ export class EventListComponent implements OnInit {
     this.router.navigate(['/events', event.slug]);
   }
 
-  async registerForEvent(event: Event, clickEvent: Event) {
+  async registerForEvent(event: Event, clickEvent: MouseEvent) {
     clickEvent.stopPropagation(); // Prevent card click
 
     if (!this.canRegister(event)) {
@@ -622,15 +622,11 @@ export class EventListComponent implements OnInit {
     }
 
     try {
-      // TODO: Implement registration flow
-      // This will be implemented in the registration tasks (T034-T043)
-      console.log('Register for event:', event.id);
-      
-      // For now, show a placeholder message
-      alert(`Registration for "${event.name}" will be implemented soon!`);
+      // Navigate to registration form
+      this.router.navigate(['/register', event.id]);
     } catch (error) {
-      console.error('Failed to register for event:', error);
-      alert('Failed to register for event. Please try again.');
+      console.error('Failed to navigate to registration:', error);
+      alert('Failed to open registration form. Please try again.');
     }
   }
 

@@ -1,12 +1,14 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { RealTimeService } from '../shared/real-time.service';
 
 export interface Event {
-  id: number;
+  id: string;
   slug: string;
   name: string;
   description: string;
@@ -23,7 +25,7 @@ export interface Event {
   createdAt: string;
   updatedAt: string;
   creator: {
-    id: number;
+    id: string;
     name: string;
     email: string;
   };
@@ -505,9 +507,12 @@ export interface EventSearchResponse {
     }
   `]
 })
-export class EventListComponent implements OnInit {
+export class EventListComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
+  
   private http = inject(HttpClient);
   private router = inject(Router);
+  private realTimeService = inject(RealTimeService);
 
   // Reactive signals
   events = signal<Event[]>([]);
@@ -516,6 +521,10 @@ export class EventListComponent implements OnInit {
   totalPages = signal(0);
   currentPage = signal(1);
   totalCount = signal(0);
+  isConnectedToRealTime = signal(false);
+
+  // Track subscribed events for cleanup
+  private subscribedEventIds = new Set<string>();
 
   // Search and filter properties
   searchQuery = '';
@@ -532,6 +541,82 @@ export class EventListComponent implements OnInit {
 
   ngOnInit() {
     this.loadInitialData();
+    this.setupRealTimeConnection();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.cleanupEventSubscriptions();
+  }
+
+  private setupRealTimeConnection() {
+    // Monitor real-time connection status
+    this.realTimeService.isConnected$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(connected => {
+        this.isConnectedToRealTime.set(connected);
+      });
+  }
+
+  /**
+   * Subscribe to real-time updates for visible events
+   */
+  private async subscribeToVisibleEvents() {
+    const currentEvents = this.events();
+    
+    for (const event of currentEvents) {
+      const eventId = event.id;
+      if (!this.subscribedEventIds.has(eventId)) {
+        try {
+          await this.realTimeService.subscribeToEvent(eventId);
+          this.subscribedEventIds.add(eventId);
+          
+          // Get event-specific observables
+          const eventObservables = this.realTimeService.getEventObservables(eventId);
+          
+          // Handle capacity updates for this event
+          eventObservables.capacityStatus$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(update => {
+              if (update && update.eventId === eventId) {
+                this.updateEventCapacity(eventId, update);
+              }
+            });
+            
+        } catch (error) {
+          console.error(`Failed to subscribe to event ${eventId}:`, error);
+        }
+      }
+    }
+  }
+
+  /**
+   * Update event capacity from real-time updates
+   */
+  private updateEventCapacity(eventId: string, update: any) {
+    const currentEvents = this.events();
+    const eventIndex = currentEvents.findIndex(e => e.id === eventId);
+    
+    if (eventIndex !== -1) {
+      const updatedEvents = [...currentEvents];
+      updatedEvents[eventIndex] = {
+        ...updatedEvents[eventIndex],
+        currentRegistrations: update.currentRegistrations ?? updatedEvents[eventIndex].currentRegistrations
+      };
+      
+      this.events.set(updatedEvents);
+    }
+  }
+
+  /**
+   * Clean up event subscriptions
+   */
+  private cleanupEventSubscriptions() {
+    this.subscribedEventIds.forEach(eventId => {
+      this.realTimeService.unsubscribeFromEvent(eventId).catch(console.error);
+    });
+    this.subscribedEventIds.clear();
   }
 
   private async loadInitialData() {
@@ -542,6 +627,9 @@ export class EventListComponent implements OnInit {
   async searchEvents() {
     this.loading.set(true);
     this.error.set(null);
+
+    // Clean up current subscriptions before loading new events
+    this.cleanupEventSubscriptions();
 
     try {
       const params = new URLSearchParams({
@@ -570,6 +658,11 @@ export class EventListComponent implements OnInit {
         this.events.set(response.events);
         this.totalPages.set(response.totalPages);
         this.totalCount.set(response.totalCount);
+        
+        // Subscribe to real-time updates for the new events
+        if (this.isConnectedToRealTime()) {
+          await this.subscribeToVisibleEvents();
+        }
       }
     } catch (error) {
       console.error('Failed to search events:', error);

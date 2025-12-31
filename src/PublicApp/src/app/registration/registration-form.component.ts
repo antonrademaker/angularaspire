@@ -1,9 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil, combineLatest, startWith } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { RealTimeService } from '../shared/real-time.service';
+import { NotificationService } from '../shared/notification.service';
 
 // Registration interfaces matching the API
 export interface RegisterRequest {
@@ -72,6 +75,22 @@ export enum RegistrationPriority {
     <div class="registration-form-container">
       <header class="form-header">
         <h1>Register for Event</h1>
+        
+        <!-- Real-time connection indicator -->
+        <div class="connection-status" [class.connected]="isConnectedToRealTime()" [class.disconnected]="!isConnectedToRealTime()">
+          @if (isConnectedToRealTime()) {
+            <span class="status-indicator connected"></span>
+            <span class="status-text">Live updates active</span>
+            @if (lastQueueUpdate()) {
+              <span class="last-update">Updated {{ formatRelativeTime(lastQueueUpdate()!) }}</span>
+            }
+          } @else {
+            <span class="status-indicator disconnected"></span>
+            <span class="status-text">Live updates unavailable</span>
+            <span class="fallback-info">Updates every 30 seconds</span>
+          }
+        </div>
+
         @if (eventDetails()) {
           <div class="event-summary">
             <h2>{{ eventDetails()!.title }}</h2>
@@ -248,7 +267,59 @@ export enum RegistrationPriority {
 
     .form-header h1 {
       color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .connection-status.connected {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .connection-status.disconnected {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-indicator.connected {
+      background-color: #28a745;
+      animation: pulse 2s infinite;
+    }
+
+    .status-indicator.disconnected {
+      background-color: #ffc107;
+    }
+
+    .status-text {
+      font-weight: 500;
+    }
+
+    .last-update,
+    .fallback-info {
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
     .event-summary {
@@ -535,12 +606,17 @@ export enum RegistrationPriority {
     }
   `]
 })
-export class RegistrationFormComponent implements OnInit {
+export class RegistrationFormComponent implements OnInit, OnDestroy {
+  // Destroy subject for cleanup
+  private readonly destroy$ = new Subject<void>();
+  
   // Injected dependencies
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly realTimeService = inject(RealTimeService);
+  private readonly notificationService = inject(NotificationService);
 
   // Signals
   eventId = signal<string>('');
@@ -549,6 +625,8 @@ export class RegistrationFormComponent implements OnInit {
   registrationResult = signal<RegistrationResponse | null>(null);
   isSubmitting = signal(false);
   error = signal<string | null>(null);
+  isConnectedToRealTime = signal(false);
+  lastQueueUpdate = signal<Date | null>(null);
 
   // Form
   registrationForm!: FormGroup;
@@ -557,6 +635,9 @@ export class RegistrationFormComponent implements OnInit {
   RegistrationPriority = RegistrationPriority;
 
   ngOnInit() {
+    // Initialize form first
+    this.initializeForm();
+    
     // Get eventId from route parameter
     this.route.params.subscribe(params => {
       const eventId = params['eventId'];
@@ -564,20 +645,172 @@ export class RegistrationFormComponent implements OnInit {
         this.eventId.set(eventId);
         this.loadEventDetails();
         this.loadQueueStatus();
+        this.setupRealTimeUpdates();
       } else {
         this.error.set('Invalid event ID');
         this.router.navigate(['/events']);
       }
     });
 
-    this.initializeForm();
+    // Monitor real-time connection status
+    this.realTimeService.isConnected$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(connected => {
+        this.isConnectedToRealTime.set(connected);
+        if (connected && !this.registrationResult()) {
+          // Show connection restored notification
+          this.notificationService.showSuccess(
+            'Connected',
+            'Real-time updates are now active.',
+            false
+          );
+        }
+      });
     
-    // Refresh queue status every 30 seconds
+    // Periodic queue status refresh (fallback for when SignalR is not available)
     setInterval(() => {
-      if (!this.registrationResult() && this.eventId()) {
+      if (!this.registrationResult() && this.eventId() && !this.isConnectedToRealTime()) {
         this.loadQueueStatus();
       }
     }, 30000);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    
+    // Clean up event subscriptions
+    if (this.eventId()) {
+      this.realTimeService.unsubscribeFromEvent(this.eventId()).catch(console.error);
+    }
+  }
+
+  /**
+   * Setup real-time updates for this event
+   */
+  private async setupRealTimeUpdates() {
+    const eventId = this.eventId();
+    if (!eventId) return;
+
+    try {
+      // Subscribe to event updates
+      await this.realTimeService.subscribeToEvent(eventId);
+      
+      // Get event-specific observables
+      const eventObservables = this.realTimeService.getEventObservables(eventId);
+      
+      // Handle queue status updates
+      eventObservables.queueStatus$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(update => {
+          if (update) {
+            this.lastQueueUpdate.set(new Date());
+            this.updateQueueStatusFromRealTime(update);
+          }
+        });
+
+      // Handle registration status updates
+      eventObservables.registrationStatus$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(update => {
+          if (update && this.registrationResult()) {
+            this.updateRegistrationStatus(update);
+          }
+        });
+
+      // Handle capacity updates
+      eventObservables.capacityStatus$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(update => {
+          if (update) {
+            this.updateEventCapacity(update);
+          }
+        });
+
+    } catch (error) {
+      console.error('Failed to setup real-time updates:', error);
+      // Continue with polling fallback
+    }
+  }
+
+  /**
+   * Update queue status from SignalR
+   */
+  private updateQueueStatusFromRealTime(update: any) {
+    const currentStatus = this.queueStatus();
+    
+    this.queueStatus.set({
+      eventId: update.eventId,
+      confirmedCount: update.confirmedCount ?? currentStatus?.confirmedCount ?? 0,
+      queuedCount: update.queuedCount ?? currentStatus?.queuedCount ?? 0,
+      maxCapacity: update.maxCapacity ?? currentStatus?.maxCapacity,
+      availableSpots: update.availableSpots ?? currentStatus?.availableSpots,
+      isAtCapacity: update.isAtCapacity ?? currentStatus?.isAtCapacity ?? false,
+      processingRate: update.processingRate ?? currentStatus?.processingRate,
+      estimatedClearTimeMinutes: update.estimatedClearTimeMinutes ?? currentStatus?.estimatedClearTimeMinutes
+    });
+
+    // Show notification for significant queue changes
+    if (update.queuePosition !== undefined && this.registrationResult()?.queuePosition !== update.queuePosition) {
+      if (update.queuePosition === 0) {
+        this.notificationService.showSuccess(
+          'Registration Confirmed!',
+          'Your registration has been confirmed.',
+          true
+        );
+      } else {
+        const waitTime = update.estimatedWaitMinutes 
+          ? ` (estimated wait: ${update.estimatedWaitMinutes} minutes)`
+          : '';
+        
+        this.notificationService.showInfo(
+          'Queue Update',
+          `You are now position #${update.queuePosition} in the queue${waitTime}.`
+        );
+      }
+    }
+  }
+
+  /**
+   * Update registration status from SignalR
+   */
+  private updateRegistrationStatus(update: any) {
+    const current = this.registrationResult();
+    if (!current) return;
+
+    const updated: RegistrationResponse = {
+      ...current,
+      status: update.status,
+      queuePosition: update.queuePosition,
+      confirmedAt: update.confirmedAt ?? current.confirmedAt,
+      estimatedWaitTimeMinutes: update.estimatedWaitTimeMinutes
+    };
+
+    this.registrationResult.set(updated);
+  }
+
+  /**
+   * Update event capacity from SignalR
+   */
+  private updateEventCapacity(update: any) {
+    const currentEvent = this.eventDetails();
+    const currentQueue = this.queueStatus();
+    
+    if (currentEvent) {
+      this.eventDetails.set({
+        ...currentEvent,
+        currentRegistrations: update.currentRegistrations ?? currentEvent.currentRegistrations
+      });
+    }
+
+    if (currentQueue) {
+      this.queueStatus.set({
+        ...currentQueue,
+        availableSpots: update.availableSpots,
+        isAtCapacity: update.isAtCapacity,
+        confirmedCount: update.confirmedCount ?? currentQueue.confirmedCount
+      });
+    }
   }
 
   private initializeForm() {
@@ -680,8 +913,30 @@ export class RegistrationFormComponent implements OnInit {
 
       if (response) {
         this.registrationResult.set(response);
-        // Refresh queue status after successful registration
+        
+        // If real-time is connected, request immediate queue status
+        if (this.isConnectedToRealTime()) {
+          try {
+            const queueUpdate = await this.realTimeService.requestQueueStatus(this.eventId());
+            if (queueUpdate) {
+              this.updateQueueStatusFromRealTime(queueUpdate);
+            }
+          } catch (error) {
+            console.error('Failed to request real-time queue status:', error);
+          }
+        }
+        
+        // Fallback: refresh queue status after successful registration
         setTimeout(() => this.loadQueueStatus(), 1000);
+        
+        // Show success notification
+        this.notificationService.showSuccess(
+          'Registration Submitted',
+          response.status === 'Confirmed' 
+            ? 'Your registration has been confirmed!'
+            : 'Your registration has been queued. You will be notified when confirmed.',
+          true
+        );
       }
     } catch (error) {
       console.error('Registration failed:', error);
@@ -690,6 +945,11 @@ export class RegistrationFormComponent implements OnInit {
       } else {
         this.error.set('An unexpected error occurred. Please try again.');
       }
+      
+      this.notificationService.showError(
+        'Registration Failed',
+        'Unable to submit your registration. Please try again.'
+      );
     } finally {
       this.isSubmitting.set(false);
     }
@@ -702,6 +962,22 @@ export class RegistrationFormComponent implements OnInit {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  formatRelativeTime(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    
+    if (diffSeconds < 10) return 'just now';
+    if (diffSeconds < 60) return `${diffSeconds}s ago`;
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    
+    return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit'
     });

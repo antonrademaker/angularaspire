@@ -92,10 +92,10 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 - [X] T039 [P] [US1] Create registration form component in src/PublicApp/src/app/registration/registration-form.component.ts
 
 ### Real-time Notifications
-- [ ] T040 [US1] Create SignalR hub for registration updates in src/PublicApi/Hubs/RegistrationHub.cs
+- [X] T040 [US1] Create SignalR hub for registration updates in src/PublicApi/Hubs/RegistrationHub.cs
 - [X] T041 [P] [US1] Create email notification service in src/Shared/Notifications/EmailService.cs
-- [ ] T042 [P] [US1] Create SignalR client service in src/PublicApp/src/app/shared/signalr.service.ts
-- [ ] T043 [P] [US1] Integrate SignalR notifications in registration components
+- [X] T042 [P] [US1] Create SignalR client service in src/PublicApp/src/app/shared/signalr.service.ts
+- [X] T043 [P] [US1] Integrate SignalR notifications in registration components
 
 ### Testing US1
 - [ ] T044 [P] [US1] Create unit tests for EventService in tests/Shared.Tests/EventManagement/EventServiceTests.cs

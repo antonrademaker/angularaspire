@@ -1,15 +1,23 @@
 # Event Management System - Developer Quickstart
 
-**Date**: 2025-12-30  
-**Feature**: Event Management System  
-**Phase**: 1 - Development Setup
+**Date**: 2025-12-31  
+**Phase**: 1 - Development Setup  
+**Updated**: OAuth 2.0, PostgreSQL, SignalR, Queue-based registration
+
+## Architecture Overview
+
+**Authentication**: OAuth 2.0 with JWT tokens, refresh token rotation  
+**Database**: PostgreSQL with JSON columns for flexible event data  
+**Real-time**: SignalR for registration updates, event changes, session notifications  
+**Capacity Management**: Redis-backed queue system for high-demand registration  
+**API Integration**: Tiered rate limiting based on partner API key types
 
 ## Prerequisites
 
-- **.NET 8.0 SDK** - Latest version with Aspire workload
-- **Node.js 18+** - For Angular development
-- **SQL Server** - LocalDB or full instance
-- **Docker Desktop** - For containerized dependencies
+- **.NET 10 SDK** - Latest version with Aspire workload
+- **Node.js 22+** - For Angular development (LTS)
+- **PostgreSQL** - For primary data storage
+- **Docker Desktop** - For containerized dependencies  
 - **Visual Studio 2022** or **VS Code** - With C# and Angular extensions
 
 ### Install .NET Aspire Workload
@@ -20,7 +28,7 @@ dotnet workload install aspire
 ### Global Tools
 ```bash
 dotnet tool install -g dotnet-ef
-npm install -g @angular/cli@17
+npm install -g @angular/cli@21
 ```
 
 ## Solution Structure
@@ -28,23 +36,24 @@ npm install -g @angular/cli@17
 ```
 AngularAspire/
 ├── src/
-│   ├── EventManagement.AppHost/           # Aspire orchestration
-│   ├── EventManagement.ServiceDefaults/   # Shared service configuration
+│   ├── AppHost/                           # Aspire orchestration
+│   ├── ServiceDefaults/                   # Shared service configuration
 │   │
-│   ├── Services/                          # Business Services (IDesign)
-│   │   ├── EventManagement.Api/           # Event management service
-│   │   ├── Registration.Api/              # Registration service
-│   │   ├── SessionManagement.Api/         # Session management service
-│   │   ├── UserManagement.Api/            # User management service
-│   │   └── Notification.Api/              # Notification service
+│   ├── PublicApi/                         # Public REST API (.NET 10)
+│   ├── PrivateApi/                        # Private REST API (.NET 10)
+│   ├── Shared/                            # Business Services (gRPC)
+│   │   ├── EventManagement/               # Event business service
+│   │   ├── Registration/                  # Registration business service
+│   │   ├── SessionManagement/             # Session business service
+│   │   ├── UserManagement/                # User business service
+│   │   └── Notifications/                 # Notification business service
 │   │
-│   ├── Gateways/                          # API Gateways
-│   │   ├── Public.Gateway/                # Public API gateway
-│   │   └── Admin.Gateway/                 # Admin API gateway
-│   │
-│   ├── Apps/                              # Frontend Applications
-│   │   ├── PublicApp/                     # Public Angular app
-│   │   └── AdminApp/                      # Admin Angular app
+│   ├── PublicApp/                         # Public Angular 21 app
+│   ├── PrivateApp/                        # Private Angular 21 app
+│   └── SharedUI/                          # Shared UI components
+│
+├── tests/
+└── protos/                                # Generated gRPC contracts
 │   │
 │   ├── Shared/                            # Shared Libraries
 │   │   ├── EventManagement.Contracts/     # gRPC contracts
@@ -91,9 +100,9 @@ dotnet new classlib -n EventManagement.Contracts
 dotnet new classlib -n EventManagement.Domain
 dotnet new classlib -n EventManagement.Infrastructure
 
-# Angular apps
-ng new PublicApp --routing --style=scss --standalone
-ng new AdminApp --routing --style=scss --standalone
+# Angular apps with modern setup
+ng new PublicApp --routing --style=scss --standalone --package-manager=npm
+ng new AdminApp --routing --style=scss --standalone --package-manager=npm
 
 # Test projects
 dotnet new xunit -n EventManagement.Tests
@@ -105,90 +114,128 @@ dotnet sln add **/*.csproj
 ```
 
 ### 3. Configure Aspire Orchestration
-Update `EventManagement.AppHost/Program.cs`:
+Update `AppHost/Program.cs`:
 
 ```csharp
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Infrastructure
-var sqlserver = builder.AddSqlServer("sqlserver")
+var postgres = builder.AddPostgres("postgres")
     .WithDataVolume()
     .AddDatabase("eventdb");
 
 var redis = builder.AddRedis("redis")
     .WithDataVolume();
 
-var storage = builder.AddAzureStorage("storage")
-    .RunAsEmulator()
-    .AddBlobs("blobs");
-
-// Business Services
-var eventService = builder.AddProject<Projects.EventManagement_Api>("eventmanagement-api")
-    .WithReference(sqlserver)
+// .NET APIs
+var publicApi = builder.AddProject<Projects.PublicApi>("public-api")
+    .WithReference(postgres)
     .WithReference(redis);
 
-var registrationService = builder.AddProject<Projects.Registration_Api>("registration-api")
-    .WithReference(sqlserver)
+var privateApi = builder.AddProject<Projects.PrivateApi>("private-api")
+    .WithReference(postgres)
     .WithReference(redis);
 
-var sessionService = builder.AddProject<Projects.SessionManagement_Api>("sessionmanagement-api")
-    .WithReference(sqlserver)
-    .WithReference(redis);
+// Angular Applications as JavaScript Apps (Development Mode)
+var publicApp = builder.AddJavaScriptApp("public-app", "../PublicApp")
+    .WithPackageManager("npm")
+    .WithPackageManagerCommand("run dev -- --port {{Port}}")
+    .WithEnvironment("PUBLIC_API_URL", publicApi.GetEndpoint("https"))
+    .WaitFor(publicApi);
 
-var userService = builder.AddProject<Projects.UserManagement_Api>("usermanagement-api")
-    .WithReference(sqlserver)
-    .WithReference(redis);
-
-var notificationService = builder.AddProject<Projects.Notification_Api>("notification-api")
-    .WithReference(redis)
-    .WithReference(storage);
-
-// API Gateways
-var publicGateway = builder.AddProject<Projects.Public_Gateway>("public-gateway")
-    .WithReference(eventService)
-    .WithReference(registrationService)
-    .WithReference(sessionService)
-    .WithReference(userService);
-
-var adminGateway = builder.AddProject<Projects.Admin_Gateway>("admin-gateway")
-    .WithReference(eventService)
-    .WithReference(registrationService)
-    .WithReference(sessionService)
-    .WithReference(userService)
-    .WithReference(notificationService);
-
-// Frontend Applications  
-builder.AddNpmApp("publicapp", "../Apps/PublicApp")
-    .WithReference(publicGateway)
-    .WithHttpEndpoint(env: "API_URL");
-
-builder.AddNpmApp("adminapp", "../Apps/AdminApp")
-    .WithReference(adminGateway)
-    .WithHttpEndpoint(env: "API_URL");
+var privateApp = builder.AddJavaScriptApp("private-app", "../PrivateApp")
+    .WithPackageManager("npm")
+    .WithPackageManagerCommand("run dev -- --port {{Port}}")
+    .WithEnvironment("PRIVATE_API_URL", privateApi.GetEndpoint("https"))
+    .WaitFor(privateApi);
 
 builder.Build().Run();
 ```
+### 4. Configure Angular Proxy for Service Discovery
 
-### 4. Start Development Environment
+Create `PublicApp/proxy.conf.js`:
+```javascript
+const FALLBACK_API_URL = 'https://localhost:5001';
+
+function getApiUrl() {
+  // Read Aspire-injected environment variable
+  return process.env.PUBLIC_API_URL || FALLBACK_API_URL;
+}
+
+const config = {
+  "/api/*": {
+    "target": getApiUrl(),
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+};
+
+module.exports = config;
+```
+
+Create `PrivateApp/proxy.conf.js`:
+```javascript
+const FALLBACK_API_URL = 'https://localhost:5002';
+
+function getApiUrl() {
+  // Read Aspire-injected environment variable  
+  return process.env.PRIVATE_API_URL || FALLBACK_API_URL;
+}
+
+const config = {
+  "/api/*": {
+    "target": getApiUrl(),
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+};
+
+module.exports = config;
+```
+
+Update both Angular apps' `package.json`:
+```json
+{
+  "scripts": {
+    "dev": "ng serve --proxy-config proxy.conf.js --host 0.0.0.0",
+    "build": "ng build --configuration production",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "lint": "ng lint"
+  }
+}
+```
+
+### 5. Start Development Environment
 ```bash
-# Terminal 1: Start Aspire orchestration
-cd src/EventManagement.AppHost
+# Start Aspire orchestration (this starts everything)
+cd src/AppHost
 dotnet run
 
 # This will start:
-# - SQL Server container
+# - PostgreSQL container
 # - Redis container  
-# - All .NET APIs
-# - Angular development servers
+# - PublicApi (.NET API)
+# - PrivateApi (.NET API)
+# - PublicApp (Angular dev server with HMR)
+# - PrivateApp (Angular dev server with HMR)
 # - Aspire dashboard at http://localhost:15888
 ```
 
-### 5. Verify Setup
+### 6. Verify Setup
 - **Aspire Dashboard**: http://localhost:15888
-- **Public App**: http://localhost:4200
-- **Admin App**: http://localhost:4201
-- **Public API**: http://localhost:5001/swagger
-- **Admin API**: http://localhost:5002/swagger
+- **Public App**: Dynamic port (shown in Aspire dashboard)
+- **Private App**: Dynamic port (shown in Aspire dashboard)  
+- **Public API**: Dynamic port with Swagger UI
+- **Private API**: Dynamic port with Swagger UI
+
+**Key Benefits of This Setup:**
+✅ **Hot Module Replacement**: Angular changes reload instantly  
+✅ **Service Discovery**: No hardcoded API URLs, reads from Aspire environment  
+✅ **Independent Development**: Frontend and backend can be developed separately  
+✅ **Production Ready**: Same codebase works for production static file serving
 
 ## Database Setup
 
@@ -258,45 +305,118 @@ app.MapGrpcService<EventGrpcService>();
 ```bash
 # PublicApp
 cd src/Apps/PublicApp
-npm install @angular/material @angular/cdk
-npm install @ngrx/store @ngrx/effects @ngrx/store-devtools
-npm install rxjs axios
+npm install @angular/material @angular/cdk @angular/animations
+## NSwag SDK Generation
 
-# AdminApp
-cd ../AdminApp  
-npm install @angular/material @angular/cdk
-npm install @ngrx/store @ngrx/effects @ngrx/store-devtools
-npm install rxjs axios ag-grid-angular
+### Configure NSwag in .NET APIs
+
+Add to `PublicApi.csproj`:
+```xml
+<ItemGroup>
+  <PackageReference Include="NSwag.MSBuild" Version="14.0.0">
+    <PrivateAssets>all</PrivateAssets>
+    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+  </PackageReference>
+</ItemGroup>
+
+<Target Name="NSwag" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)' == 'Debug' ">
+  <Exec Command="$(NSwagExe_Net80) run nswag.json" />
+</Target>
 ```
 
-### Configure Environment
-`src/Apps/PublicApp/src/environments/environment.ts`:
-
-```typescript
-export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:5001/api/v1',
-  features: {
-    registration: true,
-    socialEvents: true
+Create `PublicApi/nswag.json`:
+```json
+{
+  "runtime": "Net80",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "aspNetCoreToOpenApi": {
+      "project": "PublicApi.csproj",
+      "msBuildProjectExtensionsPath": null,
+      "configuration": "Debug",
+      "runtime": null,
+      "targetFramework": null,
+      "noBuild": false,
+      "verbose": true
+    }
+  },
+  "codeGenerators": {
+    "openApiToTypeScriptClient": {
+      "className": "PublicApiClient",
+      "moduleName": "",
+      "namespace": "",
+      "typeScriptVersion": 5.9,
+      "template": "Angular",
+      "promiseType": "Promise",
+      "httpClass": "HttpClient",
+      "withCredentials": false,
+      "useSingletonProvider": true,
+      "injectionTokenType": "InjectionToken",
+      "rxJsVersion": 7.0,
+      "dateTimeType": "Date",
+      "nullValue": "Undefined",
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "generateOptionalParameters": true,
+      "exportTypes": true,
+      "wrapDtoExceptions": true,
+      "exceptionClass": "ApiException",
+      "generateResponseClasses": true,
+      "output": "../PublicApp/src/app/shared/api/public-api.client.ts"
+    }
   }
+}
+```
+
+### Generate Angular SDK
+```bash
+# Build .NET API (triggers NSwag generation)
+cd src/PublicApi
+dotnet build
+
+# Generated TypeScript client will be available at:
+# PublicApp/src/app/shared/api/public-api.client.ts
+```
+
+### Use Generated SDK in Angular
+
+Update `PublicApp/src/app/app.config.ts`:
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { PUBLIC_API_BASE_URL, PublicApiClient } from './shared/api/public-api.client';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(),
+    // Generated NSwag client
+    PublicApiClient,
+    { provide: PUBLIC_API_BASE_URL, useValue: '/api' }
+  ]
 };
 ```
 
-### HTTP Interceptor for API Calls
+Use in Angular component:
 ```typescript
-@Injectable()
-export class ApiInterceptor implements HttpInterceptor {
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const apiReq = req.clone({
-      url: `${environment.apiUrl}${req.url}`,
-      setHeaders: {
-        'Content-Type': 'application/json'
+import { Component, inject } from '@angular/core';
+import { PublicApiClient } from './shared/api/public-api.client';
+
+@Component({
+  selector: 'app-events',
+  template: `
+    <div>
+      @for (event of events$ | async; track event.id) {
+        <div>{{ event.title }}</div>
       }
-    });
-    
-    return next.handle(apiReq);
-  }
+    </div>
+  `
+})
+export class EventsComponent {
+  private apiClient = inject(PublicApiClient);
+  
+  events$ = this.apiClient.getEvents();
 }
 ```
 
@@ -308,9 +428,11 @@ export class ApiInterceptor implements HttpInterceptor {
 cd src/Tests/EventManagement.Tests
 dotnet test
 
-# Angular Tests
+# Angular Tests with Vitest
 cd src/Apps/PublicApp
 npm run test
+# or with UI
+npm run test:ui
 ```
 
 ### Integration Testing

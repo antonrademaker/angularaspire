@@ -1,51 +1,47 @@
 # Data Model: Event Management System
 
-**Date**: 2025-12-30  
-**Feature**: Event Management System  
-**Phase**: 1 - Data Model Design
+**Date**: 2025-12-31  
+**Phase**: 1 - Design & Contracts  
+**Updated**: Aligned with clarified specification (PostgreSQL + JSON columns, OAuth 2.0, SignalR)
+
+## Entity Overview
+
+The data model supports flexible event management using PostgreSQL with JSON columns for extensibility. Authentication uses OAuth 2.0 with JWT tokens, and real-time updates via SignalR for registration, event changes, and session notifications.
 
 ## Core Entities
 
-### Event Aggregate Root
-```csharp
-public class Event
-{
-    public Guid Id { get; init; }
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public EventType Type { get; set; }
-    public EventStatus Status { get; set; }
-    
-    // Scheduling
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public TimeZoneInfo TimeZone { get; set; } = TimeZoneInfo.Utc;
-    
-    // Location (supports hybrid events)
-    public Location? PhysicalLocation { get; set; }
-    public VirtualLocation? VirtualLocation { get; set; }
-    
-    // Registration settings
-    public RegistrationSettings RegistrationSettings { get; set; } = new();
-    
-    // Organizational
-    public List<Organizer> Organizers { get; init; } = new();
-    public List<Track> Tracks { get; init; } = new();
-    public List<SocialEvent> SocialEvents { get; init; } = new();
-    
-    // Metadata (volatile - designed for frequent changes)
-    public Dictionary<string, object> Metadata { get; init; } = new();
-    
-    // Audit
-    public DateTime CreatedAt { get; init; }
-    public DateTime UpdatedAt { get; set; }
-    public Guid CreatedBy { get; init; }
-    public Guid LastUpdatedBy { get; set; }
-    
-    // Domain invariants
-    public void ValidateEventDates()
-    {
-        if (StartDate >= EndDate)
+### User
+Represents all system users with OAuth 2.0 authentication and extensible profiles.
+
+**Properties**:
+- `Id`: Guid (Primary Key)
+- `Email`: string (Required, Unique Index)
+- `FirstName`: string (Required)
+- `LastName`: string (Required)
+- `ProfileImageUrl`: string (Optional)
+- `PhoneNumber`: string (Optional)
+- `Role`: UserRole enum (Attendee, Organizer, Speaker, Admin)
+- `IsActive`: bool (Default: true)
+- `EmailVerified`: bool (Default: false)
+- `OAuthProvider`: string (Optional, e.g., "Google", "Microsoft")
+- `OAuthSubject`: string (Optional, external provider ID)
+- `RefreshToken`: string (Optional, for JWT refresh)
+- `RefreshTokenExpiry`: DateTime (Optional)
+- `CreatedAt`: DateTime (UTC)
+- `UpdatedAt`: DateTime (UTC)
+- `CustomFields`: JsonDocument (Extensible profile data)
+
+**Relationships**:
+- One-to-Many: User → Registration (Events registered for)
+- One-to-Many: User → Subscription (Sessions subscribed to)  
+- One-to-Many: User → SpeakerProfile (If speaker)
+- One-to-Many: User → Event (If organizer)
+
+**Validation Rules**:
+- Email must be valid format and unique across OAuth providers
+- OAuth users may have empty password fields
+- RefreshToken secured with encryption at rest
+- CustomFields JSON must not exceed 5KB
             throw new DomainException("Event start date must be before end date");
     }
 }

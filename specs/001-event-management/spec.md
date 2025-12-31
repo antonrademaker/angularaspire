@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "I want to build a system that can help organise events: people subscribe to the event (and later to sessions), tracks with multiple sessions (presentations from speaker(s)), social events. The API is mainly used by the app, but could also be used to integrate with other systems."
 
+## Clarifications
+
+### Session 2025-12-30
+
+- Q: Event Capacity Management Strategy - In high-demand scenarios where multiple users attempt to register simultaneously, what approach should be used for handling race conditions? → A: Queue-based processing with confirmation emails plus real-time SignalR messaging for immediate user feedback
+- Q: Authentication and Authorization Scope - The current specification mentions API authentication for external integrations but doesn't specify the authentication approach for end users. What authentication strategy should be implemented? → A: OAuth 2.0 with JWT tokens
+- Q: Event Data Storage Strategy - For supporting evolving event formats and custom fields without schema migrations, what data storage approach should be used for flexible event data? → A: PostgreSQL with JSON columns (note: SQL Server JSON columns would work similarly but PostgreSQL offers better JSON performance and cost-effectiveness)
+- Q: Real-time Communication Scope - Beyond registration notifications, what other system events should trigger real-time SignalR communications to enhance user experience? → A: Registration, event updates, and session changes
+- Q: API Rate Limiting Strategy - For external API integrations, what rate limiting approach should be implemented to balance system protection with integration partner needs? → A: Tiered rate limits based on API key types
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Event Registration and Discovery (Priority: P1)
@@ -90,23 +100,23 @@ External systems can integrate with the platform via API to access event data, m
 
 ### Functional Requirements
 
-- **FR-001**: System MUST allow users to create and manage user accounts with email verification
+- **FR-001**: System MUST allow users to create and manage user accounts with OAuth 2.0 authentication, JWT token management, and email verification
 - **FR-002**: System MUST allow event organizers to create events with title, description, dates, location, capacity, and registration settings
 - **FR-003**: System MUST allow attendees to search and filter events by date, category, location, and availability
-- **FR-004**: System MUST enable attendee registration for events with capacity management and waitlisting
+- **FR-004**: System MUST enable attendee registration for events with queue-based processing during high demand, capacity management with real-time SignalR notifications and email confirmation
 - **FR-005**: System MUST support creation of tracks within events with logical grouping of sessions
 - **FR-006**: System MUST allow creation of sessions with title, description, time slot, speaker assignment, and capacity limits
 - **FR-007**: System MUST enable attendee subscription to specific sessions within registered events
 - **FR-008**: System MUST manage speaker profiles with bio, photo, contact information, and session assignments
 - **FR-009**: System MUST support social events (networking, meals) with RSVP functionality separate from session subscriptions
 - **FR-010**: System MUST provide REST API endpoints for event data access and registration management
-- **FR-011**: System MUST implement API authentication and rate limiting for external integrations
-- **FR-012**: System MUST send email notifications for registration confirmations, session reminders, and event updates
+- **FR-011**: System MUST implement OAuth 2.0 JWT token authentication and tiered rate limiting based on API key types for external API integrations
+- **FR-012**: System MUST send both email notifications and real-time SignalR messages for registration confirmations, queue status updates, event updates, session changes, and session reminders
 - **FR-013**: System MUST handle session capacity limits and prevent overbooking
 - **FR-014**: System MUST track attendance status for events and sessions
 - **FR-015**: System MUST provide admin dashboard for event organizers to manage all aspects of their events
 - **FR-016**: System MUST support configurable event templates to accommodate different event types and evolving requirements
-- **FR-017**: System MUST enable custom field definitions for events, sessions, and registrations without schema migrations
+- **FR-017**: System MUST enable custom field definitions for events, sessions, and registrations using PostgreSQL JSON columns without schema migrations
 - **FR-018**: System MUST provide backward compatibility for API versions when schema changes occur
 - **FR-019**: System MUST support feature toggles to enable/disable functionality per event or organization
 - **FR-020**: System MUST allow plugin architecture for extending functionality with third-party integrations

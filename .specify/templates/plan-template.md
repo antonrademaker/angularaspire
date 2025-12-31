@@ -17,18 +17,18 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., .NET 8.0, Angular 17, or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., Aspire 8.0, gRPC, Entity Framework, OpenTelemetry, or NEEDS CLARIFICATION]  
+**Language/Version**: [e.g., .NET 10, Angular 21, TypeScript 5.9, or NEEDS CLARIFICATION]  
+**Primary Dependencies**: [e.g., Aspire 10, gRPC, Entity Framework, OpenTelemetry, or NEEDS CLARIFICATION]  
 **Storage**: [if applicable, e.g., SQL Server, PostgreSQL, Redis, or N/A]  
-**Testing**: [e.g., xUnit, Jest, Playwright, gRPC testing tools, or NEEDS CLARIFICATION]  
+**Testing**: [e.g., xUnit, Vitest, Playwright, gRPC testing tools, or NEEDS CLARIFICATION]  
 **Target Platform**: [e.g., Docker containers, Azure Container Apps, Kubernetes, or NEEDS CLARIFICATION]
 **Project Type**: [aspire-multi - determines source structure with .NET APIs and Angular apps]  
 **Architecture Method**: [IDesign - business service boundaries, avoid functional decomposition, or NEEDS CLARIFICATION]  
 **Service Boundaries**: [business capabilities identified, e.g., EventManagement, Registration, SessionManagement, or NEEDS CLARIFICATION]  
 **Code Generation**: [C# interfaces to .proto generation, TypeScript model generation from C#, or NEEDS CLARIFICATION]  
 **Observability**: [e.g., OpenTelemetry tracing, Prometheus metrics, structured logging, or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s APIs, <3s initial load, 90+ Lighthouse score, or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95 API response, <2MB bundle size, gRPC compatibility, or NEEDS CLARIFICATION]  
+**Performance Goals**: [domain-specific, e.g., 2000 req/s APIs, <2s initial load, 95+ Lighthouse score, or NEEDS CLARIFICATION]  
+**Constraints**: [domain-specific, e.g., <150ms p95 API response, <1.5MB bundle size, gRPC compatibility, or NEEDS CLARIFICATION]  
 **Scale/Scope**: [domain-specific, e.g., 10k users, multiple APIs, public/private apps, or NEEDS CLARIFICATION]
 
 ## Constitution Check

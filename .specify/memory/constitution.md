@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report:
-- Version change: 2.2.0 → 2.3.0
-- New principle added: VIII. Code Generation and Type Safety - C# to TypeScript model generation
-- Modified sections: Service-First Architecture principle updated to use C# interfaces instead of .proto files
-- Enhanced sections: gRPC Services section updated with C# interface approach
-- Templates requiring updates: ✅ Plan template updated with C# interface workflow
-- Follow-up TODOs: None
+- Version change: 2.7.0 → 2.8.0 (MINOR: Enhanced SDK generation requirements)
+- Enhanced principle: VIII. Code Generation and Type Safety - Comprehensive Angular SDK generation with NSwag integration
+- New requirements: Complete TypeScript SDK including models, HTTP services, validation, testing utilities, and Observable patterns
+- Technical implementation: NSwag SDK generation, Angular service factories, type-safe HTTP clients with dependency injection
+- Templates requiring updates: ✅ Plan template updated / ✅ Plan.md constitution check completed
+- Follow-up TODOs: None - comprehensive Angular SDK generation fully specified
 -->
 
 # AngularAspire Constitution
@@ -47,10 +47,11 @@ Standards include:
 ### IV. Comprehensive Testing Strategy
 Every feature requires multi-layer testing across the entire solution stack.
 Testing MUST cover:
-- **Unit Tests**: All business logic in isolation (xUnit for .NET, Jest/tunit for Angular)
+- **Unit Tests**: All business logic in isolation (xUnit for .NET, Vitest for Angular)
 - **Integration Tests**: gRPC service communication and API endpoint contracts
 - **End-to-End Tests**: Complete user workflows across public and private Angular apps (Playwright)
 - **Contract Tests**: API schema validation and backward compatibility verification
+- **Modern Testing Tools**: @testing-library/angular for component testing, MSW for HTTP mocking
 
 **Rationale**: Multi-layer testing catches issues at appropriate levels and prevents regressions across service boundaries.
 
@@ -100,25 +101,36 @@ Requirements:
 **Rationale**: IDesign method ensures systems can adapt to changing business requirements with minimal architectural impact, reducing maintenance costs and enabling rapid feature development.
 
 ### VIII. Code Generation and Type Safety (NON-NEGOTIABLE)
-All data models MUST be generated from a single source of truth to ensure type consistency across the full stack.
+All data models and API clients MUST be generated from a single source of truth to ensure type consistency and eliminate manual coding errors.
 Requirements:
-- **C# as Source of Truth**: All data models defined as C# classes with appropriate attributes
+- **C# as Source of Truth**: All data models, DTOs, and API contracts defined as C# classes with appropriate attributes
 - **Automatic .proto Generation**: gRPC .proto files generated from C# interfaces using protobuf-net.Grpc or similar tools
-- **TypeScript Model Generation**: TypeScript interfaces and models automatically generated from C# models
+- **Angular SDK Generation**: Complete TypeScript SDK automatically generated including models, services, and HTTP clients
 - **Build Integration**: Code generation integrated into CI/CD pipeline with automatic updates on model changes
 - **Type Validation**: Generated models include runtime validation compatible across C# and TypeScript
-- **Documentation Generation**: API documentation generated from C# XML comments and attributes
+- **Documentation Generation**: API documentation and SDK documentation generated from C# XML comments and attributes
 - **Version Compatibility**: Generated artifacts maintain backward compatibility through versioned generation
 
-**Technical Implementation**:
-- **C# Service Contracts**: Define gRPC services as C# interfaces with [ServiceContract] attributes
-- **Model Generation Tools**: Use NSwag, protobuf-net.Grpc, or similar tools for automatic generation
-- **Build Process**: Generate TypeScript models during .NET build process and copy to Angular projects
-- **Validation**: Shared validation attributes generate compatible client and server-side validators
-- **Testing**: Generated models include test data builders and type-safe mocking support
+**Angular SDK Generation Requirements**:
+- **TypeScript Models**: All DTOs, entities, and enums generated as TypeScript interfaces with full type safety
+- **HTTP Client Services**: Generated Angular services with typed HTTP methods for all API endpoints
+- **Validation Services**: Client-side validation generated from C# FluentValidation rules
+- **Error Handling**: Typed error responses and exception handling built into generated services
+- **Authentication Integration**: Generated services include JWT token handling and refresh logic
+- **Testing Utilities**: Generated mock services and test data builders for Angular unit tests
+- **Observable Patterns**: Generated services use Angular patterns (RxJS Observables, dependency injection)
+- **Configuration Integration**: Generated services respect Angular environment configuration
 
-**Projects affected**: All projects - ensures type safety from C# backend through Angular frontend
-**Rationale**: Single source of truth eliminates type mismatches, reduces manual synchronization errors, and provides IntelliSense support across the entire technology stack.
+**Technical Implementation**:
+- **NSwag SDK Generation**: Use NSwag.MSBuild to generate complete Angular SDK from OpenAPI specifications
+- **Service Factory Pattern**: Generated Angular services follow factory pattern with dependency injection
+- **Type-Safe HTTP Clients**: All API calls are strongly typed with request/response models
+- **Automatic Retry Logic**: Generated services include configurable retry and error handling
+- **Build Process Integration**: SDK generation happens during .NET build with automatic Angular project updates
+- **Version Management**: Generated SDK includes versioning metadata for compatibility checking
+
+**Projects affected**: All projects - Angular applications consume generated SDK instead of manual HTTP calls
+**Rationale**: SDK generation eliminates manual API client coding, ensures type consistency, reduces integration errors, and provides enterprise-grade client libraries with minimal maintenance overhead.
 
 ## Code Quality Standards
 
@@ -126,6 +138,7 @@ All projects must maintain enterprise-grade code quality:
 
 ### .NET API Projects
 - **Static Analysis**: Enable all compiler warnings, use StyleCop and SonarAnalyzer
+- **Platform Version**: .NET 10 with latest C# language features and native AOT support
 - **IDesign Architecture**: Organize by business services, NOT technical layers (avoid Controllers/Services/Repositories folders)
 - **Business Service Structure**: Each service represents complete business capability (EventManagementService, UserRegistrationService)
 - **Volatile/Stable Separation**: Business logic in volatile assemblies, infrastructure utilities in stable assemblies
@@ -134,6 +147,9 @@ All projects must maintain enterprise-grade code quality:
 - **Configuration**: Environment-specific settings with secrets management
 
 ### Angular Applications
+- **Platform Version**: Angular 21 with TypeScript 5.9 strict mode and latest standalone components
+- **Testing Framework**: Vitest with @testing-library/angular for component testing
+- **Build Tool**: Vite for fastest development builds and optimized production bundles
 - **IDesign Feature Organization**: Feature modules aligned with backend business service boundaries
 - **Business Capability Modules**: Organize by business domains (event-management, user-registration) not technical functions
 - **State Management**: NgRx for complex cross-service state, services for single-capability state
@@ -164,15 +180,15 @@ All projects must maintain enterprise-grade code quality:
 All components must meet strict performance benchmarks:
 
 ### API Performance
-- Response time: <100ms p50, <200ms p95 for all endpoints
-- Throughput: Handle 1000+ concurrent requests
-- Resource usage: <512MB memory per service instance
+- Response time: <75ms p50, <150ms p95 for all endpoints (improved with .NET 10 performance)
+- Throughput: Handle 2000+ concurrent requests (enhanced with Aspire 13)
+- Resource usage: <384MB memory per service instance (optimized with native AOT)
 - Database queries: <50ms average execution time
 
 ### Angular Application Performance
-- Initial load: <3 seconds on 3G network
-- Lighthouse Performance: ≥90 score
-- Bundle size: <2MB initial, <500KB per lazy-loaded module
+- Initial load: <2 seconds on 3G network (improved with Angular 21 optimizations)
+- Lighthouse Performance: ≥95 score (enhanced with latest framework)
+- Bundle size: <1.5MB initial, <400KB per lazy-loaded module (better tree-shaking)
 - Runtime performance: 60fps interactions, <100ms response to user input
 
 ### gRPC Communication
@@ -225,4 +241,4 @@ This constitution supersedes all other development practices and standards.
 - Cross-cutting changes require approval from both .NET and Angular team leads
 - Use `.specify/` templates and workflows for consistent multi-project development practices
 
-**Version**: 2.3.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2025-12-30
+**Version**: 2.8.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2025-12-30

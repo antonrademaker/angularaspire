@@ -3,10 +3,11 @@
 **Date**: 2025-12-30  
 **Feature**: Event Management System  
 **Phase**: 1 - API Contract Definition
+**Technology Stack**: .NET 10, Angular 21, Aspire 10
 
 ## Architecture Overview
 
-The Event Management System exposes two types of APIs:
+The Event Management System exposes two types of APIs leveraging the latest platform capabilities:
 
 ### 1. Public REST API (Angular Apps → .NET APIs)
 - **Public Angular App**: Basic event browsing, registration, session viewing

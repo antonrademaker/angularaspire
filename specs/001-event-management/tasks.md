@@ -31,17 +31,17 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 **Independent Test**: Solution builds without errors, all projects reference correctly
 
 - [x] T001 Create .NET solution file in repository root
-- [ ] T002 [P] Create AppHost project for Aspire orchestration in src/AppHost/AppHost.csproj
-- [ ] T003 [P] Create ServiceDefaults project for shared configuration in src/ServiceDefaults/ServiceDefaults.csproj
-- [ ] T004 [P] Create PublicApi .NET project in src/PublicApi/PublicApi.csproj
-- [ ] T005 [P] Create PrivateApi .NET project in src/PrivateApi/PrivateApi.csproj
-- [ ] T006 [P] Create Shared business services library in src/Shared/Shared.csproj
-- [ ] T007 [P] Create PublicApp Angular project in src/PublicApp/ using Angular CLI 21
-- [ ] T008 [P] Create PrivateApp Angular project in src/PrivateApp/ using Angular CLI 21
-- [ ] T009 [P] Create SharedUI component library in src/SharedUI/ using Angular CLI 21
-- [ ] T010 Add all projects to solution file with proper dependencies
-- [ ] T011 [P] Create tests directory structure: tests/PublicApi.Tests/, tests/PrivateApi.Tests/, tests/Shared.Tests/
-- [ ] T012 [P] Create E2E test projects: tests/PublicApp.e2e/, tests/PrivateApp.e2e/
+- [x] T002 [P] Create AppHost project for Aspire orchestration in src/AppHost/AppHost.csproj
+- [x] T003 [P] Create ServiceDefaults project for shared configuration in src/ServiceDefaults/ServiceDefaults.csproj
+- [x] T004 [P] Create PublicApi .NET project in src/PublicApi/PublicApi.csproj
+- [x] T005 [P] Create PrivateApi .NET project in src/PrivateApi/PrivateApi.csproj
+- [x] T006 [P] Create Shared business services library in src/Shared/Shared.csproj
+- [x] T007 [P] Create PublicApp Angular project in src/PublicApp/ using Angular CLI 21
+- [x] T008 [P] Create PrivateApp Angular project in src/PrivateApp/ using Angular CLI 21
+- [x] T009 [P] Create SharedUI component library in src/PublicApp/projects/shared-ui/ using Angular CLI 21
+- [x] T010 Add all projects to solution file with proper dependencies
+- [x] T011 [P] Create tests directory structure: tests/PublicApi.Tests/, tests/PrivateApi.Tests/, tests/Shared.Tests/
+- [x] T012 [P] Create E2E test projects: tests/PublicApp.e2e/, tests/PrivateApp.e2e/
 
 ---
 

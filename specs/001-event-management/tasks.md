@@ -84,10 +84,10 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 - [X] T033 [P] [US1] Create event display components in src/PublicApp/src/app/event-management/event-list.component.ts
 
 ### Registration with Queue Processing
-- [ ] T034 [P] [US1] Create Registration entity in src/Shared/Registration/Registration.cs
-- [ ] T035 [P] [US1] Create RegistrationDbContext in src/Shared/Registration/RegistrationDbContext.cs
-- [ ] T036 [US1] Create IRegistrationService with queue processing in src/Shared/Registration/IRegistrationService.cs
-- [ ] T037 [US1] Create Redis queue service for capacity management in src/Shared/Registration/QueueService.cs
+- [X] T034 [P] [US1] Create Registration entity in src/Shared/Registration/Registration.cs
+- [X] T035 [P] [US1] Create RegistrationDbContext in src/Shared/Registration/RegistrationDbContext.cs
+- [X] T036 [US1] Create IRegistrationService with queue processing in src/Shared/Registration/IRegistrationService.cs
+- [X] T037 [US1] Create Redis queue service for capacity management in src/Shared/Registration/QueueService.cs
 - [ ] T038 [P] [US1] Create registration endpoints in src/PublicApi/Registration/RegistrationController.cs
 - [ ] T039 [P] [US1] Create registration form component in src/PublicApp/src/app/registration/registration-form.component.ts
 

@@ -164,7 +164,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 
 ### API Integration Framework
 - [X] T072 [P] [US4] Create API key management in src/PrivateApi/ApiManagement/ApiKeysController.cs
-- [ ] T073 [US4] Configure tiered rate limiting middleware in src/PublicApi/Middleware/RateLimitingMiddleware.cs
+- [X] T073 [US4] Configure tiered rate limiting middleware in src/PublicApi/Middleware/RateLimitingMiddleware.cs
 - [ ] T074 [P] [US4] Create external API documentation endpoints in src/PublicApi/Documentation/
 - [ ] T075 [P] [US4] Create API client examples and SDKs in docs/api-examples/
 

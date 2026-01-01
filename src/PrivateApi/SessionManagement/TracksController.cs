@@ -260,22 +260,6 @@ public class TracksController : ControllerBase
 }
 
 /// <summary>
-/// Standard API error response
-/// </summary>
-public class ApiError
-{
-    public string Code { get; set; }
-    public string Message { get; set; }
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-
-    public ApiError(string code, string message)
-    {
-        Code = code;
-        Message = message;
-    }
-}
-
-/// <summary>
 /// Request to reorder tracks
 /// </summary>
 public class ReorderTracksRequest

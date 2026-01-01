@@ -119,7 +119,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 
 ### Organizer Interface
 - [X] T053 [P] [US2] Create track management endpoints in src/PrivateApi/SessionManagement/TracksController.cs
-- [ ] T054 [P] [US2] Create session management endpoints in src/PrivateApi/SessionManagement/SessionsController.cs
+- [X] T054 [P] [US2] Create session management endpoints in src/PrivateApi/SessionManagement/SessionsController.cs
 - [ ] T055 [P] [US2] Create track management components in src/PrivateApp/src/app/session-management/track-manager.component.ts
 - [ ] T056 [P] [US2] Create session management components in src/PrivateApp/src/app/session-management/session-manager.component.ts
 

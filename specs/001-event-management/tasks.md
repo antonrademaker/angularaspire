@@ -143,7 +143,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 ### Speaker Management
 - [X] T063 [P] [US3] Create SpeakerProfile entity in src/Shared/SessionManagement/SpeakerProfile.cs
 - [X] T064 [P] [US3] Create speaker management endpoints in src/PrivateApi/SessionManagement/SpeakersController.cs
-- [ ] T065 [P] [US3] Create speaker profile components in src/PrivateApp/src/app/session-management/speaker-manager.component.ts
+- [X] T065 [P] [US3] Create speaker profile components in src/PrivateApp/src/app/session-management/speaker-manager.component.ts
 
 ### Social Events
 - [ ] T066 [P] [US3] Create SocialEvent entity in src/Shared/EventManagement/SocialEvent.cs

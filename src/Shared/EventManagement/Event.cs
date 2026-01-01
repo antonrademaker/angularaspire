@@ -180,7 +180,11 @@ public class Event
     // Navigation properties (will be enabled as we implement related entities)
     // public virtual ICollection<Registration.Registration> Registrations { get; set; } = [];
     // public virtual ICollection<SessionManagement.Track> Tracks { get; set; } = [];
-    // public virtual ICollection<SocialEvent> SocialEvents { get; set; } = [];
+
+    /// <summary>
+    /// Navigation property to social events belonging to this event
+    /// </summary>
+    public virtual ICollection<SocialEvent> SocialEvents { get; set; } = [];
 }
 
 /// <summary>

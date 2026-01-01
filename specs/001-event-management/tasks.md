@@ -130,7 +130,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 - [X] T060 [P] [US2] Create session browsing components in src/PublicApp/src/app/session-management/session-browser.component.ts
 
 ### Testing US2
-- [ ] T061 [P] [US2] Create unit tests for SessionService in tests/Shared.Tests/SessionManagement/SessionServiceTests.cs
+- [X] T061 [P] [US2] Create unit tests for SessionService in tests/Shared.Tests/SessionManagement/SessionServiceTests.cs
 - [ ] T062 [P] [US2] Create integration tests for session subscription in tests/PublicApi.Tests/SessionManagement/SubscriptionIntegrationTests.cs
 
 ---

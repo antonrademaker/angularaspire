@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Shared.UserManagement;
 using Shared.EventManagement;
+using Shared.SessionManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +51,9 @@ builder.Services.AddUserManagement();
 
 // Add event management services
 builder.Services.AddEventManagement();
+
+// Add session management services
+builder.Services.AddSessionManagement(builder.Configuration);
 
 // Add CORS for Angular applications
 builder.Services.AddCors(options =>

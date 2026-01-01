@@ -112,10 +112,10 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 
 ### Track and Session Management
 - [ ] T048 [P] [US2] Create Track entity in src/Shared/SessionManagement/Track.cs
-- [ ] T049 [P] [US2] Create Session entity with capacity limits in src/Shared/SessionManagement/Session.cs
-- [ ] T050 [P] [US2] Create SessionDbContext in src/Shared/SessionManagement/SessionDbContext.cs
-- [ ] T051 [US2] Create ISessionService interface in src/Shared/SessionManagement/ISessionService.cs
-- [ ] T052 [US2] Create SessionService with conflict detection in src/Shared/SessionManagement/SessionService.cs
+- [X] T049 [P] [US2] Create Session entity with capacity limits in src/Shared/SessionManagement/Session.cs
+- [X] T050 [P] [US2] Create SessionDbContext in src/Shared/SessionManagement/SessionDbContext.cs
+- [X] T051 [US2] Create ISessionService interface in src/Shared/SessionManagement/ISessionService.cs
+- [X] T052 [US2] Create SessionService with conflict detection in src/Shared/SessionManagement/SessionService.cs
 
 ### Organizer Interface
 - [ ] T053 [P] [US2] Create track management endpoints in src/PrivateApi/SessionManagement/TracksController.cs
@@ -124,7 +124,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 - [ ] T056 [P] [US2] Create session management components in src/PrivateApp/src/app/session-management/session-manager.component.ts
 
 ### Attendee Session Subscription
-- [ ] T057 [P] [US2] Create Subscription entity in src/Shared/SessionManagement/Subscription.cs
+- [X] T057 [P] [US2] Create Subscription entity in src/Shared/SessionManagement/Subscription.cs
 - [ ] T058 [US2] Create subscription service with capacity management in src/Shared/SessionManagement/SubscriptionService.cs
 - [ ] T059 [P] [US2] Create session subscription endpoints in src/PublicApi/SessionManagement/SubscriptionsController.cs
 - [ ] T060 [P] [US2] Create session browsing components in src/PublicApp/src/app/session-management/session-browser.component.ts

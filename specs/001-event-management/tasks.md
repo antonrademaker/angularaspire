@@ -191,7 +191,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 - [X] T084 [P] Create CI/CD pipeline configuration in .github/workflows/deploy.yml
 
 ### Performance & Monitoring
-- [ ] T085 [P] Configure application insights and monitoring in src/ServiceDefaults/
+- [X] T085 [P] Configure application insights and monitoring in src/ServiceDefaults/
 - [ ] T086 [P] Add performance budgets to Angular applications in angular.json
 - [ ] T087 [P] Create comprehensive E2E test suite in tests/e2e/full-workflow.spec.ts
 

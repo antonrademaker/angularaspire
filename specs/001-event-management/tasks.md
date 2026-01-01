@@ -148,7 +148,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 ### Social Events
 - [X] T066 [P] [US3] Create SocialEvent entity in src/Shared/EventManagement/SocialEvent.cs
 - [X] T067 [P] [US3] Create SocialEventRSVP entity in src/Shared/EventManagement/SocialEventRSVP.cs
-- [ ] T068 [US3] Create social event service in src/Shared/EventManagement/SocialEventService.cs
+- [X] T068 [US3] Create social event service in src/Shared/EventManagement/SocialEventService.cs
 - [ ] T069 [P] [US3] Create social event endpoints in src/PublicApi/EventManagement/SocialEventsController.cs
 - [ ] T070 [P] [US3] Create social event components in src/PublicApp/src/app/event-management/social-events.component.ts
 

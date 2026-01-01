@@ -121,7 +121,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 - [X] T053 [P] [US2] Create track management endpoints in src/PrivateApi/SessionManagement/TracksController.cs
 - [X] T054 [P] [US2] Create session management endpoints in src/PrivateApi/SessionManagement/SessionsController.cs
 - [X] T055 [P] [US2] Create track management components in src/PrivateApp/src/app/session-management/track-manager.component.ts
-- [ ] T056 [P] [US2] Create session management components in src/PrivateApp/src/app/session-management/session-manager.component.ts
+- [X] T056 [P] [US2] Create session management components in src/PrivateApp/src/app/session-management/session-manager.component.ts
 
 ### Attendee Session Subscription
 - [X] T057 [P] [US2] Create Subscription entity in src/Shared/SessionManagement/Subscription.cs

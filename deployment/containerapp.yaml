@@ -1,0 +1,221 @@
+apiVersion: 2023-05-01
+location: eastus
+name: eventmanagement
+type: Microsoft.App/containerApps
+properties:
+  managedEnvironmentId: /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.App/managedEnvironments/${ENVIRONMENT_NAME}
+  
+  configuration:
+    secrets:
+      - name: jwt-secret
+        value: ${JWT_SECRET_KEY}
+      - name: db-connection
+        value: ${DATABASE_CONNECTION_STRING}
+      - name: redis-connection
+        value: ${REDIS_CONNECTION_STRING}
+      - name: smtp-password
+        value: ${SMTP_PASSWORD}
+      - name: appinsights-connection
+        value: ${APPLICATIONINSIGHTS_CONNECTION_STRING}
+    
+    registries:
+      - server: ${ACR_LOGIN_SERVER}
+        username: ${ACR_USERNAME}
+        passwordSecretRef: acr-password
+    
+    ingress:
+      external: true
+      targetPort: 8080
+      transport: http
+      corsPolicy:
+        allowedOrigins:
+          - https://${APP_DOMAIN}
+          - https://www.${APP_DOMAIN}
+        allowedMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        allowedHeaders:
+          - "*"
+        exposeHeaders:
+          - X-RateLimit-Limit
+          - X-RateLimit-Remaining
+          - X-RateLimit-Reset
+        maxAge: 3600
+        allowCredentials: true
+  
+  template:
+    containers:
+      - name: publicapi
+        image: ${ACR_LOGIN_SERVER}/eventmanagement/publicapi:${IMAGE_TAG}
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+        env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: Production
+          - name: ConnectionStrings__DefaultConnection
+            secretRef: db-connection
+          - name: ConnectionStrings__Redis
+            secretRef: redis-connection
+          - name: Jwt__SecretKey
+            secretRef: jwt-secret
+          - name: Jwt__Issuer
+            value: EventManagement
+          - name: Jwt__Audience
+            value: EventManagement
+          - name: Email__SmtpHost
+            value: ${SMTP_HOST}
+          - name: Email__SmtpPort
+            value: "587"
+          - name: Email__SmtpUsername
+            value: ${SMTP_USERNAME}
+          - name: Email__SmtpPassword
+            secretRef: smtp-password
+          - name: ApplicationInsights__ConnectionString
+            secretRef: appinsights-connection
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          - type: Readiness
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+    
+    scale:
+      minReplicas: 1
+      maxReplicas: 10
+      rules:
+        - name: http-scaling
+          http:
+            metadata:
+              concurrentRequests: "100"
+---
+apiVersion: 2023-05-01
+location: eastus
+name: eventmanagement-private
+type: Microsoft.App/containerApps
+properties:
+  managedEnvironmentId: /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.App/managedEnvironments/${ENVIRONMENT_NAME}
+  
+  configuration:
+    secrets:
+      - name: jwt-secret
+        value: ${JWT_SECRET_KEY}
+      - name: db-connection
+        value: ${DATABASE_CONNECTION_STRING}
+      - name: redis-connection
+        value: ${REDIS_CONNECTION_STRING}
+      - name: appinsights-connection
+        value: ${APPLICATIONINSIGHTS_CONNECTION_STRING}
+    
+    registries:
+      - server: ${ACR_LOGIN_SERVER}
+        username: ${ACR_USERNAME}
+        passwordSecretRef: acr-password
+    
+    ingress:
+      external: false
+      targetPort: 8080
+      transport: http
+  
+  template:
+    containers:
+      - name: privateapi
+        image: ${ACR_LOGIN_SERVER}/eventmanagement/privateapi:${IMAGE_TAG}
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+        env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: Production
+          - name: ConnectionStrings__DefaultConnection
+            secretRef: db-connection
+          - name: ConnectionStrings__Redis
+            secretRef: redis-connection
+          - name: Jwt__SecretKey
+            secretRef: jwt-secret
+          - name: ApplicationInsights__ConnectionString
+            secretRef: appinsights-connection
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          - type: Readiness
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+    
+    scale:
+      minReplicas: 1
+      maxReplicas: 5
+      rules:
+        - name: http-scaling
+          http:
+            metadata:
+              concurrentRequests: "50"
+---
+apiVersion: 2023-05-01
+location: eastus
+name: eventmanagement-web
+type: Microsoft.App/containerApps
+properties:
+  managedEnvironmentId: /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.App/managedEnvironments/${ENVIRONMENT_NAME}
+  
+  configuration:
+    registries:
+      - server: ${ACR_LOGIN_SERVER}
+        username: ${ACR_USERNAME}
+        passwordSecretRef: acr-password
+    
+    ingress:
+      external: true
+      targetPort: 80
+      transport: http
+      customDomains:
+        - name: ${APP_DOMAIN}
+          bindingType: SniEnabled
+          certificateId: /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.App/managedEnvironments/${ENVIRONMENT_NAME}/certificates/${CERTIFICATE_NAME}
+  
+  template:
+    containers:
+      - name: publicapp
+        image: ${ACR_LOGIN_SERVER}/eventmanagement/publicapp:${IMAGE_TAG}
+        resources:
+          cpu: 0.25
+          memory: 0.5Gi
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          - type: Readiness
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+    
+    scale:
+      minReplicas: 1
+      maxReplicas: 5
+      rules:
+        - name: http-scaling
+          http:
+            metadata:
+              concurrentRequests: "200"

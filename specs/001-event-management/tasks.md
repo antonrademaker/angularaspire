@@ -131,7 +131,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 
 ### Testing US2
 - [X] T061 [P] [US2] Create unit tests for SessionService in tests/Shared.Tests/SessionManagement/SessionServiceTests.cs
-- [ ] T062 [P] [US2] Create integration tests for session subscription in tests/PublicApi.Tests/SessionManagement/SubscriptionIntegrationTests.cs
+- [X] T062 [P] [US2] Create integration tests for session subscription in tests/PublicApi.Tests/SessionManagement/SubscriptionIntegrationTests.cs
 
 ---
 

@@ -432,9 +432,8 @@ public class SessionSpeaker
 
     /// <summary>
     /// Navigation property to the speaker profile
-    /// Note: SpeakerProfile will be defined in T063
     /// </summary>
-    // public virtual SpeakerProfile? Speaker { get; set; }
+    public virtual SpeakerProfile? Speaker { get; set; }
 }
 
 /// <summary>

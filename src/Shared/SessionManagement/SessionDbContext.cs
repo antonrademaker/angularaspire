@@ -42,6 +42,11 @@ public class SessionDbContext : DbContext
     public DbSet<SessionSpeaker> SessionSpeakers => Set<SessionSpeaker>();
 
     /// <summary>
+    /// DbSet for SpeakerProfile entities
+    /// </summary>
+    public DbSet<SpeakerProfile> SpeakerProfiles => Set<SpeakerProfile>();
+
+    /// <summary>
     /// Configures the database schema and relationships
     /// </summary>
     /// <param name="modelBuilder">The model builder</param>
@@ -198,7 +203,52 @@ public class SessionDbContext : DbContext
                 .HasForeignKey(ss => ss.SessionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Note: SpeakerProfile relationship will be configured when implemented in T063
+            // SpeakerProfile relationship
+            entity.HasOne(ss => ss.Speaker)
+                .WithMany(sp => sp.SessionAssignments)
+                .HasForeignKey(ss => ss.SpeakerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configure SpeakerProfile entity
+        modelBuilder.Entity<SpeakerProfile>(entity =>
+        {
+            entity.HasKey(sp => sp.Id);
+            entity.HasIndex(sp => sp.UserId).IsUnique();
+            entity.HasIndex(sp => sp.DisplayName);
+            entity.HasIndex(sp => sp.Status);
+            entity.HasIndex(sp => sp.IsActive);
+            entity.HasIndex(sp => sp.IsPublic);
+
+            // Relationships
+            entity.HasOne(sp => sp.User)
+                .WithMany()
+                .HasForeignKey(sp => sp.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(sp => sp.SessionAssignments)
+                .WithOne(ss => ss.Speaker)
+                .HasForeignKey(ss => ss.SpeakerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // JSON column configurations - only for PostgreSQL, ignore for InMemory
+            if (isInMemory)
+            {
+                entity.Ignore(sp => sp.SocialLinks);
+                entity.Ignore(sp => sp.ExpertiseAreas);
+                entity.Ignore(sp => sp.CustomFields);
+            }
+            else
+            {
+                entity.Property(sp => sp.SocialLinks)
+                    .HasColumnType("jsonb");
+
+                entity.Property(sp => sp.ExpertiseAreas)
+                    .HasColumnType("jsonb");
+
+                entity.Property(sp => sp.CustomFields)
+                    .HasColumnType("jsonb");
+            }
         });
     }
 

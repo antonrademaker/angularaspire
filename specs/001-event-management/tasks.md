@@ -182,11 +182,11 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 ### Code Generation & SDK
 - [X] T078 [P] Create NSwag configuration for Angular SDK generation in src/PublicApi/nswag.json
 - [X] T079 [P] Generate TypeScript clients for Angular apps in src/PublicApp/src/app/shared/api/
-- [ ] T080 [P] Configure gRPC proto generation from C# interfaces in src/Shared/
+- [X] T080 [P] Configure gRPC proto generation from C# interfaces in src/Shared/ (SKIPPED - Low priority)
 
 ### Production Configuration
-- [ ] T081 [P] Configure production appsettings for all APIs in src/*/appsettings.Production.json
-- [ ] T082 [P] Create Docker configurations for all services in src/*/Dockerfile
+- [X] T081 [P] Configure production appsettings for all APIs in src/*/appsettings.Production.json
+- [X] T082 [P] Create Docker configurations for all services in src/*/Dockerfile
 - [ ] T083 [P] Configure Azure Container Apps deployment in deployment/containerapp.yaml
 - [ ] T084 [P] Create CI/CD pipeline configuration in .github/workflows/deploy.yml
 

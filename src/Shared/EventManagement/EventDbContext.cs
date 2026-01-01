@@ -605,6 +605,7 @@ public static class EventDbContextExtensions
 
         // Register business services
         services.AddScoped<IEventService, EventService>();
+        services.AddScoped<ISocialEventService, SocialEventService>();
 
         return services;
     }

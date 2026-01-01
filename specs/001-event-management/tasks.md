@@ -126,7 +126,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 ### Attendee Session Subscription
 - [X] T057 [P] [US2] Create Subscription entity in src/Shared/SessionManagement/Subscription.cs
 - [X] T058 [US2] Create subscription service with capacity management in src/Shared/SessionManagement/SubscriptionService.cs
-- [ ] T059 [P] [US2] Create session subscription endpoints in src/PublicApi/SessionManagement/SubscriptionsController.cs
+- [X] T059 [P] [US2] Create session subscription endpoints in src/PublicApi/SessionManagement/SubscriptionsController.cs
 - [ ] T060 [P] [US2] Create session browsing components in src/PublicApp/src/app/session-management/session-browser.component.ts
 
 ### Testing US2

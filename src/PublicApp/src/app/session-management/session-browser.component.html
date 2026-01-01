@@ -1,0 +1,242 @@
+<div class="session-browser">
+  <!-- Header -->
+  <header class="page-header">
+    <h1>Browse Sessions</h1>
+    <p>Discover and subscribe to sessions that interest you</p>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <form [formGroup]="searchForm" class="filters">
+      <div class="search-box">
+        <input type="text" 
+               formControlName="searchText"
+               placeholder="Search sessions, speakers, tags..."
+               class="search-input">
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <select formControlName="trackId" class="filter-select">
+        <option value="">All Tracks</option>
+        <option *ngFor="let track of tracks()" [value]="track.id">
+          {{ track.name }}
+        </option>
+      </select>
+
+      <select formControlName="type" class="filter-select">
+        <option value="">All Types</option>
+        <option *ngFor="let type of sessionTypes" [value]="type">
+          {{ type }}
+        </option>
+      </select>
+
+      <select formControlName="difficulty" class="filter-select">
+        <option value="">All Levels</option>
+        <option *ngFor="let level of difficultyLevels" [value]="level">
+          {{ level }}
+        </option>
+      </select>
+
+      <label class="checkbox-label">
+        <input type="checkbox" formControlName="showOnlyAvailable">
+        Available only
+      </label>
+
+      <button type="button" class="clear-btn" (click)="clearFilters()">
+        Clear
+      </button>
+    </form>
+
+    <div class="view-controls">
+      <button class="view-btn" 
+              [class.active]="viewMode() === 'list'"
+              (click)="viewMode.set('list')">
+        📋 List
+      </button>
+      <button class="view-btn"
+              [class.active]="viewMode() === 'schedule'"
+              (click)="viewMode.set('schedule')">
+        📅 Schedule
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading">
+    <div class="spinner"></div>
+    <p>Loading sessions...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error()" class="error-message">
+    <p>{{ error() }}</p>
+    <button (click)="loadSessions()" class="retry-btn">Try Again</button>
+  </div>
+
+  <!-- Session Results Summary -->
+  <div class="results-summary" *ngIf="!isLoading() && !error()">
+    <span>{{ filteredSessions().length }} sessions found</span>
+    <span *ngIf="mySubscribedSessions().length > 0" class="subscribed-count">
+      · {{ mySubscribedSessions().length }} subscribed
+    </span>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="!isLoading() && !error() && viewMode() === 'list'" class="sessions-list">
+    <div *ngFor="let session of filteredSessions()" class="session-card">
+      <div class="session-header">
+        <div class="track-indicator" 
+             *ngIf="session.trackId"
+             [style.background-color]="getTrackColor(session.trackId)">
+        </div>
+        <div class="session-meta">
+          <span class="session-type">{{ session.type }}</span>
+          <span class="session-level">{{ session.difficultyLevel }}</span>
+          <span class="session-time">
+            {{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}
+          </span>
+        </div>
+      </div>
+
+      <h3 class="session-title">{{ session.title }}</h3>
+      
+      <p class="session-description">{{ session.description }}</p>
+
+      <!-- Speakers -->
+      <div *ngIf="session.speakers && session.speakers.length > 0" class="speakers">
+        <span class="speaker" *ngFor="let speaker of session.speakers">
+          👤 {{ speaker.name }}
+          <span *ngIf="speaker.title" class="speaker-title">, {{ speaker.title }}</span>
+        </span>
+      </div>
+
+      <!-- Session Info -->
+      <div class="session-info">
+        <span *ngIf="session.room" class="info-item">
+          📍 {{ session.room }}{{ session.building ? ', ' + session.building : '' }}
+        </span>
+        <span *ngIf="session.isVirtual" class="info-item virtual">
+          💻 Virtual
+        </span>
+        <span class="info-item duration">
+          ⏱️ {{ formatDuration(session) }}
+        </span>
+      </div>
+
+      <!-- Capacity Bar -->
+      <div *ngIf="session.requiresSubscription && session.maxAttendees" class="capacity-section">
+        <div class="capacity-bar">
+          <div class="capacity-fill" 
+               [style.width.%]="getCapacityPercentage(session)"
+               [class.warning]="getCapacityPercentage(session) >= 80"
+               [class.full]="getCapacityPercentage(session) >= 100">
+          </div>
+        </div>
+        <span class="capacity-text">
+          {{ session.currentAttendees }}/{{ session.maxAttendees }} spots
+          <span *ngIf="getCapacityPercentage(session) >= 100" class="waitlist-badge">
+            Waitlist available
+          </span>
+        </span>
+      </div>
+
+      <!-- Tags -->
+      <div *ngIf="session.tags && session.tags.length > 0" class="tags">
+        <span *ngFor="let tag of session.tags" class="tag">{{ tag }}</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="session-actions">
+        <ng-container *ngIf="session.requiresSubscription">
+          <ng-container *ngIf="!isSubscribed(session.id)">
+            <button class="subscribe-btn" (click)="subscribe(session)">
+              {{ getCapacityPercentage(session) >= 100 ? 'Join Waitlist' : 'Subscribe' }}
+            </button>
+          </ng-container>
+          
+          <ng-container *ngIf="isSubscribed(session.id)">
+            <div class="subscribed-badge" [class.waitlisted]="isWaitlisted(session.id)">
+              <span *ngIf="!isWaitlisted(session.id)">✓ Subscribed</span>
+              <span *ngIf="isWaitlisted(session.id)">
+                ⏳ Waitlist #{{ getSubscription(session.id)?.waitlistPosition }}
+              </span>
+            </div>
+            <button class="unsubscribe-btn" (click)="unsubscribe(session)">
+              Unsubscribe
+            </button>
+          </ng-container>
+        </ng-container>
+
+        <span *ngIf="!session.requiresSubscription" class="open-session">
+          Open Session - No registration required
+        </span>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredSessions().length === 0" class="empty-state">
+      <p>No sessions match your filters</p>
+      <button (click)="clearFilters()" class="clear-btn">Clear Filters</button>
+    </div>
+  </div>
+
+  <!-- Schedule View -->
+  <div *ngIf="!isLoading() && !error() && viewMode() === 'schedule'" class="schedule-view">
+    <div *ngFor="let day of sessionsByTime() | keyvalue" class="schedule-day">
+      <h2 class="day-header">{{ formatDate(day.key) }}</h2>
+      
+      <div class="timeline">
+        <div *ngFor="let session of day.value" class="timeline-item">
+          <div class="time-slot">
+            <span class="time-start">{{ formatTime(session.startTime) }}</span>
+            <span class="time-duration">{{ formatDuration(session) }}</span>
+          </div>
+          
+          <div class="session-content" 
+               [style.border-left-color]="getTrackColor(session.trackId)"
+               [class.subscribed]="isSubscribed(session.id)">
+            <div class="session-header-compact">
+              <span class="session-type-badge">{{ session.type }}</span>
+              <span *ngIf="session.room" class="room">{{ session.room }}</span>
+            </div>
+            
+            <h4 class="session-title-compact">{{ session.title }}</h4>
+            
+            <div *ngIf="session.speakers && session.speakers.length > 0" class="speakers-compact">
+              <span *ngFor="let speaker of session.speakers; let last = last">
+                {{ speaker.name }}{{ !last ? ', ' : '' }}
+              </span>
+            </div>
+
+            <div class="session-actions-compact">
+              <ng-container *ngIf="session.requiresSubscription && !isSubscribed(session.id)">
+                <button class="subscribe-btn-sm" (click)="subscribe(session)">
+                  Subscribe
+                </button>
+              </ng-container>
+              
+              <span *ngIf="isSubscribed(session.id)" class="subscribed-indicator">
+                ✓ In Schedule
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Schedule Summary -->
+  <div *ngIf="mySubscribedSessions().length > 0" class="my-schedule-summary">
+    <h3>My Schedule ({{ mySubscribedSessions().length }} sessions)</h3>
+    <div class="mini-schedule">
+      <div *ngFor="let session of mySubscribedSessions()" class="mini-session">
+        <span class="mini-time">{{ formatTime(session.startTime) }}</span>
+        <span class="mini-title">{{ session.title }}</span>
+        <span *ngIf="isWaitlisted(session.id)" class="mini-waitlist">Waitlisted</span>
+      </div>
+    </div>
+    <a [routerLink]="['/events', selectedEventId(), 'schedule']" class="view-schedule-link">
+      View Full Schedule →
+    </a>
+  </div>
+</div>

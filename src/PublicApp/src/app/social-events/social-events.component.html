@@ -1,0 +1,272 @@
+<div class="social-events-page">
+  <!-- Header -->
+  <header class="page-header">
+    <h1>Social Events</h1>
+    <p>Connect, network, and enjoy social activities</p>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <form [formGroup]="searchForm" class="filters">
+      <div class="search-box">
+        <input type="text" 
+               formControlName="searchText"
+               placeholder="Search events, locations..."
+               class="search-input">
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <select formControlName="type" class="filter-select">
+        <option value="">All Types</option>
+        <option *ngFor="let type of socialEventTypes" [value]="type">
+          {{ getTypeIcon(type) }} {{ type }}
+        </option>
+      </select>
+
+      <button type="button" class="clear-btn" (click)="clearFilters()">
+        Clear
+      </button>
+    </form>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading">
+    <div class="spinner"></div>
+    <p>Loading social events...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error()" class="error-message">
+    <p>{{ error() }}</p>
+    <button (click)="loadSocialEvents()" class="retry-btn">Try Again</button>
+  </div>
+
+  <!-- Results Summary -->
+  <div class="results-summary" *ngIf="!isLoading() && !error()">
+    <span>{{ filteredSocialEvents().length }} social events</span>
+    <span *ngIf="myRsvpEvents().length > 0" class="rsvp-count">
+      · {{ myRsvpEvents().length }} RSVP'd
+    </span>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading() && !error() && filteredSocialEvents().length === 0" class="empty-state">
+    <div class="empty-icon">🎉</div>
+    <h2>No social events found</h2>
+    <p>Try adjusting your filters or check back later.</p>
+  </div>
+
+  <!-- Events by Date -->
+  <div *ngIf="!isLoading() && !error()" class="events-container">
+    <div *ngFor="let dateEntry of socialEventsByDate() | keyvalue" class="date-group">
+      <h2 class="date-header">{{ formatDate(dateEntry.key) }}</h2>
+      
+      <div class="events-list">
+        <div *ngFor="let event of dateEntry.value" 
+             class="event-card"
+             [class.cancelled]="event.status === 'Cancelled'"
+             [class.has-rsvp]="hasRsvp(event.id)">
+          
+          <!-- Event Header -->
+          <div class="event-header">
+            <div class="event-type-badge">
+              <span class="type-icon">{{ getTypeIcon(event.type) }}</span>
+              <span class="type-name">{{ event.typeName || event.type }}</span>
+            </div>
+            <div class="event-status" [class]="getStatusClass(event.status)">
+              {{ event.statusName || event.status }}
+            </div>
+          </div>
+
+          <h3 class="event-title" (click)="viewEventDetails(event)">{{ event.title }}</h3>
+          
+          <p class="event-description">{{ event.description }}</p>
+
+          <!-- Event Details -->
+          <div class="event-details">
+            <div class="detail-item time">
+              <span class="icon">🕐</span>
+              <span>{{ formatTime(event.startTime) }} - {{ formatTime(event.endTime) }}</span>
+              <span class="duration">({{ formatDuration(event) }})</span>
+            </div>
+            
+            <div class="detail-item location">
+              <span class="icon">📍</span>
+              <span>{{ event.location }}{{ event.room ? ', ' + event.room : '' }}</span>
+            </div>
+
+            <div *ngIf="event.dressCode" class="detail-item dress-code">
+              <span class="icon">👔</span>
+              <span>{{ event.dressCode }}</span>
+            </div>
+
+            <div class="detail-item cost">
+              <span class="icon">💰</span>
+              <span>{{ formatCost(event) }}</span>
+            </div>
+          </div>
+
+          <!-- Capacity Section -->
+          <div *ngIf="event.maxCapacity" class="capacity-section">
+            <div class="capacity-bar">
+              <div class="capacity-fill" 
+                   [style.width.%]="getCapacityPercentage(event)"
+                   [class.warning]="getCapacityPercentage(event) >= 80"
+                   [class.full]="getCapacityPercentage(event) >= 100">
+              </div>
+            </div>
+            <span class="capacity-text">
+              {{ event.currentRsvpCount }}/{{ event.maxCapacity }} spots
+              <span *ngIf="isFull(event) && event.waitlistCount > 0" class="waitlist-info">
+                ({{ event.waitlistCount }} on waitlist)
+              </span>
+            </span>
+          </div>
+
+          <!-- Guest Info -->
+          <div *ngIf="event.guestsAllowed" class="guest-info">
+            <span class="icon">👥</span>
+            <span>Guests allowed (max {{ event.maxGuestsPerAttendee }} per person)</span>
+          </div>
+
+          <!-- Tags -->
+          <div *ngIf="event.tags && event.tags.length > 0" class="tags">
+            <span *ngFor="let tag of event.tags" class="tag">{{ tag }}</span>
+          </div>
+
+          <!-- User's RSVP Status -->
+          <div *ngIf="hasRsvp(event.id)" class="my-rsvp-status">
+            <ng-container *ngIf="getRsvp(event.id) as rsvp">
+              <div class="rsvp-badge" [class.waitlisted]="rsvp.isWaitlisted">
+                <span *ngIf="!rsvp.isWaitlisted">✓ RSVP'd</span>
+                <span *ngIf="rsvp.isWaitlisted">⏳ Waitlisted (#{{ rsvp.waitlistPosition }})</span>
+              </div>
+              <span *ngIf="rsvp.guestCount > 0" class="guest-badge">
+                +{{ rsvp.guestCount }} guest{{ rsvp.guestCount > 1 ? 's' : '' }}
+              </span>
+            </ng-container>
+          </div>
+
+          <!-- Actions -->
+          <div class="event-actions">
+            <ng-container *ngIf="event.rsvpRequired && isRsvpOpen(event)">
+              <button *ngIf="!hasRsvp(event.id)"
+                      class="btn btn-primary"
+                      (click)="openRsvpDialog(event)"
+                      [disabled]="isFull(event) && event.waitlistCount === 0">
+                {{ isFull(event) ? 'Join Waitlist' : 'RSVP Now' }}
+              </button>
+              
+              <button *ngIf="hasRsvp(event.id)"
+                      class="btn btn-secondary"
+                      (click)="cancelRsvp(event)">
+                Cancel RSVP
+              </button>
+            </ng-container>
+
+            <span *ngIf="!event.rsvpRequired" class="no-rsvp-badge">
+              No RSVP required
+            </span>
+
+            <span *ngIf="event.rsvpRequired && !isRsvpOpen(event)" class="rsvp-closed-badge">
+              RSVP Closed
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RSVP Dialog -->
+  <div *ngIf="showRsvpDialog()" class="dialog-backdrop" (click)="closeRsvpDialog()">
+    <div class="dialog-content" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>RSVP to {{ selectedSocialEvent()?.title }}</h2>
+        <button class="close-btn" (click)="closeRsvpDialog()">×</button>
+      </div>
+
+      <!-- Availability Info -->
+      <div *ngIf="rsvpAvailability()" class="availability-info">
+        <ng-container *ngIf="rsvpAvailability() as avail">
+          <div class="avail-status" [class.available]="avail.isAvailable" [class.waitlist]="!avail.hasCapacity && avail.waitlistAvailable">
+            <span *ngIf="avail.hasCapacity && avail.spotsRemaining !== null">
+              {{ avail.spotsRemaining }} spots remaining
+            </span>
+            <span *ngIf="!avail.hasCapacity && avail.waitlistAvailable">
+              Event is full - you'll be added to the waitlist
+            </span>
+            <span *ngIf="!avail.isAvailable && !avail.waitlistAvailable">
+              This event is not available for RSVP
+            </span>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- RSVP Form -->
+      <form [formGroup]="rsvpForm" (ngSubmit)="submitRsvp()" class="rsvp-form">
+        <ng-container *ngIf="selectedSocialEvent()?.guestsAllowed">
+          <div class="form-group">
+            <label for="guestCount">Number of Guests</label>
+            <input type="number" 
+                   id="guestCount" 
+                   formControlName="guestCount"
+                   min="0"
+                   [max]="selectedSocialEvent()?.maxGuestsPerAttendee || 0">
+            <small>Maximum {{ selectedSocialEvent()?.maxGuestsPerAttendee }} guests allowed</small>
+          </div>
+
+          <div class="form-group" *ngIf="guestCount() > 0">
+            <label for="guestNames">Guest Names (comma-separated)</label>
+            <input type="text" 
+                   id="guestNames" 
+                   formControlName="guestNames"
+                   placeholder="John Doe, Jane Smith">
+          </div>
+        </ng-container>
+
+        <div class="form-group">
+          <label for="dietaryRequirements">Dietary Requirements</label>
+          <input type="text" 
+                 id="dietaryRequirements" 
+                 formControlName="dietaryRequirements"
+                 placeholder="e.g., Vegetarian, Gluten-free, Allergies...">
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Additional Notes</label>
+          <textarea id="notes" 
+                    formControlName="notes"
+                    rows="3"
+                    placeholder="Any other information we should know..."></textarea>
+        </div>
+
+        <!-- Cost Info -->
+        <div *ngIf="selectedSocialEvent()?.costPerPerson" class="cost-info">
+          <strong>Cost:</strong> {{ formatCost(selectedSocialEvent()!) }}
+          <span *ngIf="guestCount() > 0">
+            × {{ 1 + guestCount() }} = 
+            {{ selectedSocialEvent()!.currency }} 
+            {{ ((1 + guestCount()) * selectedSocialEvent()!.costPerPerson!).toFixed(2) }}
+          </span>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="rsvpError()" class="error-message">
+          {{ rsvpError() }}
+        </div>
+
+        <!-- Actions -->
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeRsvpDialog()">
+            Cancel
+          </button>
+          <button type="submit" 
+                  class="btn btn-primary"
+                  [disabled]="!rsvpForm.valid || rsvpInProgress()">
+            {{ rsvpInProgress() ? 'Submitting...' : 'Confirm RSVP' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

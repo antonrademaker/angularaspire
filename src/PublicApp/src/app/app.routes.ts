@@ -11,6 +11,10 @@ export const routes: Routes = [
     loadComponent: () => import('./session-management/session-browser.component').then(c => c.SessionBrowserComponent)
   },
   {
+    path: 'events/:eventId/social-events',
+    loadComponent: () => import('./social-events/social-events.component').then(c => c.SocialEventsComponent)
+  },
+  {
     path: 'register/:eventId',
     loadComponent: () => import('./registration/registration-form.component').then(c => c.RegistrationFormComponent)
   },

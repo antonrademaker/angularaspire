@@ -5,7 +5,9 @@ using Shared.UserManagement;
 using Shared.EventManagement;
 using Shared.Registration;
 using Shared.Notifications;
+using Shared.ApiManagement;
 using PublicApi.Hubs;
+using PublicApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +85,28 @@ builder.Services.AddRegistrationServices(builder.Configuration);
 // Add email notification services
 builder.Services.AddEmailService(builder.Configuration);
 
+// Add API management services for rate limiting
+builder.Services.AddApiManagement(builder.Configuration);
+
+// Add API rate limiting middleware services
+builder.Services.AddApiRateLimiting(options =>
+{
+    // Configure protected paths for external API
+    options.ProtectedPaths = ["/api/external"];
+    
+    // Configure excluded paths
+    options.ExcludedPaths = 
+    [
+        "/api/health",
+        "/api/docs",
+        "/api/events",        // Public event discovery
+        "/api/social-events", // Public social event discovery
+        "/openapi",
+        "/swagger",
+        "/hubs"
+    ];
+});
+
 // Add CORS for Angular applications
 builder.Services.AddCors(options =>
 {
@@ -149,6 +173,9 @@ app.UseHttpsRedirection();
 app.UseCors("AngularApps");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// API rate limiting middleware (for external API endpoints)
+app.UseApiRateLimiting();
 
 // Map default health checks
 app.MapDefaultEndpoints();

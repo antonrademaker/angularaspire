@@ -150,10 +150,10 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 - [X] T067 [P] [US3] Create SocialEventRSVP entity in src/Shared/EventManagement/SocialEventRSVP.cs
 - [X] T068 [US3] Create social event service in src/Shared/EventManagement/SocialEventService.cs
 - [X] T069 [P] [US3] Create social event endpoints in src/PublicApi/EventManagement/SocialEventsController.cs
-- [ ] T070 [P] [US3] Create social event components in src/PublicApp/src/app/event-management/social-events.component.ts
+- [X] T070 [P] [US3] Create social event components in src/PublicApp/src/app/event-management/social-events.component.ts
 
 ### Testing US3
-- [ ] T071 [P] [US3] Create unit tests for SocialEventService in tests/Shared.Tests/EventManagement/SocialEventServiceTests.cs
+- [X] T071 [P] [US3] Create unit tests for SocialEventService in tests/Shared.Tests/EventManagement/SocialEventServiceTests.cs
 
 ---
 
@@ -163,7 +163,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 **Independent Test**: Generate API key, perform CRUD operations, verify rate limiting works
 
 ### API Integration Framework
-- [ ] T072 [P] [US4] Create API key management in src/PrivateApi/ApiManagement/ApiKeysController.cs
+- [X] T072 [P] [US4] Create API key management in src/PrivateApi/ApiManagement/ApiKeysController.cs
 - [ ] T073 [US4] Configure tiered rate limiting middleware in src/PublicApi/Middleware/RateLimitingMiddleware.cs
 - [ ] T074 [P] [US4] Create external API documentation endpoints in src/PublicApi/Documentation/
 - [ ] T075 [P] [US4] Create API client examples and SDKs in docs/api-examples/

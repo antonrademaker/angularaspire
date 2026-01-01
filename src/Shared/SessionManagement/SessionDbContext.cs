@@ -49,6 +49,19 @@ public class SessionDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Check if we're using InMemory provider (for testing)
+        var isInMemory = Database.IsInMemory();
+
+        // Configure Event entity (referenced from Session/Track) - ignore JsonDocument for InMemory
+        if (isInMemory)
+        {
+            modelBuilder.Entity<Event>(entity =>
+            {
+                entity.Ignore(e => e.CustomFields);
+                entity.Ignore(e => e.Tags);
+            });
+        }
+
         // Configure Track entity
         modelBuilder.Entity<Track>(entity =>
         {
@@ -73,12 +86,20 @@ public class SessionDbContext : DbContext
                 .HasForeignKey(s => s.TrackId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // JSON column configurations for PostgreSQL
-            entity.Property(t => t.Tags)
-                .HasColumnType("jsonb");
+            // JSON column configurations - only for PostgreSQL, ignore for InMemory
+            if (isInMemory)
+            {
+                entity.Ignore(t => t.Tags);
+                entity.Ignore(t => t.CustomFields);
+            }
+            else
+            {
+                entity.Property(t => t.Tags)
+                    .HasColumnType("jsonb");
 
-            entity.Property(t => t.CustomFields)
-                .HasColumnType("jsonb");
+                entity.Property(t => t.CustomFields)
+                    .HasColumnType("jsonb");
+            }
         });
 
         // Configure Session entity
@@ -117,20 +138,31 @@ public class SessionDbContext : DbContext
                 .HasForeignKey(ss => ss.SessionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // JSON column configurations for PostgreSQL
-            entity.Property(s => s.Tags)
-                .HasColumnType("jsonb");
+            // JSON column configurations - only for PostgreSQL, ignore for InMemory
+            if (isInMemory)
+            {
+                entity.Ignore(s => s.Tags);
+                entity.Ignore(s => s.CustomFields);
+            }
+            else
+            {
+                entity.Property(s => s.Tags)
+                    .HasColumnType("jsonb");
 
-            entity.Property(s => s.CustomFields)
-                .HasColumnType("jsonb");
+                entity.Property(s => s.CustomFields)
+                    .HasColumnType("jsonb");
+            }
 
-            // Check constraints
-            entity.HasCheckConstraint("CK_Session_EndTimeAfterStartTime", 
-                "end_time > start_time");
-            entity.HasCheckConstraint("CK_Session_MaxAttendeesPositive", 
-                "max_attendees IS NULL OR max_attendees > 0");
-            entity.HasCheckConstraint("CK_Session_CurrentAttendeesNonNegative", 
-                "current_attendees >= 0");
+            // Check constraints - only for PostgreSQL (InMemory doesn't support them)
+            if (!isInMemory)
+            {
+                entity.HasCheckConstraint("CK_Session_EndTimeAfterStartTime", 
+                    "end_time > start_time");
+                entity.HasCheckConstraint("CK_Session_MaxAttendeesPositive", 
+                    "max_attendees IS NULL OR max_attendees > 0");
+                entity.HasCheckConstraint("CK_Session_CurrentAttendeesNonNegative", 
+                    "current_attendees >= 0");
+            }
         });
 
         // Configure Subscription entity

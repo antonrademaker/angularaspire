@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.InMemory;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 
@@ -22,11 +23,17 @@ public class EventDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Check if we're using InMemory provider (for testing)
+        var isInMemory = Database.IsInMemory();
+
         // Configure Event entity
         modelBuilder.Entity<Event>(entity =>
         {
-            // Table configuration
-            entity.ToTable("events", schema: "event_management");
+            // Table configuration - only for PostgreSQL
+            if (!isInMemory)
+            {
+                entity.ToTable("events", schema: "event_management");
+            }
             
             // Primary key
             entity.HasKey(e => e.Id);
@@ -141,14 +148,22 @@ public class EventDbContext : DbContext
                 .HasColumnName("contact_email")
                 .HasMaxLength(320);
 
-            // PostgreSQL JSON support for flexible fields
-            entity.Property(e => e.CustomFields)
-                .HasColumnName("custom_fields")
-                .HasColumnType("jsonb"); // Use JSONB for better performance
+            // PostgreSQL JSON support - ignore for InMemory provider
+            if (isInMemory)
+            {
+                entity.Ignore(e => e.CustomFields);
+                entity.Ignore(e => e.Tags);
+            }
+            else
+            {
+                entity.Property(e => e.CustomFields)
+                    .HasColumnName("custom_fields")
+                    .HasColumnType("jsonb"); // Use JSONB for better performance
 
-            entity.Property(e => e.Tags)
-                .HasColumnName("tags")
-                .HasColumnType("jsonb"); // Use JSONB for better performance
+                entity.Property(e => e.Tags)
+                    .HasColumnName("tags")
+                    .HasColumnType("jsonb"); // Use JSONB for better performance
+            }
 
             // User relationship and audit fields
             entity.Property(e => e.CreatedByUserId)
@@ -194,20 +209,23 @@ public class EventDbContext : DbContext
             entity.HasIndex(e => new { e.Status, e.Visibility, e.StartDate })
                 .HasDatabaseName("ix_events_discovery");
 
-            // GIN index for JSONB fields (PostgreSQL specific)
-            entity.HasIndex(e => e.Tags)
-                .HasMethod("gin")
-                .HasDatabaseName("ix_events_tags_gin");
+            // GIN index for JSONB fields (PostgreSQL specific) - skip for InMemory
+            if (!isInMemory)
+            {
+                entity.HasIndex(e => e.Tags)
+                    .HasMethod("gin")
+                    .HasDatabaseName("ix_events_tags_gin");
 
-            entity.HasIndex(e => e.CustomFields)
-                .HasMethod("gin")
-                .HasDatabaseName("ix_events_custom_fields_gin");
+                entity.HasIndex(e => e.CustomFields)
+                    .HasMethod("gin")
+                    .HasDatabaseName("ix_events_custom_fields_gin");
 
-            // Full-text search support (PostgreSQL specific)
-            entity.HasIndex(e => new { e.Title, e.Description })
-                .HasMethod("gin")
-                .HasDatabaseName("ix_events_fulltext_search")
-                .HasAnnotation("Npgsql:TsVectorConfig", "english");
+                // Full-text search support (PostgreSQL specific)
+                entity.HasIndex(e => new { e.Title, e.Description })
+                    .HasMethod("gin")
+                    .HasDatabaseName("ix_events_fulltext_search")
+                    .HasAnnotation("Npgsql:TsVectorConfig", "english");
+            }
         });
 
         // Configure JSON conversion for custom fields

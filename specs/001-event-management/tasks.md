@@ -98,10 +98,10 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 - [X] T043 [P] [US1] Integrate SignalR notifications in registration components
 
 ### Testing US1
-- [ ] T044 [P] [US1] Create unit tests for EventService in tests/Shared.Tests/EventManagement/EventServiceTests.cs
-- [ ] T045 [P] [US1] Create unit tests for RegistrationService in tests/Shared.Tests/Registration/RegistrationServiceTests.cs
-- [ ] T046 [P] [US1] Create integration tests for registration flow in tests/PublicApi.Tests/Registration/RegistrationIntegrationTests.cs
-- [ ] T047 [P] [US1] Create E2E tests for event discovery and registration in tests/PublicApp.e2e/registration.spec.ts
+- [X] T044 [P] [US1] Create unit tests for EventService in tests/Shared.Tests/EventManagement/EventServiceTests.cs
+- [X] T045 [P] [US1] Create unit tests for RegistrationService in tests/Shared.Tests/Registration/RegistrationServiceTests.cs
+- [X] T046 [P] [US1] Create integration tests for registration flow in tests/PublicApi.Tests/Registration/RegistrationIntegrationTests.cs
+- [X] T047 [P] [US1] Create E2E tests for event discovery and registration in tests/PublicApp.e2e/registration.spec.ts
 
 ---
 

@@ -4,6 +4,7 @@ using System.Text;
 using Shared.UserManagement;
 using Shared.EventManagement;
 using Shared.SessionManagement;
+using Shared.ApiManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,9 @@ builder.Services.AddEventManagement();
 
 // Add session management services
 builder.Services.AddSessionManagement(builder.Configuration);
+
+// Add API key management services
+builder.Services.AddApiManagement(builder.Configuration);
 
 // Add CORS for Angular applications
 builder.Services.AddCors(options =>

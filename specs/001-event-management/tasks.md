@@ -193,7 +193,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 ### Performance & Monitoring
 - [X] T085 [P] Configure application insights and monitoring in src/ServiceDefaults/
 - [X] T086 [P] Add performance budgets to Angular applications in angular.json
-- [ ] T087 [P] Create comprehensive E2E test suite in tests/e2e/full-workflow.spec.ts
+- [X] T087 [P] Create comprehensive E2E test suite in tests/e2e/full-workflow.spec.ts
 
 ---
 

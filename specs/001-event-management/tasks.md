@@ -180,8 +180,8 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 **Independent Test**: All features work together, performance meets requirements, security is properly configured
 
 ### Code Generation & SDK
-- [ ] T078 [P] Create NSwag configuration for Angular SDK generation in src/PublicApi/nswag.json
-- [ ] T079 [P] Generate TypeScript clients for Angular apps in src/PublicApp/src/app/shared/api/
+- [X] T078 [P] Create NSwag configuration for Angular SDK generation in src/PublicApi/nswag.json
+- [X] T079 [P] Generate TypeScript clients for Angular apps in src/PublicApp/src/app/shared/api/
 - [ ] T080 [P] Configure gRPC proto generation from C# interfaces in src/Shared/
 
 ### Production Configuration

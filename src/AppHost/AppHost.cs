@@ -22,14 +22,21 @@ var storage = builder.AddAzureStorage("storage")
 var blobStorage = storage.AddBlobs("blobs");
 
 // Register PublicApi and PrivateApi projects with infrastructure dependencies
+// WaitFor ensures dependencies are healthy before starting the APIs
 var publicApi = builder.AddProject<Projects.PublicApi>("publicapi")
     .WithReference(eventDb)
+    .WaitFor(eventDb)
     .WithReference(redis)
-    .WithReference(blobStorage);
+    .WaitFor(redis)
+    .WithReference(blobStorage)
+    .WaitFor(blobStorage);
 
 var privateApi = builder.AddProject<Projects.PrivateApi>("privateapi")
     .WithReference(eventDb)
+    .WaitFor(eventDb)
     .WithReference(redis)
-    .WithReference(blobStorage);
+    .WaitFor(redis)
+    .WithReference(blobStorage)
+    .WaitFor(blobStorage);
 
 builder.Build().Run();

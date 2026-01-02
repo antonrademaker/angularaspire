@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
 using Shared.EventManagement;
 using Shared.UserManagement;
 
@@ -204,18 +203,18 @@ public class Session
     public string? TargetAudience { get; set; }
 
     /// <summary>
-    /// Session tags for categorization and filtering (stored as JSON array)
-    /// Examples: ["javascript", "react", "beginner", "hands-on"]
+    /// Session tags for categorization and filtering (stored as JSON)
+    /// Examples: { "tag1": "javascript", "tag2": "react" }
     /// </summary>
     [Column("tags", TypeName = "jsonb")]
-    public JsonDocument? Tags { get; set; }
+    public string? Tags { get; set; }
 
     /// <summary>
     /// Flexible JSON metadata for session-specific data
     /// Examples: sponsor information, special equipment needs, accessibility notes
     /// </summary>
     [Column("custom_fields", TypeName = "jsonb")]
-    public JsonDocument? CustomFields { get; set; }
+    public string? CustomFields { get; set; }
 
     /// <summary>
     /// User who created this session (organizer or admin)

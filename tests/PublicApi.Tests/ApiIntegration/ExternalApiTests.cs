@@ -15,15 +15,15 @@ namespace PublicApi.Tests.ApiIntegration;
 /// <summary>
 /// Integration tests for External API endpoints
 /// </summary>
-public class ExternalApiTests : IClassFixture<WebApplicationFactory<Program>>
+public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly TestWebApplicationFactory _factory;
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
 
-    public ExternalApiTests(WebApplicationFactory<Program> factory)
+    public ExternalApiTests(TestWebApplicationFactory factory)
     {
         _factory = factory;
     }

@@ -207,7 +207,7 @@ public class SocialEventService : ISocialEventService
         // Handle tags
         if (request.Tags != null && request.Tags.Any())
         {
-            socialEvent.Tags = JsonDocument.Parse(JsonSerializer.Serialize(request.Tags));
+            socialEvent.Tags = JsonSerializer.Serialize(request.Tags);
         }
 
         _context.SocialEvents.Add(socialEvent);
@@ -313,7 +313,7 @@ public class SocialEventService : ISocialEventService
         if (request.Tags != null)
         {
             socialEvent.Tags = request.Tags.Any()
-                ? JsonDocument.Parse(JsonSerializer.Serialize(request.Tags))
+                ? JsonSerializer.Serialize(request.Tags)
                 : null;
         }
 
@@ -967,8 +967,9 @@ public class SocialEventService : ISocialEventService
             ? Math.Max(0, socialEvent.MaxCapacity.Value - socialEvent.CurrentRsvpCount)
             : int.MaxValue;
 
-        var tags = socialEvent.Tags != null
-            ? JsonSerializer.Deserialize<IEnumerable<string>>(socialEvent.Tags.RootElement.GetRawText())
+        // Convert Tags JSON string to IEnumerable<string> for response
+        var tags = !string.IsNullOrEmpty(socialEvent.Tags) 
+            ? JsonSerializer.Deserialize<List<string>>(socialEvent.Tags) 
             : null;
 
         return new SocialEventResponse(

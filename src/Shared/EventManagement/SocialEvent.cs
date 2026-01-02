@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
 using Shared.UserManagement;
 
 namespace Shared.EventManagement;
@@ -194,13 +193,13 @@ public class SocialEvent
     /// Tags for categorization (JSONB column)
     /// </summary>
     [Column("tags", TypeName = "jsonb")]
-    public JsonDocument? Tags { get; set; }
+    public string? Tags { get; set; }
 
     /// <summary>
     /// Custom fields for extensibility (JSONB column)
     /// </summary>
     [Column("custom_fields", TypeName = "jsonb")]
-    public JsonDocument? CustomFields { get; set; }
+    public string? CustomFields { get; set; }
 
     /// <summary>
     /// User who created this social event

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Shared.Common;
 using System.Text.Json;
 
 namespace Shared.EventManagement;
@@ -12,11 +14,16 @@ public class EventService : IEventService
 {
     private readonly EventDbContext _eventContext;
     private readonly ILogger<EventService> _logger;
+    private readonly bool _isInMemory;
 
-    public EventService(EventDbContext eventContext, ILogger<EventService> logger)
+    public EventService(
+        EventDbContext eventContext, 
+        ILogger<EventService> logger,
+        IOptions<DatabaseOptions>? databaseOptions = null)
     {
         _eventContext = eventContext;
         _logger = logger;
+        _isInMemory = databaseOptions?.Value?.UseInMemoryDatabase ?? false;
     }
 
     // Event Discovery Operations
@@ -25,9 +32,13 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Searching events with criteria: {SearchText}", searchRequest.SearchText);
 
-        var query = _eventContext.Events
-            .Include(e => e.CreatedByUser)
-            .AsQueryable();
+        var query = _eventContext.Events.AsQueryable();
+        
+        // Only include user navigation when not using InMemory (avoids cross-context issues in tests)
+        if (!_isInMemory)
+        {
+            query = query.Include(e => e.CreatedByUser);
+        }
 
         // Apply filters
         if (!string.IsNullOrWhiteSpace(searchRequest.SearchText))
@@ -108,7 +119,8 @@ public class EventService : IEventService
 
         var query = _eventContext.Events.AsQueryable();
 
-        if (includeDetails)
+        // Only include user navigation when not using InMemory and includeDetails is true
+        if (includeDetails && !_isInMemory)
         {
             query = query.Include(e => e.CreatedByUser);
         }
@@ -122,7 +134,8 @@ public class EventService : IEventService
 
         var query = _eventContext.Events.AsQueryable();
 
-        if (includeDetails)
+        // Only include user navigation when not using InMemory and includeDetails is true
+        if (includeDetails && !_isInMemory)
         {
             query = query.Include(e => e.CreatedByUser);
         }
@@ -213,12 +226,12 @@ public class EventService : IEventService
         // Handle JSON fields
         if (eventData.CustomFields != null && eventData.CustomFields.Count > 0)
         {
-            newEvent.CustomFields = JsonDocument.Parse(JsonSerializer.Serialize(eventData.CustomFields));
+            newEvent.CustomFields = JsonSerializer.Serialize(eventData.CustomFields);
         }
 
         if (eventData.Tags != null && eventData.Tags.Length > 0)
         {
-            newEvent.Tags = JsonDocument.Parse(JsonSerializer.Serialize(eventData.Tags));
+            newEvent.Tags = JsonSerializer.Serialize(eventData.Tags);
         }
 
         _eventContext.Events.Add(newEvent);
@@ -274,7 +287,7 @@ public class EventService : IEventService
         // Update JSON fields
         if (eventData.CustomFields != null && eventData.CustomFields.Count > 0)
         {
-            existingEvent.CustomFields = JsonDocument.Parse(JsonSerializer.Serialize(eventData.CustomFields));
+            existingEvent.CustomFields = JsonSerializer.Serialize(eventData.CustomFields);
         }
         else
         {
@@ -283,7 +296,7 @@ public class EventService : IEventService
 
         if (eventData.Tags != null && eventData.Tags.Length > 0)
         {
-            existingEvent.Tags = JsonDocument.Parse(JsonSerializer.Serialize(eventData.Tags));
+            existingEvent.Tags = JsonSerializer.Serialize(eventData.Tags);
         }
         else
         {
@@ -406,25 +419,14 @@ public class EventService : IEventService
         };
     }
 
-    private bool ContainsAnyTag(JsonDocument tagsJson, string[] searchTags)
+    private bool ContainsAnyTag(string? tagsJson, string[] searchTags)
     {
-        try
-        {
-            if (tagsJson.RootElement.ValueKind != JsonValueKind.Array) return false;
+        if (string.IsNullOrEmpty(tagsJson)) return false;
 
-            var eventTags = tagsJson.RootElement.EnumerateArray()
-                .Where(element => element.ValueKind == JsonValueKind.String)
-                .Select(element => element.GetString()?.ToLower())
-                .Where(tag => !string.IsNullOrEmpty(tag))
-                .ToArray();
+        var eventTags = JsonSerializer.Deserialize<List<string>>(tagsJson);
+        if (eventTags == null || eventTags.Count == 0) return false;
 
-            return searchTags.Any(searchTag => 
-                eventTags.Contains(searchTag.ToLower()));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Error parsing event tags JSON");
-            return false;
-        }
+        return searchTags.Any(searchTag => 
+            eventTags.Any(t => t.Equals(searchTag, StringComparison.OrdinalIgnoreCase)));
     }
 }

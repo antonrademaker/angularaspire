@@ -12,12 +12,12 @@ namespace PublicApi.Tests.SessionManagement;
 /// Full end-to-end testing with the actual database requires running with TestContainers
 /// or a dedicated test environment with PostgreSQL.
 /// </summary>
-public class SubscriptionIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+public class SubscriptionIntegrationTests : IClassFixture<TestWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly TestWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
-    public SubscriptionIntegrationTests(WebApplicationFactory<Program> factory)
+    public SubscriptionIntegrationTests(TestWebApplicationFactory factory)
     {
         _factory = factory;
         _client = factory.CreateClient();

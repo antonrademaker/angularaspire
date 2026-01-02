@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 
 namespace Shared.EventManagement;
 
@@ -142,7 +141,7 @@ public class Event
     /// Flexible JSON metadata for custom fields, integrations, and edition-specific data
     /// Examples: social media links, sponsor information, custom registration fields, etc.
     /// </summary>
-    public JsonDocument? CustomFields { get; set; }
+    public string? CustomFields { get; set; }
 
     /// <summary>
     /// Maximum number of attendees for the event (null for unlimited)
@@ -150,10 +149,10 @@ public class Event
     public int? MaxCapacity { get; set; }
 
     /// <summary>
-    /// Tags for categorization and filtering (stored as JSON array)
-    /// Examples: ["technology", "conference", "workshops", "networking"]
+    /// Tags for categorization and filtering (stored as JSON)
+    /// Examples: { "tag1": "technology", "tag2": "conference" }
     /// </summary>
-    public JsonDocument? Tags { get; set; }
+    public string? Tags { get; set; }
 
     /// <summary>
     /// User who created this event (organizer or admin)

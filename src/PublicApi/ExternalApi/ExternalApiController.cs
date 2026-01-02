@@ -141,6 +141,18 @@ public class ExternalApiController : ControllerBase
             return BadRequest(ExternalApiResponse<object>.CreateError("INVALID_API_KEY", "Could not determine user from API key"));
         }
 
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(request.Title))
+        {
+            return BadRequest(ExternalApiResponse<object>.CreateError("VALIDATION_ERROR", "Title is required"));
+        }
+
+        // Validate dates
+        if (request.EndDate <= request.StartDate)
+        {
+            return BadRequest(ExternalApiResponse<object>.CreateError("VALIDATION_ERROR", "End date must be after start date"));
+        }
+
         var createRequest = new CreateEventRequest
         {
             Title = request.Title,
@@ -280,6 +292,13 @@ public class ExternalApiController : ControllerBase
             !HttpContext.HasApiKeyScope("*"))
         {
             return Forbidden("social_events:read");
+        }
+
+        // Check if event exists
+        var eventEntity = await _eventService.GetEventByIdAsync(eventId, false);
+        if (eventEntity == null)
+        {
+            return NotFound(ExternalApiResponse<object>.CreateError("EVENT_NOT_FOUND", $"Event with ID {eventId} not found"));
         }
 
         var socialEvents = await _socialEventService.GetSocialEventsForEventAsync(eventId, true, cancellationToken);

@@ -86,8 +86,8 @@ public class SessionService : ISessionService
                 Prerequisites = request.Prerequisites,
                 LearningOutcomes = request.LearningOutcomes,
                 TargetAudience = request.TargetAudience,
-                Tags = request.Tags?.Any() == true ? JsonDocument.Parse(JsonSerializer.Serialize(request.Tags)) : null,
-                CustomFields = request.CustomFields?.Any() == true ? JsonDocument.Parse(JsonSerializer.Serialize(request.CustomFields)) : null,
+                Tags = request.Tags?.Any() == true ? JsonSerializer.Serialize(request.Tags) : null,
+                CustomFields = request.CustomFields?.Any() == true ? JsonSerializer.Serialize(request.CustomFields) : null,
                 CreatedByUserId = Guid.NewGuid(), // TODO: Get from current user context
                 CreatedAt = DateTime.UtcNow
             };
@@ -194,9 +194,9 @@ public class SessionService : ISessionService
             if (request.TargetAudience != null)
                 session.TargetAudience = request.TargetAudience;
             if (request.Tags != null)
-                session.Tags = request.Tags.Any() ? JsonDocument.Parse(JsonSerializer.Serialize(request.Tags)) : null;
+                session.Tags = request.Tags.Any() ? JsonSerializer.Serialize(request.Tags) : null;
             if (request.CustomFields != null)
-                session.CustomFields = request.CustomFields.Any() ? JsonDocument.Parse(JsonSerializer.Serialize(request.CustomFields)) : null;
+                session.CustomFields = request.CustomFields.Any() ? JsonSerializer.Serialize(request.CustomFields) : null;
 
             // Check for conflicts if time or room changed
             if (request.StartTime.HasValue || request.EndTime.HasValue || request.Room != null)
@@ -868,8 +868,9 @@ public class SessionService : ISessionService
 
     private async Task<SessionResponse> MapToSessionResponseAsync(Session session)
     {
-        var tags = session.Tags != null ? JsonSerializer.Deserialize<List<string>>(session.Tags.RootElement) : null;
-        var customFields = session.CustomFields != null ? JsonSerializer.Deserialize<Dictionary<string, object>>(session.CustomFields.RootElement) : null;
+        // Deserialize JSON strings for response
+        var tags = !string.IsNullOrEmpty(session.Tags) ? JsonSerializer.Deserialize<List<string>>(session.Tags) : null;
+        var customFields = !string.IsNullOrEmpty(session.CustomFields) ? JsonSerializer.Deserialize<Dictionary<string, object>>(session.CustomFields) : null;
 
         return new SessionResponse
         {

@@ -12,11 +12,11 @@ namespace PublicApi.Tests.RateLimiting;
 /// <summary>
 /// Integration tests for API rate limiting middleware
 /// </summary>
-public class RateLimitingTests : IClassFixture<WebApplicationFactory<Program>>
+public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly TestWebApplicationFactory _factory;
 
-    public RateLimitingTests(WebApplicationFactory<Program> factory)
+    public RateLimitingTests(TestWebApplicationFactory factory)
     {
         _factory = factory;
     }

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.InMemory;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 
@@ -10,8 +10,12 @@ namespace Shared.EventManagement;
 /// </summary>
 public class EventDbContext : DbContext
 {
+    private readonly bool _isInMemory;
+
     public EventDbContext(DbContextOptions<EventDbContext> options) : base(options)
     {
+        // Check if we're using InMemory provider by examining the options extensions
+        _isInMemory = options.Extensions.Any(e => e.GetType().Name.Contains("InMemory"));
     }
 
     /// <summary>
@@ -33,14 +37,11 @@ public class EventDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Check if we're using InMemory provider (for testing)
-        var isInMemory = Database.IsInMemory();
-
         // Configure Event entity
         modelBuilder.Entity<Event>(entity =>
         {
             // Table configuration - only for PostgreSQL
-            if (!isInMemory)
+            if (!_isInMemory)
             {
                 entity.ToTable("events", schema: "event_management");
             }
@@ -158,22 +159,14 @@ public class EventDbContext : DbContext
                 .HasColumnName("contact_email")
                 .HasMaxLength(320);
 
-            // PostgreSQL JSON support - ignore for InMemory provider
-            if (isInMemory)
-            {
-                entity.Ignore(e => e.CustomFields);
-                entity.Ignore(e => e.Tags);
-            }
-            else
-            {
-                entity.Property(e => e.CustomFields)
-                    .HasColumnName("custom_fields")
-                    .HasColumnType("jsonb"); // Use JSONB for better performance
+            // PostgreSQL JSON support - Dictionary<string, object> works with both InMemory and PostgreSQL
+            entity.Property(e => e.CustomFields)
+                .HasColumnName("custom_fields")
+                .HasColumnType("jsonb"); // Use JSONB for better performance
 
-                entity.Property(e => e.Tags)
-                    .HasColumnName("tags")
-                    .HasColumnType("jsonb"); // Use JSONB for better performance
-            }
+            entity.Property(e => e.Tags)
+                .HasColumnName("tags")
+                .HasColumnType("jsonb"); // Use JSONB for better performance
 
             // User relationship and audit fields
             entity.Property(e => e.CreatedByUserId)
@@ -220,7 +213,7 @@ public class EventDbContext : DbContext
                 .HasDatabaseName("ix_events_discovery");
 
             // GIN index for JSONB fields (PostgreSQL specific) - skip for InMemory
-            if (!isInMemory)
+            if (!_isInMemory)
             {
                 entity.HasIndex(e => e.Tags)
                     .HasMethod("gin")
@@ -242,7 +235,7 @@ public class EventDbContext : DbContext
         modelBuilder.Entity<SocialEvent>(entity =>
         {
             // Table configuration - only for PostgreSQL
-            if (!isInMemory)
+            if (!_isInMemory)
             {
                 entity.ToTable("social_events", schema: "event_management");
             }
@@ -371,22 +364,14 @@ public class EventDbContext : DbContext
                 .HasColumnName("is_published")
                 .HasDefaultValue(false);
 
-            // PostgreSQL JSON support - ignore for InMemory provider
-            if (isInMemory)
-            {
-                entity.Ignore(e => e.Tags);
-                entity.Ignore(e => e.CustomFields);
-            }
-            else
-            {
-                entity.Property(e => e.Tags)
-                    .HasColumnName("tags")
-                    .HasColumnType("jsonb");
+            // PostgreSQL JSON support - Dictionary<string, object> works with both InMemory and PostgreSQL
+            entity.Property(e => e.Tags)
+                .HasColumnName("tags")
+                .HasColumnType("jsonb");
 
-                entity.Property(e => e.CustomFields)
-                    .HasColumnName("custom_fields")
-                    .HasColumnType("jsonb");
-            }
+            entity.Property(e => e.CustomFields)
+                .HasColumnName("custom_fields")
+                .HasColumnType("jsonb");
 
             // Audit fields
             entity.Property(e => e.CreatedByUserId)
@@ -436,7 +421,7 @@ public class EventDbContext : DbContext
         modelBuilder.Entity<SocialEventRsvp>(entity =>
         {
             // Table configuration - only for PostgreSQL
-            if (!isInMemory)
+            if (!_isInMemory)
             {
                 entity.ToTable("social_event_rsvps", schema: "event_management");
             }

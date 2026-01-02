@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ public class RegistrationDbContext : DbContext
     private readonly IConfiguration _configuration;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly ILogger<RegistrationDbContext>? _logger;
+    private readonly bool _isInMemory;
 
     /// <summary>
     /// Registrations DbSet
@@ -32,6 +34,8 @@ public class RegistrationDbContext : DbContext
         _configuration = configuration;
         _hostEnvironment = hostEnvironment;
         _logger = logger;
+        // Check if we're using InMemory provider by examining the options extensions
+        _isInMemory = options.Extensions.Any(e => e.GetType().Name.Contains("InMemory"));
     }
 
     /// <summary>

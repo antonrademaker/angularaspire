@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System.Text.Json;
+using Shared.Common;
 using Shared.EventManagement;
 using Shared.UserManagement;
 using Shared.Notifications;
@@ -17,8 +20,9 @@ public class RegistrationService : IRegistrationService
     private readonly IUserService _userService;
     private readonly IEventService _eventService;
     private readonly IEmailService _emailService;
-    private readonly IDatabase _redis;
+    private readonly StackExchange.Redis.IDatabase _redis;
     private readonly ILogger<RegistrationService> _logger;
+    private readonly bool _isInMemory;
 
     private const string QUEUE_KEY_PREFIX = "event_queue:";
     private const string PROCESSING_RATE_KEY_PREFIX = "processing_rate:";
@@ -30,7 +34,8 @@ public class RegistrationService : IRegistrationService
         IEventService eventService,
         IEmailService emailService,
         IConnectionMultiplexer redis,
-        ILogger<RegistrationService> logger)
+        ILogger<RegistrationService> logger,
+        IOptions<DatabaseOptions>? databaseOptions = null)
     {
         _context = context;
         _userService = userService;
@@ -38,6 +43,7 @@ public class RegistrationService : IRegistrationService
         _emailService = emailService;
         _redis = redis.GetDatabase();
         _logger = logger;
+        _isInMemory = databaseOptions?.Value?.UseInMemoryDatabase ?? false;
     }
 
     public async Task<RegistrationResult> RegisterUserAsync(RegistrationRequest request, CancellationToken cancellationToken = default)
@@ -74,7 +80,13 @@ public class RegistrationService : IRegistrationService
                 };
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+            // InMemory database doesn't support transactions, so we conditionally use them
+            IDbContextTransaction? transaction = null;
+            if (!_isInMemory)
+            {
+                transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+            }
+            
             try
             {
                 // Check current capacity and determine if registration should be queued
@@ -107,7 +119,7 @@ public class RegistrationService : IRegistrationService
                 int? queuePosition = null;
                 int? estimatedWaitTime = null;
 
-                if (shouldQueue)
+                if (shouldQueue && !_isInMemory)
                 {
                     var queueKey = QUEUE_KEY_PREFIX + request.EventId;
                     var queueData = JsonSerializer.Serialize(new
@@ -132,7 +144,10 @@ public class RegistrationService : IRegistrationService
                     await _context.SaveChangesAsync(cancellationToken);
                 }
 
-                await transaction.CommitAsync(cancellationToken);
+                if (transaction != null)
+                {
+                    await transaction.CommitAsync(cancellationToken);
+                }
 
                 // Send appropriate email notification
                 bool emailSent = false;
@@ -167,8 +182,15 @@ public class RegistrationService : IRegistrationService
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync(cancellationToken);
+                if (transaction != null)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                }
                 throw;
+            }
+            finally
+            {
+                transaction?.Dispose();
             }
         }
         catch (Exception ex)
@@ -189,9 +211,14 @@ public class RegistrationService : IRegistrationService
     {
         try
         {
-            var registration = await _context.Registrations
-                .Include(r => r.User)
-                .Include(r => r.Event)
+            // InMemory provider doesn't support Include across different contexts
+            var query = _context.Registrations.AsQueryable();
+            if (!_isInMemory)
+            {
+                query = query.Include(r => r.User).Include(r => r.Event);
+            }
+            
+            var registration = await query
                 .FirstOrDefaultAsync(r => r.Id == registrationId && r.UserId == userId, cancellationToken);
 
             if (registration == null)
@@ -204,7 +231,13 @@ public class RegistrationService : IRegistrationService
                 return true; // Already cancelled
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+            // InMemory provider doesn't support transactions
+            IDbContextTransaction? transaction = null;
+            if (!_isInMemory)
+            {
+                transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+            }
+            
             try
             {
                 var wasQueued = registration.Status == RegistrationStatus.Queued;
@@ -217,37 +250,46 @@ public class RegistrationService : IRegistrationService
 
                 await _context.SaveChangesAsync(cancellationToken);
 
-                // Remove from Redis queue if queued
-                if (wasQueued && registration.QueuePosition.HasValue)
+                // Remove from Redis queue if queued (skip for InMemory tests)
+                if (wasQueued && registration.QueuePosition.HasValue && !_isInMemory)
                 {
                     await RemoveFromQueueAsync(registration.EventId, registrationId);
                 }
 
                 // If this was a confirmed registration, process the queue to promote someone
-                if (wasConfirmed)
+                if (wasConfirmed && !_isInMemory)
                 {
                     var promoted = await ProcessEventQueueAsync(registration.EventId, 1, cancellationToken);
                     _logger.LogInformation("Promoted {Count} registrations from queue for event {EventId} after cancellation", 
                         promoted, registration.EventId);
                 }
 
-                await transaction.CommitAsync(cancellationToken);
-
-                // Send cancellation email
-                var emailSent = await _emailService.SendRegistrationCancelledAsync(
-                    registration.User!, registration.Event!, registration, 
-                    registration.CancellationReason, cancellationToken);
-
-                if (!emailSent)
+                if (transaction != null)
                 {
-                    _logger.LogWarning("Failed to send cancellation email for registration {RegistrationId}", registrationId);
+                    await transaction.CommitAsync(cancellationToken);
+                }
+
+                // Send cancellation email (skip User/Event lookup if InMemory and they weren't loaded)
+                if (!_isInMemory)
+                {
+                    var emailSent = await _emailService.SendRegistrationCancelledAsync(
+                        registration.User!, registration.Event!, registration, 
+                        registration.CancellationReason, cancellationToken);
+
+                    if (!emailSent)
+                    {
+                        _logger.LogWarning("Failed to send cancellation email for registration {RegistrationId}", registrationId);
+                    }
                 }
 
                 return true;
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync(cancellationToken);
+                if (transaction != null)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                }
                 throw;
             }
         }

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.InMemory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.EventManagement;
@@ -54,19 +53,6 @@ public class SessionDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Check if we're using InMemory provider (for testing)
-        var isInMemory = Database.IsInMemory();
-
-        // Configure Event entity (referenced from Session/Track) - ignore JsonDocument for InMemory
-        if (isInMemory)
-        {
-            modelBuilder.Entity<Event>(entity =>
-            {
-                entity.Ignore(e => e.CustomFields);
-                entity.Ignore(e => e.Tags);
-            });
-        }
-
         // Configure Track entity
         modelBuilder.Entity<Track>(entity =>
         {
@@ -91,20 +77,12 @@ public class SessionDbContext : DbContext
                 .HasForeignKey(s => s.TrackId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // JSON column configurations - only for PostgreSQL, ignore for InMemory
-            if (isInMemory)
-            {
-                entity.Ignore(t => t.Tags);
-                entity.Ignore(t => t.CustomFields);
-            }
-            else
-            {
-                entity.Property(t => t.Tags)
-                    .HasColumnType("jsonb");
+            // JSON column configurations for Dictionary properties
+            entity.Property(t => t.Tags)
+                .HasColumnType("jsonb");
 
-                entity.Property(t => t.CustomFields)
-                    .HasColumnType("jsonb");
-            }
+            entity.Property(t => t.CustomFields)
+                .HasColumnType("jsonb");
         });
 
         // Configure Session entity
@@ -143,31 +121,20 @@ public class SessionDbContext : DbContext
                 .HasForeignKey(ss => ss.SessionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // JSON column configurations - only for PostgreSQL, ignore for InMemory
-            if (isInMemory)
-            {
-                entity.Ignore(s => s.Tags);
-                entity.Ignore(s => s.CustomFields);
-            }
-            else
-            {
-                entity.Property(s => s.Tags)
-                    .HasColumnType("jsonb");
+            // JSON column configurations for Dictionary properties
+            entity.Property(s => s.Tags)
+                .HasColumnType("jsonb");
 
-                entity.Property(s => s.CustomFields)
-                    .HasColumnType("jsonb");
-            }
+            entity.Property(s => s.CustomFields)
+                .HasColumnType("jsonb");
 
-            // Check constraints - only for PostgreSQL (InMemory doesn't support them)
-            if (!isInMemory)
-            {
-                entity.HasCheckConstraint("CK_Session_EndTimeAfterStartTime", 
-                    "end_time > start_time");
-                entity.HasCheckConstraint("CK_Session_MaxAttendeesPositive", 
-                    "max_attendees IS NULL OR max_attendees > 0");
-                entity.HasCheckConstraint("CK_Session_CurrentAttendeesNonNegative", 
-                    "current_attendees >= 0");
-            }
+            // Check constraints - InMemory doesn't support them but they'll be ignored
+            entity.HasCheckConstraint("CK_Session_EndTimeAfterStartTime", 
+                "end_time > start_time");
+            entity.HasCheckConstraint("CK_Session_MaxAttendeesPositive", 
+                "max_attendees IS NULL OR max_attendees > 0");
+            entity.HasCheckConstraint("CK_Session_CurrentAttendeesNonNegative", 
+                "current_attendees >= 0");
         });
 
         // Configure Subscription entity
@@ -231,24 +198,15 @@ public class SessionDbContext : DbContext
                 .HasForeignKey(ss => ss.SpeakerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // JSON column configurations - only for PostgreSQL, ignore for InMemory
-            if (isInMemory)
-            {
-                entity.Ignore(sp => sp.SocialLinks);
-                entity.Ignore(sp => sp.ExpertiseAreas);
-                entity.Ignore(sp => sp.CustomFields);
-            }
-            else
-            {
-                entity.Property(sp => sp.SocialLinks)
-                    .HasColumnType("jsonb");
+            // JSON column configurations for Dictionary properties
+            entity.Property(sp => sp.SocialLinks)
+                .HasColumnType("jsonb");
 
-                entity.Property(sp => sp.ExpertiseAreas)
-                    .HasColumnType("jsonb");
+            entity.Property(sp => sp.ExpertiseAreas)
+                .HasColumnType("jsonb");
 
-                entity.Property(sp => sp.CustomFields)
-                    .HasColumnType("jsonb");
-            }
+            entity.Property(sp => sp.CustomFields)
+                .HasColumnType("jsonb");
         });
     }
 

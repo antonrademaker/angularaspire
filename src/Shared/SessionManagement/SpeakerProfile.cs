@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
 using Shared.UserManagement;
 
 namespace Shared.SessionManagement;
@@ -95,14 +94,14 @@ public class SpeakerProfile
     /// Example: { "twitter": "@handle", "linkedin": "profile-url", "github": "username" }
     /// </summary>
     [Column("social_links", TypeName = "jsonb")]
-    public JsonDocument? SocialLinks { get; set; }
+    public string? SocialLinks { get; set; }
 
     /// <summary>
-    /// Areas of expertise/topics as JSON array
-    /// Example: ["Cloud Computing", "AI/ML", "DevOps"]
+    /// Areas of expertise/topics as JSON
+    /// Example: { "area1": "Cloud Computing", "area2": "AI/ML" }
     /// </summary>
     [Column("expertise_areas", TypeName = "jsonb")]
-    public JsonDocument? ExpertiseAreas { get; set; }
+    public string? ExpertiseAreas { get; set; }
 
     /// <summary>
     /// Preferred session formats (Talk, Workshop, Panel, etc.)
@@ -140,7 +139,7 @@ public class SpeakerProfile
     /// Custom fields for extensibility (JSONB column)
     /// </summary>
     [Column("custom_fields", TypeName = "jsonb")]
-    public JsonDocument? CustomFields { get; set; }
+    public string? CustomFields { get; set; }
 
     /// <summary>
     /// When the speaker profile was created

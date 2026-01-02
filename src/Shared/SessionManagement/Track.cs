@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json;
 using Shared.EventManagement;
 
 namespace Shared.SessionManagement;
@@ -102,18 +101,18 @@ public class Track
     public TrackCategory Category { get; set; } = TrackCategory.Technical;
 
     /// <summary>
-    /// Tags for track categorization and filtering (stored as JSON array)
-    /// Examples: ["javascript", "react", "frontend", "web-development"]
+    /// Tags for track categorization and filtering (stored as JSON)
+    /// Examples: { "tag1": "javascript", "tag2": "react" }
     /// </summary>
     [Column("tags", TypeName = "jsonb")]
-    public JsonDocument? Tags { get; set; }
+    public string? Tags { get; set; }
 
     /// <summary>
     /// Flexible JSON metadata for track-specific data and customization
     /// Examples: sponsor information, special requirements, custom attributes
     /// </summary>
     [Column("custom_fields", TypeName = "jsonb")]
-    public JsonDocument? CustomFields { get; set; }
+    public string? CustomFields { get; set; }
 
     /// <summary>
     /// User who created this track (organizer or admin)

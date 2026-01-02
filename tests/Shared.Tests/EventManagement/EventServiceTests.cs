@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
+using Shared.Common;
 using Shared.EventManagement;
 using Xunit;
 
@@ -20,7 +22,10 @@ public class EventServiceTests : IDisposable
 
         _context = new EventDbContext(options);
         _mockLogger = new Mock<ILogger<EventService>>();
-        _eventService = new EventService(_context, _mockLogger.Object);
+        
+        // Configure DatabaseOptions to indicate InMemory mode
+        var databaseOptions = Options.Create(new DatabaseOptions { UseInMemoryDatabase = true });
+        _eventService = new EventService(_context, _mockLogger.Object, databaseOptions);
     }
 
     [Fact]
@@ -245,6 +250,9 @@ public class EventServiceTests : IDisposable
 
         var userId = Guid.NewGuid();
         var createdEvent = await _eventService.CreateEventAsync(createRequest, userId);
+        
+        // Publish the event (required for registration to be available)
+        await _eventService.ChangeEventStatusAsync(createdEvent.Id, EventStatus.Published, userId);
 
         // Act
         var result = await _eventService.IsRegistrationAvailableAsync(createdEvent.Id);

@@ -64,8 +64,8 @@ public class TrackService : ITrackService
                 DisplayOrder = request.DisplayOrder,
                 IsActive = request.IsActive,
                 MaxConcurrentSessions = request.MaxConcurrentSessions,
-                Tags = request.Tags?.Any() == true ? JsonDocument.Parse(JsonSerializer.Serialize(request.Tags)) : null,
-                CustomFields = request.CustomFields?.Any() == true ? JsonDocument.Parse(JsonSerializer.Serialize(request.CustomFields)) : null,
+                Tags = request.Tags?.Any() == true ? JsonSerializer.Serialize(request.Tags) : null,
+                CustomFields = request.CustomFields?.Any() == true ? JsonSerializer.Serialize(request.CustomFields) : null,
                 CreatedByUserId = Guid.NewGuid(), // TODO: Get from current user context
                 CreatedAt = DateTime.UtcNow
             };
@@ -144,9 +144,9 @@ public class TrackService : ITrackService
             if (request.MaxConcurrentSessions.HasValue)
                 track.MaxConcurrentSessions = request.MaxConcurrentSessions.Value;
             if (request.Tags != null)
-                track.Tags = request.Tags.Any() ? JsonDocument.Parse(JsonSerializer.Serialize(request.Tags)) : null;
+                track.Tags = request.Tags.Any() ? JsonSerializer.Serialize(request.Tags) : null;
             if (request.CustomFields != null)
-                track.CustomFields = request.CustomFields.Any() ? JsonDocument.Parse(JsonSerializer.Serialize(request.CustomFields)) : null;
+                track.CustomFields = request.CustomFields.Any() ? JsonSerializer.Serialize(request.CustomFields) : null;
 
             track.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
@@ -392,8 +392,9 @@ public class TrackService : ITrackService
 
     private async Task<TrackResponse> MapToTrackResponseAsync(Track track)
     {
-        var tags = track.Tags != null ? JsonSerializer.Deserialize<List<string>>(track.Tags.RootElement) : null;
-        var customFields = track.CustomFields != null ? JsonSerializer.Deserialize<Dictionary<string, object>>(track.CustomFields.RootElement) : null;
+        // Deserialize JSON strings for response
+        var tags = !string.IsNullOrEmpty(track.Tags) ? JsonSerializer.Deserialize<List<string>>(track.Tags) : null;
+        var customFields = !string.IsNullOrEmpty(track.CustomFields) ? JsonSerializer.Deserialize<Dictionary<string, object>>(track.CustomFields) : null;
 
         // Get session count if sessions are loaded
         int? sessionCount = null;

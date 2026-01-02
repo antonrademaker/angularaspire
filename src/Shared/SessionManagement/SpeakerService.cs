@@ -45,12 +45,8 @@ public class SpeakerService : ISpeakerService
                 ContactEmail = request.ContactEmail,
                 PhoneNumber = request.PhoneNumber,
                 WebsiteUrl = request.WebsiteUrl,
-                SocialLinks = request.SocialLinks != null 
-                    ? JsonDocument.Parse(JsonSerializer.Serialize(request.SocialLinks)) 
-                    : null,
-                ExpertiseAreas = request.ExpertiseAreas != null 
-                    ? JsonDocument.Parse(JsonSerializer.Serialize(request.ExpertiseAreas)) 
-                    : null,
+                SocialLinks = request.SocialLinks != null ? JsonSerializer.Serialize(request.SocialLinks) : null,
+                ExpertiseAreas = request.ExpertiseAreas != null ? JsonSerializer.Serialize(request.ExpertiseAreas) : null,
                 PreferredSessionTypes = request.PreferredSessionTypes,
                 AvailabilityNotes = request.AvailabilityNotes,
                 IsPublic = request.IsPublic,
@@ -126,9 +122,9 @@ public class SpeakerService : ISpeakerService
             if (request.WebsiteUrl != null)
                 speakerProfile.WebsiteUrl = request.WebsiteUrl;
             if (request.SocialLinks != null)
-                speakerProfile.SocialLinks = JsonDocument.Parse(JsonSerializer.Serialize(request.SocialLinks));
+                speakerProfile.SocialLinks = JsonSerializer.Serialize(request.SocialLinks);
             if (request.ExpertiseAreas != null)
-                speakerProfile.ExpertiseAreas = JsonDocument.Parse(JsonSerializer.Serialize(request.ExpertiseAreas));
+                speakerProfile.ExpertiseAreas = JsonSerializer.Serialize(request.ExpertiseAreas);
             if (request.PreferredSessionTypes != null)
                 speakerProfile.PreferredSessionTypes = request.PreferredSessionTypes;
             if (request.AvailabilityNotes != null)
@@ -454,12 +450,8 @@ public class SpeakerService : ISpeakerService
             ContactEmail = speakerProfile.ContactEmail,
             PhoneNumber = speakerProfile.PhoneNumber,
             WebsiteUrl = speakerProfile.WebsiteUrl,
-            SocialLinks = speakerProfile.SocialLinks != null
-                ? JsonSerializer.Deserialize<Dictionary<string, string>>(speakerProfile.SocialLinks.RootElement.GetRawText())
-                : null,
-            ExpertiseAreas = speakerProfile.ExpertiseAreas != null
-                ? JsonSerializer.Deserialize<List<string>>(speakerProfile.ExpertiseAreas.RootElement.GetRawText())
-                : null,
+            SocialLinks = !string.IsNullOrEmpty(speakerProfile.SocialLinks) ? JsonSerializer.Deserialize<Dictionary<string, string>>(speakerProfile.SocialLinks) : null,
+            ExpertiseAreas = !string.IsNullOrEmpty(speakerProfile.ExpertiseAreas) ? JsonSerializer.Deserialize<List<string>>(speakerProfile.ExpertiseAreas) : null,
             PreferredSessionTypes = speakerProfile.PreferredSessionTypes,
             AvailabilityNotes = speakerProfile.AvailabilityNotes,
             IsPublic = speakerProfile.IsPublic,

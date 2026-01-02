@@ -40,18 +40,18 @@ var privateApi = builder.AddProject<Projects.PrivateApi>("privateapi")
     .WaitFor(blobStorage);
 
 // Add Angular applications
-// PublicApp - public-facing Angular frontend
+// PublicApp - public-facing Angular frontend on port 4200
 var publicApp = builder.AddNpmApp("publicapp", "../PublicApp", "start")
     .WithReference(publicApi)
     .WaitFor(publicApi)
-    .WithHttpEndpoint(env: "PORT")
+    .WithHttpEndpoint(port: 4200, env: "PORT")
     .WithExternalHttpEndpoints();
 
-// PrivateApp - admin Angular frontend
+// PrivateApp - admin Angular frontend on port 4201
 var privateApp = builder.AddNpmApp("privateapp", "../PrivateApp", "start")
     .WithReference(privateApi)
     .WaitFor(privateApi)
-    .WithHttpEndpoint(env: "PORT")
+    .WithHttpEndpoint(port: 4201, env: "PORT")
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();

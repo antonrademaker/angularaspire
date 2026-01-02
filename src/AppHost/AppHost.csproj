@@ -1,8 +1,8 @@
 <Project Sdk="Aspire.AppHost.Sdk/13.1.0">
 
   <ItemGroup>
-    <ProjectReference Include="..\PublicApi\PublicApi.csproj" />
-    <ProjectReference Include="..\PrivateApi\PrivateApi.csproj" />
+    <ProjectReference Include="..\PublicApi\PublicApi.csproj" IsAspireProjectResource="true" />
+    <ProjectReference Include="..\PrivateApi\PrivateApi.csproj" IsAspireProjectResource="true" />
   </ItemGroup>
 
   <ItemGroup>

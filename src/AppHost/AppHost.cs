@@ -1,18 +1,23 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add PostgreSQL database for persistent storage
+// WithLifetime(Persistent) keeps it running between debug sessions
 var postgres = builder.AddPostgres("postgres")
     .WithDataVolume()
-    .WithPgAdmin();
+    .WithPgAdmin()
+    .WithLifetime(ContainerLifetime.Persistent);
 
 var eventDb = postgres.AddDatabase("eventdb");
 
 // Add Redis for queue management and caching
-var redis = builder.AddRedis("redis");
+// WithLifetime(Persistent) keeps it running between debug sessions
+var redis = builder.AddRedis("redis")
+    .WithLifetime(ContainerLifetime.Persistent);
 
 // Add Azure Blob Storage emulator for file storage
+// WithLifetime(Persistent) keeps it running between debug sessions
 var storage = builder.AddAzureStorage("storage")
-    .RunAsEmulator();
+    .RunAsEmulator(emulator => emulator.WithLifetime(ContainerLifetime.Persistent));
 
 var blobStorage = storage.AddBlobs("blobs");
 

@@ -281,8 +281,8 @@ public static class SessionDbContextExtensions
         this IServiceCollection services, 
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("DefaultConnection string is not configured");
+        var connectionString = configuration.GetConnectionString("eventdb")
+            ?? throw new InvalidOperationException("eventdb connection string is not configured");
 
         services.AddDbContext<SessionDbContext>(options =>
         {

@@ -1,0 +1,291 @@
+<div class="session-browser">
+  <!-- Header -->
+  <header class="page-header">
+    <h1>Browse Sessions</h1>
+    <p>Discover and subscribe to sessions that interest you</p>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <form [formGroup]="searchForm" class="filters">
+      <div class="search-box">
+        <input type="text"
+          formControlName="searchText"
+          placeholder="Search sessions, speakers, tags..."
+          class="search-input">
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <select formControlName="trackId" class="filter-select">
+          <option value="">All Tracks</option>
+          @for (track of tracks(); track track) {
+            <option [value]="track.id">
+              {{ track.name }}
+            </option>
+          }
+        </select>
+
+        <select formControlName="type" class="filter-select">
+          <option value="">All Types</option>
+          @for (type of sessionTypes; track type) {
+            <option [value]="type">
+              {{ type }}
+            </option>
+          }
+        </select>
+
+        <select formControlName="difficulty" class="filter-select">
+          <option value="">All Levels</option>
+          @for (level of difficultyLevels; track level) {
+            <option [value]="level">
+              {{ level }}
+            </option>
+          }
+        </select>
+
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="showOnlyAvailable">
+          Available only
+        </label>
+
+        <button type="button" class="clear-btn" (click)="clearFilters()">
+          Clear
+        </button>
+      </form>
+
+      <div class="view-controls">
+        <button class="view-btn"
+          [class.active]="viewMode() === 'list'"
+          (click)="viewMode.set('list')">
+          📋 List
+        </button>
+        <button class="view-btn"
+          [class.active]="viewMode() === 'schedule'"
+          (click)="viewMode.set('schedule')">
+          📅 Schedule
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading sessions...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error()) {
+      <div class="error-message">
+        <p>{{ error() }}</p>
+        <button (click)="loadSessions()" class="retry-btn">Try Again</button>
+      </div>
+    }
+
+    <!-- Session Results Summary -->
+    @if (!isLoading() && !error()) {
+      <div class="results-summary">
+        <span>{{ filteredSessions().length }} sessions found</span>
+        @if (mySubscribedSessions().length > 0) {
+          <span class="subscribed-count">
+            · {{ mySubscribedSessions().length }} subscribed
+          </span>
+        }
+      </div>
+    }
+
+    <!-- List View -->
+    @if (!isLoading() && !error() && viewMode() === 'list') {
+      <div class="sessions-list">
+        @for (session of filteredSessions(); track session) {
+          <div class="session-card">
+            <div class="session-header">
+              @if (session.trackId) {
+                <div class="track-indicator"
+                  [style.background-color]="getTrackColor(session.trackId)">
+                </div>
+              }
+              <div class="session-meta">
+                <span class="session-type">{{ session.type }}</span>
+                <span class="session-level">{{ session.difficultyLevel }}</span>
+                <span class="session-time">
+                  {{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}
+                </span>
+              </div>
+            </div>
+            <h3 class="session-title">{{ session.title }}</h3>
+            <p class="session-description">{{ session.description }}</p>
+            <!-- Speakers -->
+            @if (session.speakers && session.speakers.length > 0) {
+              <div class="speakers">
+                @for (speaker of session.speakers; track speaker) {
+                  <span class="speaker">
+                    👤 {{ speaker.name }}
+                    @if (speaker.title) {
+                      <span class="speaker-title">, {{ speaker.title }}</span>
+                    }
+                  </span>
+                }
+              </div>
+            }
+            <!-- Session Info -->
+            <div class="session-info">
+              @if (session.room) {
+                <span class="info-item">
+                  📍 {{ session.room }}{{ session.building ? ', ' + session.building : '' }}
+                </span>
+              }
+              @if (session.isVirtual) {
+                <span class="info-item virtual">
+                  💻 Virtual
+                </span>
+              }
+              <span class="info-item duration">
+                ⏱️ {{ formatDuration(session) }}
+              </span>
+            </div>
+            <!-- Capacity Bar -->
+            @if (session.requiresSubscription && session.maxAttendees) {
+              <div class="capacity-section">
+                <div class="capacity-bar">
+                  <div class="capacity-fill"
+                    [style.width.%]="getCapacityPercentage(session)"
+                    [class.warning]="getCapacityPercentage(session) >= 80"
+                    [class.full]="getCapacityPercentage(session) >= 100">
+                  </div>
+                </div>
+                <span class="capacity-text">
+                  {{ session.currentAttendees }}/{{ session.maxAttendees }} spots
+                  @if (getCapacityPercentage(session) >= 100) {
+                    <span class="waitlist-badge">
+                      Waitlist available
+                    </span>
+                  }
+                </span>
+              </div>
+            }
+            <!-- Tags -->
+            @if (session.tags && session.tags.length > 0) {
+              <div class="tags">
+                @for (tag of session.tags; track tag) {
+                  <span class="tag">{{ tag }}</span>
+                }
+              </div>
+            }
+            <!-- Actions -->
+            <div class="session-actions">
+              @if (session.requiresSubscription) {
+                @if (!isSubscribed(session.id)) {
+                  <button class="subscribe-btn" (click)="subscribe(session)">
+                    {{ getCapacityPercentage(session) >= 100 ? 'Join Waitlist' : 'Subscribe' }}
+                  </button>
+                }
+                @if (isSubscribed(session.id)) {
+                  <div class="subscribed-badge" [class.waitlisted]="isWaitlisted(session.id)">
+                    @if (!isWaitlisted(session.id)) {
+                      <span>✓ Subscribed</span>
+                    }
+                    @if (isWaitlisted(session.id)) {
+                      <span>
+                        ⏳ Waitlist #{{ getSubscription(session.id)?.waitlistPosition }}
+                      </span>
+                    }
+                  </div>
+                  <button class="unsubscribe-btn" (click)="unsubscribe(session)">
+                    Unsubscribe
+                  </button>
+                }
+              }
+              @if (!session.requiresSubscription) {
+                <span class="open-session">
+                  Open Session - No registration required
+                </span>
+              }
+            </div>
+          </div>
+        }
+        <!-- Empty State -->
+        @if (filteredSessions().length === 0) {
+          <div class="empty-state">
+            <p>No sessions match your filters</p>
+            <button (click)="clearFilters()" class="clear-btn">Clear Filters</button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Schedule View -->
+    @if (!isLoading() && !error() && viewMode() === 'schedule') {
+      <div class="schedule-view">
+        @for (day of sessionsByTime() | keyvalue; track day) {
+          <div class="schedule-day">
+            <h2 class="day-header">{{ formatDate(day.key) }}</h2>
+            <div class="timeline">
+              @for (session of day.value; track session) {
+                <div class="timeline-item">
+                  <div class="time-slot">
+                    <span class="time-start">{{ formatTime(session.startTime) }}</span>
+                    <span class="time-duration">{{ formatDuration(session) }}</span>
+                  </div>
+                  <div class="session-content"
+                    [style.border-left-color]="getTrackColor(session.trackId)"
+                    [class.subscribed]="isSubscribed(session.id)">
+                    <div class="session-header-compact">
+                      <span class="session-type-badge">{{ session.type }}</span>
+                      @if (session.room) {
+                        <span class="room">{{ session.room }}</span>
+                      }
+                    </div>
+                    <h4 class="session-title-compact">{{ session.title }}</h4>
+                    @if (session.speakers && session.speakers.length > 0) {
+                      <div class="speakers-compact">
+                        @for (speaker of session.speakers; track speaker; let last = $last) {
+                          <span>
+                            {{ speaker.name }}{{ !last ? ', ' : '' }}
+                          </span>
+                        }
+                      </div>
+                    }
+                    <div class="session-actions-compact">
+                      @if (session.requiresSubscription && !isSubscribed(session.id)) {
+                        <button class="subscribe-btn-sm" (click)="subscribe(session)">
+                          Subscribe
+                        </button>
+                      }
+                      @if (isSubscribed(session.id)) {
+                        <span class="subscribed-indicator">
+                          ✓ In Schedule
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- My Schedule Summary -->
+    @if (mySubscribedSessions().length > 0) {
+      <div class="my-schedule-summary">
+        <h3>My Schedule ({{ mySubscribedSessions().length }} sessions)</h3>
+        <div class="mini-schedule">
+          @for (session of mySubscribedSessions(); track session) {
+            <div class="mini-session">
+              <span class="mini-time">{{ formatTime(session.startTime) }}</span>
+              <span class="mini-title">{{ session.title }}</span>
+              @if (isWaitlisted(session.id)) {
+                <span class="mini-waitlist">Waitlisted</span>
+              }
+            </div>
+          }
+        </div>
+        <a [routerLink]="['/events', selectedEventId(), 'schedule']" class="view-schedule-link">
+          View Full Schedule →
+        </a>
+      </div>
+    }
+  </div>

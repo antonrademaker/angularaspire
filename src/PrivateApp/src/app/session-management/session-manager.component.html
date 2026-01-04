@@ -1,0 +1,289 @@
+<div class="session-manager-container">
+  <!-- Toolbar -->
+  <mat-toolbar color="primary" class="toolbar">
+    <mat-icon>event</mat-icon>
+    <span class="title">Session Management</span>
+    <span class="spacer"></span>
+    <button mat-raised-button color="accent" (click)="createSession()">
+      <mat-icon>add</mat-icon>
+      Create Session
+    </button>
+  </mat-toolbar>
+
+  <!-- Filters Card -->
+  <mat-card class="filter-card">
+    <mat-card-content>
+      <form [formGroup]="searchForm" class="filter-form">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search Sessions</mat-label>
+          <input matInput formControlName="searchText" placeholder="Search by title, description, or tags">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Track</mat-label>
+          <mat-select formControlName="trackId">
+            <mat-option [value]="null">All Tracks</mat-option>
+            @for (track of tracks(); track track) {
+              <mat-option [value]="track.id">
+                <span class="track-indicator" [style.background-color]="track.color"></span>
+                {{ track.name }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="sessionType">
+            <mat-option [value]="''">All Types</mat-option>
+            @for (type of sessionTypes; track type) {
+              <mat-option [value]="type">
+                {{ type }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Difficulty</mat-label>
+          <mat-select formControlName="difficulty">
+            <mat-option [value]="''">All Levels</mat-option>
+            @for (level of difficultyLevels; track level) {
+              <mat-option [value]="level">
+                {{ level }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="showUnpublished">Show Unpublished</mat-checkbox>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+      <p>Loading sessions...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="error-container">
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-button color="primary" (click)="loadSessions()">Retry</button>
+    </div>
+  }
+
+  <!-- Sessions Table -->
+  @if (!isLoading() && !error()) {
+    <mat-card class="table-card">
+      <mat-card-content>
+        <!-- Tab Navigation for Status -->
+        <mat-tab-group (selectedIndexChange)="onTabChange($event)" [selectedIndex]="selectedTabIndex()">
+          <mat-tab label="All Sessions">
+            <ng-template matTabLabel>
+              <span [matBadge]="totalCount()" matBadgeOverlap="false">All Sessions</span>
+            </ng-template>
+          </mat-tab>
+          <mat-tab label="Scheduled"></mat-tab>
+          <mat-tab label="In Progress"></mat-tab>
+          <mat-tab label="Completed"></mat-tab>
+          <mat-tab label="Drafts"></mat-tab>
+        </mat-tab-group>
+        <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="sessions-table">
+          <!-- Title Column -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+            <td mat-cell *matCellDef="let session">
+              <div class="session-title-cell">
+                <span class="session-title">{{ session.title }}</span>
+                <span class="session-badges">
+                  @if (!session.isPublished) {
+                    <mat-icon class="unpublished-icon"
+                    matTooltip="Unpublished">visibility_off</mat-icon>
+                  }
+                  @if (session.isVirtual) {
+                    <mat-icon class="virtual-icon"
+                    matTooltip="Virtual Session">videocam</mat-icon>
+                  }
+                  @if (session.requiresSubscription) {
+                    <mat-icon class="subscription-icon"
+                    matTooltip="Requires Registration">how_to_reg</mat-icon>
+                  }
+                </span>
+              </div>
+              <div class="session-subtitle">
+                {{ session.type }} • {{ session.difficultyLevel }}
+                @if (session.room) {
+                  <span> • {{ session.room }}</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+          <!-- Track Column -->
+          <ng-container matColumnDef="track">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Track</th>
+            <td mat-cell *matCellDef="let session">
+              @if (session.trackId) {
+                <mat-chip [style.background-color]="getTrackColor(session.trackId)">
+                  {{ session.trackName || 'Unknown Track' }}
+                </mat-chip>
+              }
+              @if (!session.trackId) {
+                <span class="no-track">No Track</span>
+              }
+            </td>
+          </ng-container>
+          <!-- Time Column -->
+          <ng-container matColumnDef="time">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="startTime">Time</th>
+            <td mat-cell *matCellDef="let session">
+              <div class="time-cell">
+                <span class="start-time">{{ formatDateTime(session.startTime) }}</span>
+                <span class="duration">{{ formatDuration(session) }}</span>
+              </div>
+            </td>
+          </ng-container>
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+            <td mat-cell *matCellDef="let session">
+              <mat-chip class="type-chip">
+                {{ session.type }}
+              </mat-chip>
+            </td>
+          </ng-container>
+          <!-- Capacity Column -->
+          <ng-container matColumnDef="capacity">
+            <th mat-header-cell *matHeaderCellDef>Capacity</th>
+            <td mat-cell *matCellDef="let session">
+              @if (session.maxAttendees) {
+                <div class="capacity-cell">
+                  <span class="capacity-text">
+                    {{ session.currentAttendees }} / {{ session.maxAttendees }}
+                  </span>
+                  <div class="capacity-bar">
+                    <div class="capacity-fill"
+                      [style.width.%]="getCapacityPercentage(session)"
+                      [class.full]="getCapacityPercentage(session) >= 100"
+                    [class.warning]="getCapacityPercentage(session) >= 80"></div>
+                  </div>
+                </div>
+              }
+              @if (!session.maxAttendees) {
+                <span class="unlimited">Unlimited</span>
+              }
+            </td>
+          </ng-container>
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+            <td mat-cell *matCellDef="let session">
+              <mat-chip [style.background-color]="getStatusColor(session.status)" class="status-chip">
+                {{ session.status }}
+              </mat-chip>
+            </td>
+          </ng-container>
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let session">
+              <button mat-icon-button [matMenuTriggerFor]="actionMenu"
+                matTooltip="Actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #actionMenu="matMenu">
+                <button mat-menu-item (click)="editSession(session)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="duplicateSession(session)">
+                  <mat-icon>content_copy</mat-icon>
+                  <span>Duplicate</span>
+                </button>
+                <mat-divider></mat-divider>
+                @if (!session.isPublished) {
+                  <button mat-menu-item (click)="publishSession(session)">
+                    <mat-icon>publish</mat-icon>
+                    <span>Publish</span>
+                  </button>
+                }
+                @if (session.isPublished) {
+                  <button mat-menu-item (click)="unpublishSession(session)">
+                    <mat-icon>unpublished</mat-icon>
+                    <span>Unpublish</span>
+                  </button>
+                }
+                <mat-divider></mat-divider>
+                @if (session.status === 'Scheduled') {
+                  <button mat-menu-item (click)="startSession(session)">
+                    <mat-icon>play_arrow</mat-icon>
+                    <span>Start Session</span>
+                  </button>
+                }
+                @if (session.status === 'InProgress') {
+                  <button mat-menu-item (click)="completeSession(session)">
+                    <mat-icon>check_circle</mat-icon>
+                    <span>Complete Session</span>
+                  </button>
+                }
+                @if (session.status !== 'Cancelled' && session.status !== 'Completed') {
+                  <button mat-menu-item
+                    (click)="cancelSession(session)">
+                    <mat-icon>cancel</mat-icon>
+                    <span>Cancel Session</span>
+                  </button>
+                }
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="checkConflicts(session)">
+                  <mat-icon>warning</mat-icon>
+                  <span>Check Conflicts</span>
+                </button>
+                @if (session.requiresSubscription) {
+                  <button mat-menu-item (click)="viewSubscriptions(session)">
+                    <mat-icon>group</mat-icon>
+                    <span>View Subscriptions</span>
+                  </button>
+                }
+                <mat-divider></mat-divider>
+                <button mat-menu-item class="delete-action" (click)="deleteSession(session)">
+                  <mat-icon color="warn">delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+            [class.unpublished]="!row.isPublished"
+          [class.cancelled]="row.status === 'Cancelled'"></tr>
+          <!-- No Data Row -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+              <div class="no-data">
+                <mat-icon>event_busy</mat-icon>
+                <p>No sessions found</p>
+                <button mat-raised-button color="primary" (click)="createSession()">
+                  Create First Session
+                </button>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <!-- Paginator -->
+        <mat-paginator [length]="totalCount()"
+          [pageSize]="pageSize()"
+          [pageIndex]="pageIndex()"
+          [pageSizeOptions]="[10, 25, 50, 100]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

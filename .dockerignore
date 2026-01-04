@@ -1,0 +1,70 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Build outputs
+**/bin
+**/obj
+**/out
+**/dist
+**/node_modules
+
+# Test results
+**/TestResults
+**/coverage
+
+# Documentation
+docs
+*.md
+!README.md
+
+# Specs
+specs
+
+# Local environment
+.env
+.env.*
+*.local
+
+# Logs
+logs
+*.log
+
+# Docker
+**/Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+
+# NPM
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Angular
+.angular
+
+# Test files
+**/tests
+**/*.Tests
+**/*.Test
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.temp

@@ -1,0 +1,20 @@
+{
+  "name": "event-management-api-examples",
+  "version": "1.0.0",
+  "description": "Example code for Event Management External API",
+  "type": "module",
+  "main": "client.js",
+  "scripts": {
+    "start": "node examples.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "event-management",
+    "api",
+    "client"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

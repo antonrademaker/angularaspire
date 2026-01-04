@@ -20,13 +20,25 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Public .NET API**: `src/PublicApi/`, tests in `tests/PublicApi.Tests/`
-- **Private .NET API**: `src/PrivateApi/`, tests in `tests/PrivateApi.Tests/`
-- **Shared gRPC Services**: `src/Shared/`, proto files in `protos/`, tests in `tests/Shared.Tests/`
-- **Public Angular App**: `src/PublicApp/src/app/`, tests in `src/PublicApp/src/tests/`, e2e in `src/PublicApp/e2e/`
-- **Private Angular App**: `src/PrivateApp/src/app/`, tests in `src/PrivateApp/src/tests/`, e2e in `src/PrivateApp/e2e/`
-- **Shared Angular Components**: `src/SharedUI/`, tests in `src/SharedUI/src/tests/`
-- Paths shown below assume Aspire multi-project structure - adjust based on plan.md
+### IDesign Service Organization (Business Capabilities)
+- **EventManagementService**: `src/Shared/EventManagement/IEventService.cs` (generates `protos/EventManagement.proto`)
+- **RegistrationService**: `src/Shared/Registration/IRegistrationService.cs` (generates `protos/Registration.proto`)  
+- **SessionService**: `src/Shared/SessionManagement/ISessionService.cs` (generates `protos/SessionManagement.proto`)
+- **UserService**: `src/Shared/UserManagement/IUserService.cs` (generates `protos/UserManagement.proto`)
+- **NotificationService**: `src/Shared/Notifications/INotificationService.cs` (generates `protos/Notifications.proto`)
+
+### Project Structure (Implementation)
+- **Public .NET API**: `src/PublicApi/` (business service endpoints, NOT technical layers)
+- **Private .NET API**: `src/PrivateApi/` (same business services, different access)
+- **Public Angular App**: `src/PublicApp/src/app/` (feature modules by business capability)
+- **Private Angular App**: `src/PrivateApp/src/app/` (feature modules by business capability)
+- **Shared Angular Components**: `src/SharedUI/` (UI components, NOT business logic)
+
+### Avoid Technical Layer Organization
+- ❌ `Controllers/`, `Services/`, `Repositories/` folders
+- ❌ `services/`, `components/`, `models/` Angular folders
+- ✅ Business capability folders with complete functionality
+- Paths shown below assume IDesign business service structure - adjust based on plan.md
 
 <!-- 
   ============================================================================
@@ -93,7 +105,7 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Define gRPC service contract in protos/[ServiceName].proto
+- [ ] T014 [P] [US1] Define gRPC service interface in src/Shared/[ServiceName]/I[ServiceName].cs (auto-generates .proto)
 - [ ] T015 [P] [US1] Generate C# client/server code from proto definitions
 - [ ] T016 [P] [US1] Implement gRPC service in src/Shared/Services/[ServiceName]Service.cs
 - [ ] T017 [US1] Create API endpoints in src/[PublicApi|PrivateApi]/Controllers/[ControllerName].cs (depends on T016)
@@ -127,7 +139,7 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Implementation for User Story 2
 
-- [ ] T031 [P] [US2] Define or extend gRPC service contract in protos/[ServiceName].proto
+- [ ] T031 [P] [US2] Define or extend gRPC service interface in src/Shared/[ServiceName]/I[ServiceName].cs (auto-generates .proto)
 - [ ] T032 [US2] Implement gRPC service methods in src/Shared/Services/[ServiceName]Service.cs
 - [ ] T033 [US2] Create API endpoints in src/[PublicApi|PrivateApi]/Controllers/[ControllerName].cs
 - [ ] T034 [P] [US2] Create shared DTOs in src/Shared/Models/[EntityName].cs

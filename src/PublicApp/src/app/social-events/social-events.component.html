@@ -1,0 +1,312 @@
+<div class="social-events-page">
+  <!-- Header -->
+  <header class="page-header">
+    <h1>Social Events</h1>
+    <p>Connect, network, and enjoy social activities</p>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <form [formGroup]="searchForm" class="filters">
+      <div class="search-box">
+        <input type="text"
+          formControlName="searchText"
+          placeholder="Search events, locations..."
+          class="search-input">
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <select formControlName="type" class="filter-select">
+          <option value="">All Types</option>
+          @for (type of socialEventTypes; track type) {
+            <option [value]="type">
+              {{ getTypeIcon(type) }} {{ type }}
+            </option>
+          }
+        </select>
+
+        <button type="button" class="clear-btn" (click)="clearFilters()">
+          Clear
+        </button>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading social events...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error()) {
+      <div class="error-message">
+        <p>{{ error() }}</p>
+        <button (click)="loadSocialEvents()" class="retry-btn">Try Again</button>
+      </div>
+    }
+
+    <!-- Results Summary -->
+    @if (!isLoading() && !error()) {
+      <div class="results-summary">
+        <span>{{ filteredSocialEvents().length }} social events</span>
+        @if (myRsvpEvents().length > 0) {
+          <span class="rsvp-count">
+            · {{ myRsvpEvents().length }} RSVP'd
+          </span>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading() && !error() && filteredSocialEvents().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🎉</div>
+        <h2>No social events found</h2>
+        <p>Try adjusting your filters or check back later.</p>
+      </div>
+    }
+
+    <!-- Events by Date -->
+    @if (!isLoading() && !error()) {
+      <div class="events-container">
+        @for (dateEntry of socialEventsByDate() | keyvalue; track dateEntry) {
+          <div class="date-group">
+            <h2 class="date-header">{{ formatDate(dateEntry.key) }}</h2>
+            <div class="events-list">
+              @for (event of dateEntry.value; track event) {
+                <div
+                  class="event-card"
+                  [class.cancelled]="event.status === 'Cancelled'"
+                  [class.has-rsvp]="hasRsvp(event.id)">
+                  <!-- Event Header -->
+                  <div class="event-header">
+                    <div class="event-type-badge">
+                      <span class="type-icon">{{ getTypeIcon(event.type) }}</span>
+                      <span class="type-name">{{ event.typeName || event.type }}</span>
+                    </div>
+                    <div class="event-status" [class]="getStatusClass(event.status)">
+                      {{ event.statusName || event.status }}
+                    </div>
+                  </div>
+                  <h3 class="event-title" (click)="viewEventDetails(event)">{{ event.title }}</h3>
+                  <p class="event-description">{{ event.description }}</p>
+                  <!-- Event Details -->
+                  <div class="event-details">
+                    <div class="detail-item time">
+                      <span class="icon">🕐</span>
+                      <span>{{ formatTime(event.startTime) }} - {{ formatTime(event.endTime) }}</span>
+                      <span class="duration">({{ formatDuration(event) }})</span>
+                    </div>
+                    <div class="detail-item location">
+                      <span class="icon">📍</span>
+                      <span>{{ event.location }}{{ event.room ? ', ' + event.room : '' }}</span>
+                    </div>
+                    @if (event.dressCode) {
+                      <div class="detail-item dress-code">
+                        <span class="icon">👔</span>
+                        <span>{{ event.dressCode }}</span>
+                      </div>
+                    }
+                    <div class="detail-item cost">
+                      <span class="icon">💰</span>
+                      <span>{{ formatCost(event) }}</span>
+                    </div>
+                  </div>
+                  <!-- Capacity Section -->
+                  @if (event.maxCapacity) {
+                    <div class="capacity-section">
+                      <div class="capacity-bar">
+                        <div class="capacity-fill"
+                          [style.width.%]="getCapacityPercentage(event)"
+                          [class.warning]="getCapacityPercentage(event) >= 80"
+                          [class.full]="getCapacityPercentage(event) >= 100">
+                        </div>
+                      </div>
+                      <span class="capacity-text">
+                        {{ event.currentRsvpCount }}/{{ event.maxCapacity }} spots
+                        @if (isFull(event) && event.waitlistCount > 0) {
+                          <span class="waitlist-info">
+                            ({{ event.waitlistCount }} on waitlist)
+                          </span>
+                        }
+                      </span>
+                    </div>
+                  }
+                  <!-- Guest Info -->
+                  @if (event.guestsAllowed) {
+                    <div class="guest-info">
+                      <span class="icon">👥</span>
+                      <span>Guests allowed (max {{ event.maxGuestsPerAttendee }} per person)</span>
+                    </div>
+                  }
+                  <!-- Tags -->
+                  @if (event.tags && event.tags.length > 0) {
+                    <div class="tags">
+                      @for (tag of event.tags; track tag) {
+                        <span class="tag">{{ tag }}</span>
+                      }
+                    </div>
+                  }
+                  <!-- User's RSVP Status -->
+                  @if (hasRsvp(event.id)) {
+                    <div class="my-rsvp-status">
+                      @if (getRsvp(event.id); as rsvp) {
+                        <div class="rsvp-badge" [class.waitlisted]="rsvp.isWaitlisted">
+                          @if (!rsvp.isWaitlisted) {
+                            <span>✓ RSVP'd</span>
+                          }
+                          @if (rsvp.isWaitlisted) {
+                            <span>⏳ Waitlisted (#{{ rsvp.waitlistPosition }})</span>
+                          }
+                        </div>
+                        @if (rsvp.guestCount > 0) {
+                          <span class="guest-badge">
+                            +{{ rsvp.guestCount }} guest{{ rsvp.guestCount > 1 ? 's' : '' }}
+                          </span>
+                        }
+                      }
+                    </div>
+                  }
+                  <!-- Actions -->
+                  <div class="event-actions">
+                    @if (event.rsvpRequired && isRsvpOpen(event)) {
+                      @if (!hasRsvp(event.id)) {
+                        <button
+                          class="btn btn-primary"
+                          (click)="openRsvpDialog(event)"
+                          [disabled]="isFull(event) && event.waitlistCount === 0">
+                          {{ isFull(event) ? 'Join Waitlist' : 'RSVP Now' }}
+                        </button>
+                      }
+                      @if (hasRsvp(event.id)) {
+                        <button
+                          class="btn btn-secondary"
+                          (click)="cancelRsvp(event)">
+                          Cancel RSVP
+                        </button>
+                      }
+                    }
+                    @if (!event.rsvpRequired) {
+                      <span class="no-rsvp-badge">
+                        No RSVP required
+                      </span>
+                    }
+                    @if (event.rsvpRequired && !isRsvpOpen(event)) {
+                      <span class="rsvp-closed-badge">
+                        RSVP Closed
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- RSVP Dialog -->
+    @if (showRsvpDialog()) {
+      <div class="dialog-backdrop" (click)="closeRsvpDialog()">
+        <div class="dialog-content" (click)="$event.stopPropagation()">
+          <div class="dialog-header">
+            <h2>RSVP to {{ selectedSocialEvent()?.title }}</h2>
+            <button class="close-btn" (click)="closeRsvpDialog()">×</button>
+          </div>
+          <!-- Availability Info -->
+          @if (rsvpAvailability()) {
+            <div class="availability-info">
+              @if (rsvpAvailability(); as avail) {
+                <div class="avail-status" [class.available]="avail.isAvailable" [class.waitlist]="!avail.hasCapacity && avail.waitlistAvailable">
+                  @if (avail.hasCapacity && avail.spotsRemaining !== null) {
+                    <span>
+                      {{ avail.spotsRemaining }} spots remaining
+                    </span>
+                  }
+                  @if (!avail.hasCapacity && avail.waitlistAvailable) {
+                    <span>
+                      Event is full - you'll be added to the waitlist
+                    </span>
+                  }
+                  @if (!avail.isAvailable && !avail.waitlistAvailable) {
+                    <span>
+                      This event is not available for RSVP
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+          }
+          <!-- RSVP Form -->
+          <form [formGroup]="rsvpForm" (ngSubmit)="submitRsvp()" class="rsvp-form">
+            @if (selectedSocialEvent()?.guestsAllowed) {
+              <div class="form-group">
+                <label for="guestCount">Number of Guests</label>
+                <input type="number"
+                  id="guestCount"
+                  formControlName="guestCount"
+                  min="0"
+                  [max]="selectedSocialEvent()?.maxGuestsPerAttendee || 0">
+                  <small>Maximum {{ selectedSocialEvent()?.maxGuestsPerAttendee }} guests allowed</small>
+                </div>
+                @if (guestCount() > 0) {
+                  <div class="form-group">
+                    <label for="guestNames">Guest Names (comma-separated)</label>
+                    <input type="text"
+                      id="guestNames"
+                      formControlName="guestNames"
+                      placeholder="John Doe, Jane Smith">
+                    </div>
+                  }
+                }
+                <div class="form-group">
+                  <label for="dietaryRequirements">Dietary Requirements</label>
+                  <input type="text"
+                    id="dietaryRequirements"
+                    formControlName="dietaryRequirements"
+                    placeholder="e.g., Vegetarian, Gluten-free, Allergies...">
+                  </div>
+                  <div class="form-group">
+                    <label for="notes">Additional Notes</label>
+                    <textarea id="notes"
+                      formControlName="notes"
+                      rows="3"
+                    placeholder="Any other information we should know..."></textarea>
+                  </div>
+                  <!-- Cost Info -->
+                  @if (selectedSocialEvent()?.costPerPerson) {
+                    <div class="cost-info">
+                      <strong>Cost:</strong> {{ formatCost(selectedSocialEvent()!) }}
+                      @if (guestCount() > 0) {
+                        <span>
+                          × {{ 1 + guestCount() }} =
+                          {{ selectedSocialEvent()!.currency }}
+                          {{ ((1 + guestCount()) * selectedSocialEvent()!.costPerPerson!).toFixed(2) }}
+                        </span>
+                      }
+                    </div>
+                  }
+                  <!-- Error Message -->
+                  @if (rsvpError()) {
+                    <div class="error-message">
+                      {{ rsvpError() }}
+                    </div>
+                  }
+                  <!-- Actions -->
+                  <div class="dialog-actions">
+                    <button type="button" class="btn btn-secondary" (click)="closeRsvpDialog()">
+                      Cancel
+                    </button>
+                    <button type="submit"
+                      class="btn btn-primary"
+                      [disabled]="!rsvpForm.valid || rsvpInProgress()">
+                      {{ rsvpInProgress() ? 'Submitting...' : 'Confirm RSVP' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          }
+        </div>

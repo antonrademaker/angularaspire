@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "eastus"
+    },
+    "namePrefix": {
+      "value": "eventmgmt"
+    },
+    "environment": {
+      "value": "dev"
+    },
+    "imageTag": {
+      "value": "latest"
+    },
+    "jwtSecretKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEYVAULT_NAME}"
+        },
+        "secretName": "jwt-secret-key"
+      }
+    },
+    "smtpPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEYVAULT_NAME}"
+        },
+        "secretName": "smtp-password"
+      }
+    },
+    "smtpHost": {
+      "value": "smtp.sendgrid.net"
+    },
+    "smtpUsername": {
+      "value": "apikey"
+    }
+  }
+}

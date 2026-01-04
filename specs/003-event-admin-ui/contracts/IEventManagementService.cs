@@ -11,7 +11,7 @@ namespace Shared.EventManagement
         Task<EventDto> UpdateEventAsync(UpdateEventRequest request);
         Task DeleteEventAsync(string eventId);
         Task<PagedList<EventDto>> ListEventsAsync(ListEventsRequest request);
-        
+
         // Tracks
         Task<TrackDto> CreateTrackAsync(CreateTrackRequest request);
         Task<TrackDto> UpdateTrackAsync(UpdateTrackRequest request);

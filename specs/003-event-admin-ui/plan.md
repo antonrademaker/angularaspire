@@ -7,7 +7,9 @@
 
 ## Summary
 
-Implement a comprehensive event administration system in the PrivateApp and supporting backend services. This includes managing multi-day events, tracks, time slots, sessions, speakers, and rooms. The system will support complex scheduling scenarios like session swapping, room combinations, and hybrid events. It will also handle attendee registration, waitlists, and personalized agendas, along with a robust audit trail and GDPR compliance.
+Implement the **Core Scheduling** foundation for the event administration system. This phase focuses on the critical path for event creation and schedule management: managing multi-day events, tracks, time slots, sessions, speakers, and rooms. It includes complex scheduling scenarios like session swapping and basic room management.
+
+**Note:** Advanced modules defined in the spec (Registration, Sponsors, Equipment, CFP, Announcements, GDPR, and Audit Logs) are **out of scope** for this specific implementation plan and will be addressed in subsequent feature iterations.
 
 ## Technical Context
 

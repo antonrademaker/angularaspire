@@ -399,13 +399,14 @@ public class SpeakerService : ISpeakerService
             {
                 var previousStatus = sessionSpeaker.Status;
                 sessionSpeaker.Status = request.Status.Value;
-                
+
                 // Set timestamps based on status changes
                 if (request.Status.Value == SessionSpeakerStatus.Contacted && previousStatus != SessionSpeakerStatus.Contacted)
                     sessionSpeaker.ContactedAt = DateTime.UtcNow;
                 if (request.Status.Value == SessionSpeakerStatus.Confirmed && previousStatus != SessionSpeakerStatus.Confirmed)
                     sessionSpeaker.ConfirmedAt = DateTime.UtcNow;
             }
+
             if (request.StatusNotes != null)
                 sessionSpeaker.StatusNotes = request.StatusNotes;
 

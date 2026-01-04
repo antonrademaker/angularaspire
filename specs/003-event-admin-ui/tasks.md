@@ -23,7 +23,7 @@
 ## Phase 2: Foundational Data & Services
 **Goal**: Implement core shared entities and base service infrastructure.
 
-- [ ] T006 Implement Location and Room entities in [src/Shared/EventManagement/Entities/Location.cs](src/Shared/EventManagement/Entities/Location.cs)
+- [x] T006 Implement Location and Room entities in [src/Shared/EventManagement/Entities/Location.cs](src/Shared/EventManagement/Entities/Location.cs)
 - [ ] T007 Implement Tag entity in [src/Shared/EventManagement/Entities/Tag.cs](src/Shared/EventManagement/Entities/Tag.cs)
 - [ ] T008 Implement Person entity (Organizer/Speaker base) in [src/Shared/EventManagement/Entities/Person.cs](src/Shared/EventManagement/Entities/Person.cs)
 - [ ] T009 Create EF Core migrations for foundational entities in [src/Shared/EventManagement/Data/Migrations/](src/Shared/EventManagement/Data/Migrations/)

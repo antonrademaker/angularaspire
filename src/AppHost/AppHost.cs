@@ -51,7 +51,7 @@ var publicApp = builder.AddNpmApp("publicapp", "../PublicApp", "start")
 var privateApp = builder.AddNpmApp("privateapp", "../PrivateApp", "start")
     .WithReference(privateApi)
     .WaitFor(privateApi)
-    .WithHttpEndpoint(port: 4201, env: "PORT")
+    .WithHttpEndpoint(port: 4201, targetPort: 4201, env: "PORT", isProxied: false)
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();

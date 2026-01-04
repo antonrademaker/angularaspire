@@ -7,6 +7,11 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'health',
+    loadComponent: () => import('./health/health.component').then(c => c.HealthComponent),
+    data: { prerender: false }
+  },
+  {
     path: 'session-management',
     children: [
       {

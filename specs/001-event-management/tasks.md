@@ -132,6 +132,7 @@ Following the user's request for **structure first, then infrastructure (Aspire)
 ### Testing US2
 - [X] T061 [P] [US2] Create unit tests for SessionService in tests/Shared.Tests/SessionManagement/SessionServiceTests.cs
 - [X] T062 [P] [US2] Create integration tests for session subscription in tests/PublicApi.Tests/SessionManagement/SubscriptionIntegrationTests.cs
+- [X] T088 [US2] Create E2E Playwright test for session CRUD (add, edit, view, delete) in admin app in tests/PrivateApp.e2e/session-management.spec.ts
 
 ---
 

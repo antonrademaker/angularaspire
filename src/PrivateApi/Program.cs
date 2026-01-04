@@ -112,6 +112,33 @@ app.UseAuthorization();
 // Map default health checks
 app.MapDefaultEndpoints();
 
+// Map detailed health check endpoint for Angular admin dashboard
+app.MapGet("/api/health/detailed", async (IServiceProvider services) =>
+{
+    var healthCheckService = services.GetRequiredService<Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckService>();
+    var report = await healthCheckService.CheckHealthAsync();
+
+    var response = new
+    {
+        status = report.Status.ToString(),
+        totalDuration = report.TotalDuration.TotalMilliseconds,
+        timestamp = DateTime.UtcNow,
+        checks = report.Entries.Select(e => new
+        {
+            name = e.Key,
+            status = e.Value.Status.ToString(),
+            duration = e.Value.Duration.TotalMilliseconds,
+            description = e.Value.Description,
+            exception = e.Value.Exception?.Message,
+            data = e.Value.Data
+        })
+    };
+
+    return report.Status == Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy
+        ? Results.Ok(response)
+        : Results.Json(response, statusCode: 503);
+}).WithTags("Health").AllowAnonymous();
+
 // Map controllers
 app.MapControllers();
 

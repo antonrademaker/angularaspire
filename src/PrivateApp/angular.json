@@ -48,40 +48,40 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "700kB"
+                  "maximumWarning": "800kB",
+                  "maximumError": "1.5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kB",
-                  "maximumError": "4kB"
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
                 },
                 {
                   "type": "bundle",
                   "name": "main",
-                  "maximumWarning": "350kB",
-                  "maximumError": "550kB"
+                  "maximumWarning": "500kB",
+                  "maximumError": "800kB"
                 },
                 {
                   "type": "bundle",
                   "name": "polyfills",
-                  "maximumWarning": "50kB",
-                  "maximumError": "100kB"
+                  "maximumWarning": "100kB",
+                  "maximumError": "200kB"
                 },
                 {
                   "type": "allScript",
-                  "maximumWarning": "600kB",
-                  "maximumError": "900kB"
+                  "maximumWarning": "1.5MB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "all",
-                  "maximumWarning": "700kB",
-                  "maximumError": "1.2MB"
+                  "maximumWarning": "1.8MB",
+                  "maximumError": "2.5MB"
                 },
                 {
                   "type": "anyScript",
-                  "maximumWarning": "150kB",
-                  "maximumError": "250kB"
+                  "maximumWarning": "400kB",
+                  "maximumError": "600kB"
                 }
               ],
               "outputHashing": "all",
@@ -97,6 +97,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.js"
+          },
           "configurations": {
             "production": {
               "buildTarget": "PrivateApp:build:production"

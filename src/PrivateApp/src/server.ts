@@ -1,3 +1,6 @@
+// OpenTelemetry must be imported first to initialize before any other imports
+import './telemetry';
+
 import {
   AngularNodeAppEngine,
   createNodeRequestHandler,

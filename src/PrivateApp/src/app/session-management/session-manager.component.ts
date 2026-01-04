@@ -317,8 +317,10 @@ export class SessionManagerComponent implements OnInit {
   }
 
   async ngOnInit() {
-    // Load event ID from route parameters or input
-    const eventId = this.eventId || this.route.snapshot.paramMap.get('eventId');
+    // Load event ID from route parameters, query parameters, or input
+    const eventId = this.eventId || 
+      this.route.snapshot.paramMap.get('eventId') || 
+      this.route.snapshot.queryParamMap.get('eventId');
     const trackId = this.trackId || this.route.snapshot.queryParamMap.get('trackId');
     
     if (eventId) {

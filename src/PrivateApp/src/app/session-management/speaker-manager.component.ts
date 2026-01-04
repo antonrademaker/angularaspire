@@ -129,14 +129,33 @@ export interface SessionSpeakerDetail {
   sessionId: string;
   speakerId: string;
   role: SpeakerRole;
+  status: SessionSpeakerStatus;
+  statusNotes?: string;
+  contactedAt?: string;
+  confirmedAt?: string;
   displayOrder: number;
   speaker?: SpeakerProfile;
+}
+
+export enum SessionSpeakerStatus {
+  New = 'New',
+  Contacted = 'Contacted',
+  Confirmed = 'Confirmed',
+  Cancelled = 'Cancelled',
+  Removed = 'Removed'
 }
 
 export interface AssignSpeakerRequest {
   speakerId: string;
   role: SpeakerRole;
   displayOrder: number;
+}
+
+export interface UpdateSessionSpeakerRequest {
+  role?: SpeakerRole;
+  displayOrder?: number;
+  status?: SessionSpeakerStatus;
+  statusNotes?: string;
 }
 
 @Component({

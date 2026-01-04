@@ -395,6 +395,19 @@ public class SpeakerService : ISpeakerService
                 sessionSpeaker.Role = request.Role.Value;
             if (request.DisplayOrder.HasValue)
                 sessionSpeaker.DisplayOrder = request.DisplayOrder.Value;
+            if (request.Status.HasValue)
+            {
+                var previousStatus = sessionSpeaker.Status;
+                sessionSpeaker.Status = request.Status.Value;
+                
+                // Set timestamps based on status changes
+                if (request.Status.Value == SessionSpeakerStatus.Contacted && previousStatus != SessionSpeakerStatus.Contacted)
+                    sessionSpeaker.ContactedAt = DateTime.UtcNow;
+                if (request.Status.Value == SessionSpeakerStatus.Confirmed && previousStatus != SessionSpeakerStatus.Confirmed)
+                    sessionSpeaker.ConfirmedAt = DateTime.UtcNow;
+            }
+            if (request.StatusNotes != null)
+                sessionSpeaker.StatusNotes = request.StatusNotes;
 
             await _context.SaveChangesAsync();
 
@@ -472,6 +485,10 @@ public class SpeakerService : ISpeakerService
             SessionId = sessionSpeaker.SessionId,
             SpeakerId = sessionSpeaker.SpeakerId,
             Role = sessionSpeaker.Role,
+            Status = sessionSpeaker.Status,
+            StatusNotes = sessionSpeaker.StatusNotes,
+            ContactedAt = sessionSpeaker.ContactedAt,
+            ConfirmedAt = sessionSpeaker.ConfirmedAt,
             DisplayOrder = sessionSpeaker.DisplayOrder,
             Speaker = sessionSpeaker.Speaker != null ? MapToResponse(sessionSpeaker.Speaker) : null
         };

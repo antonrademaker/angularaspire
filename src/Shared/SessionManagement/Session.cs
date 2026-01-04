@@ -419,10 +419,35 @@ public class SessionSpeaker
     public SpeakerRole Role { get; set; } = SpeakerRole.Speaker;
 
     /// <summary>
+    /// Speaker invitation/confirmation status
+    /// </summary>
+    [Column("status")]
+    public SessionSpeakerStatus Status { get; set; } = SessionSpeakerStatus.New;
+
+    /// <summary>
     /// Display order for multiple speakers
     /// </summary>
     [Column("display_order")]
     public int DisplayOrder { get; set; } = 0;
+
+    /// <summary>
+    /// Notes about the speaker status (e.g., reason for cancellation)
+    /// </summary>
+    [MaxLength(1000)]
+    [Column("status_notes")]
+    public string? StatusNotes { get; set; }
+
+    /// <summary>
+    /// Date when the speaker was last contacted
+    /// </summary>
+    [Column("contacted_at")]
+    public DateTime? ContactedAt { get; set; }
+
+    /// <summary>
+    /// Date when the speaker confirmed participation
+    /// </summary>
+    [Column("confirmed_at")]
+    public DateTime? ConfirmedAt { get; set; }
 
     /// <summary>
     /// Navigation property to the session
@@ -433,6 +458,37 @@ public class SessionSpeaker
     /// Navigation property to the speaker profile
     /// </summary>
     public virtual SpeakerProfile? Speaker { get; set; }
+}
+
+/// <summary>
+/// Session-Speaker invitation/confirmation status for tracking the workflow
+/// </summary>
+public enum SessionSpeakerStatus
+{
+    /// <summary>
+    /// Speaker has been added but not yet contacted
+    /// </summary>
+    New = 0,
+
+    /// <summary>
+    /// Speaker has been contacted/invited
+    /// </summary>
+    Contacted = 1,
+
+    /// <summary>
+    /// Speaker has confirmed participation
+    /// </summary>
+    Confirmed = 2,
+
+    /// <summary>
+    /// Speaker cancelled their participation
+    /// </summary>
+    Cancelled = 3,
+
+    /// <summary>
+    /// Speaker was removed from the session
+    /// </summary>
+    Removed = 4
 }
 
 /// <summary>

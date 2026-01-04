@@ -93,12 +93,24 @@ export enum SessionStatus {
   Cancelled = 'Cancelled'
 }
 
+export enum SessionSpeakerStatus {
+  New = 'New',
+  Contacted = 'Contacted',
+  Confirmed = 'Confirmed',
+  Cancelled = 'Cancelled',
+  Removed = 'Removed'
+}
+
 export interface SessionSpeaker {
   speakerId: string;
   name: string;
   title?: string;
   bio?: string;
   role: string;
+  status: SessionSpeakerStatus;
+  statusNotes?: string;
+  contactedAt?: string;
+  confirmedAt?: string;
   displayOrder: number;
 }
 

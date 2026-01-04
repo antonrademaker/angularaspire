@@ -163,6 +163,7 @@ public class SessionDbContext : DbContext
             entity.HasKey(ss => ss.Id);
             entity.HasIndex(ss => new { ss.SessionId, ss.SpeakerId }).IsUnique();
             entity.HasIndex(ss => ss.DisplayOrder);
+            entity.HasIndex(ss => ss.Status);
 
             // Relationships
             entity.HasOne(ss => ss.Session)

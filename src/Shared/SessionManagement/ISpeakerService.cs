@@ -177,6 +177,8 @@ public class UpdateSessionSpeakerRequest
 {
     public SpeakerRole? Role { get; set; }
     public int? DisplayOrder { get; set; }
+    public SessionSpeakerStatus? Status { get; set; }
+    public string? StatusNotes { get; set; }
 }
 
 /// <summary>
@@ -188,6 +190,10 @@ public class SessionSpeakerDetailResponse
     public Guid SessionId { get; set; }
     public Guid SpeakerId { get; set; }
     public SpeakerRole Role { get; set; }
+    public SessionSpeakerStatus Status { get; set; }
+    public string? StatusNotes { get; set; }
+    public DateTime? ContactedAt { get; set; }
+    public DateTime? ConfirmedAt { get; set; }
     public int DisplayOrder { get; set; }
     public SpeakerProfileResponse? Speaker { get; set; }
 }

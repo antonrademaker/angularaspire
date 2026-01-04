@@ -16,7 +16,7 @@
 
 - [x] T001 Create EventManagement service structure in [src/Shared/EventManagement/](src/Shared/EventManagement/)
 - [x] T002 Create PrivateApi controller structure in [src/PrivateApi/EventManagement/](src/PrivateApi/EventManagement/)
-- [ ] T003 Create Angular module structure in [src/PrivateApp/src/app/event-management/](src/PrivateApp/src/app/event-management/)
+- [x] T003 Create Angular module structure in [src/PrivateApp/src/app/event-management/](src/PrivateApp/src/app/event-management/)
 - [ ] T004 [P] Register EventManagementDbContext in [src/AppHost/Program.cs](src/AppHost/Program.cs)
 - [ ] T005 [P] Configure OpenTelemetry for EventManagement in [src/ServiceDefaults/Extensions.cs](src/ServiceDefaults/Extensions.cs)
 

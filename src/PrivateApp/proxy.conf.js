@@ -3,11 +3,11 @@ const ASPIRE_ENDPOINT = process.env['services__privateapi__https__0'] || process
 console.log('PrivateApp proxy configured for:', ASPIRE_ENDPOINT);
 
 const config = {
-  '/api/*': {
+  '/api': {
     target: ASPIRE_ENDPOINT,
     secure: false, // Allow self-signed certificates in development
     changeOrigin: true,
-    logLevel: 'info',
+    logLevel: 'debug',
     onError: (err, req, res) => {
       console.error('Proxy error:', err);
     },

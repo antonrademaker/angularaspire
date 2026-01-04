@@ -19,7 +19,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatTimepickerModule } from '@angular/material/timepicker';
+import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -696,7 +697,8 @@ export class SessionManagerComponent implements OnInit {
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatTabsModule
+    MatTabsModule,
+    MatTimepickerModule
   ],
   template: `
     <h2 mat-dialog-title>
@@ -785,14 +787,32 @@ export class SessionManagerComponent implements OnInit {
           <div class="tab-content">
             <form [formGroup]="sessionForm" class="session-form">
               <div class="row">
-                <mat-form-field appearance="outline" class="half-width">
-                  <mat-label>Start Time</mat-label>
-                  <input matInput type="datetime-local" formControlName="startTime" required>
+                <mat-form-field appearance="outline" class="quarter-width">
+                  <mat-label>Start Date</mat-label>
+                  <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" required>
+                  <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startDatePicker></mat-datepicker>
                 </mat-form-field>
 
-                <mat-form-field appearance="outline" class="half-width">
+                <mat-form-field appearance="outline" class="quarter-width">
+                  <mat-label>Start Time</mat-label>
+                  <input matInput [matTimepicker]="startTimePicker" formControlName="startTimeValue" required>
+                  <mat-timepicker-toggle matIconSuffix [for]="startTimePicker"></mat-timepicker-toggle>
+                  <mat-timepicker #startTimePicker [interval]="'15m'"></mat-timepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="quarter-width">
+                  <mat-label>End Date</mat-label>
+                  <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" required>
+                  <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endDatePicker></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="quarter-width">
                   <mat-label>End Time</mat-label>
-                  <input matInput type="datetime-local" formControlName="endTime" required>
+                  <input matInput [matTimepicker]="endTimePicker" formControlName="endTimeValue" required>
+                  <mat-timepicker-toggle matIconSuffix [for]="endTimePicker"></mat-timepicker-toggle>
+                  <mat-timepicker #endTimePicker [interval]="'15m'"></mat-timepicker>
                 </mat-form-field>
               </div>
 
@@ -932,6 +952,7 @@ export class SessionManagerComponent implements OnInit {
     .full-width { flex: 1; }
     .half-width { flex: 0.5; }
     .third-width { flex: 0.33; }
+    .quarter-width { flex: 0.25; min-width: 150px; }
     .checkboxes {
       gap: 24px;
     }
@@ -965,8 +986,10 @@ export class SessionDialogComponent implements OnInit {
     type: [SessionType.Talk, Validators.required],
     difficultyLevel: [SessionDifficulty.Intermediate, Validators.required],
     language: ['en'],
-    startTime: ['', Validators.required],
-    endTime: ['', Validators.required],
+    startDate: [null as Date | null, Validators.required],
+    startTimeValue: [null as Date | null, Validators.required],
+    endDate: [null as Date | null, Validators.required],
+    endTimeValue: [null as Date | null, Validators.required],
     room: [''],
     building: [''],
     isVirtual: [false],
@@ -986,8 +1009,16 @@ export class SessionDialogComponent implements OnInit {
   ngOnInit() {
     if (this.data.mode === 'edit' && this.data.session) {
       const session = this.data.session;
-      const startTime = new Date(session.startTime).toISOString().slice(0, 16);
-      const endTime = new Date(session.endTime).toISOString().slice(0, 16);
+      const startDateTime = new Date(session.startTime);
+      const endDateTime = new Date(session.endTime);
+      
+      // Create time-only Date objects for the timepicker
+      // The timepicker uses Date objects but only cares about hours/minutes
+      const createTimeDate = (date: Date): Date => {
+        const timeDate = new Date();
+        timeDate.setHours(date.getHours(), date.getMinutes(), 0, 0);
+        return timeDate;
+      };
       
       this.sessionForm.patchValue({
         title: session.title,
@@ -998,8 +1029,10 @@ export class SessionDialogComponent implements OnInit {
         type: session.type,
         difficultyLevel: session.difficultyLevel,
         language: session.language,
-        startTime: startTime,
-        endTime: endTime,
+        startDate: startDateTime,
+        startTimeValue: createTimeDate(startDateTime),
+        endDate: endDateTime,
+        endTimeValue: createTimeDate(endDateTime),
         room: session.room || '',
         building: session.building || '',
         isVirtual: session.isVirtual,
@@ -1014,6 +1047,24 @@ export class SessionDialogComponent implements OnInit {
         materialsUrl: session.materialsUrl || '',
         recordingUrl: session.recordingUrl || '',
         tagsInput: session.tags?.join(', ') || ''
+      });
+    } else {
+      // Set default dates for new sessions (tomorrow at 9:00 and 10:00)
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(9, 0, 0, 0);
+      
+      const defaultStartTime = new Date();
+      defaultStartTime.setHours(9, 0, 0, 0);
+      
+      const defaultEndTime = new Date();
+      defaultEndTime.setHours(10, 0, 0, 0);
+      
+      this.sessionForm.patchValue({
+        startDate: tomorrow,
+        startTimeValue: defaultStartTime,
+        endDate: tomorrow,
+        endTimeValue: defaultEndTime
       });
     }
 
@@ -1032,6 +1083,29 @@ export class SessionDialogComponent implements OnInit {
     }
   }
 
+  // Helper to combine date and time into a single Date object
+  // timeValue can be a Date object (from mat-timepicker) or a string (HH:mm format)
+  private combineDateAndTime(date: Date, timeValue: Date | string): Date {
+    const result = new Date(date);
+    
+    if (timeValue instanceof Date) {
+      // Mat-timepicker returns a Date object
+      result.setHours(timeValue.getHours(), timeValue.getMinutes(), 0, 0);
+    } else if (typeof timeValue === 'string' && timeValue.includes(':')) {
+      // String format "HH:mm"
+      const [hours, minutes] = timeValue.split(':').map(Number);
+      result.setHours(hours, minutes, 0, 0);
+    } else {
+      // Fallback - try to parse as date
+      const timeDate = new Date(timeValue);
+      if (!isNaN(timeDate.getTime())) {
+        result.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
+      }
+    }
+    
+    return result;
+  }
+
   async save() {
     if (this.sessionForm.invalid) return;
 
@@ -1042,6 +1116,10 @@ export class SessionDialogComponent implements OnInit {
       ? formValue.tagsInput.split(',').map(t => t.trim().toLowerCase()).filter(t => t)
       : undefined;
 
+    // Combine date and time values
+    const startDateTime = this.combineDateAndTime(formValue.startDate!, formValue.startTimeValue!);
+    const endDateTime = this.combineDateAndTime(formValue.endDate!, formValue.endTimeValue!);
+
     try {
       if (this.data.mode === 'create') {
         const request: CreateSessionRequest = {
@@ -1051,8 +1129,8 @@ export class SessionDialogComponent implements OnInit {
           description: formValue.description!,
           abstract: formValue.abstract || undefined,
           slug: formValue.slug!,
-          startTime: new Date(formValue.startTime!).toISOString(),
-          endTime: new Date(formValue.endTime!).toISOString(),
+          startTime: startDateTime.toISOString(),
+          endTime: endDateTime.toISOString(),
           type: formValue.type!,
           difficultyLevel: formValue.difficultyLevel!,
           maxAttendees: formValue.maxAttendees || undefined,
@@ -1081,8 +1159,8 @@ export class SessionDialogComponent implements OnInit {
           description: formValue.description!,
           abstract: formValue.abstract || undefined,
           slug: formValue.slug!,
-          startTime: new Date(formValue.startTime!).toISOString(),
-          endTime: new Date(formValue.endTime!).toISOString(),
+          startTime: startDateTime.toISOString(),
+          endTime: endDateTime.toISOString(),
           type: formValue.type!,
           difficultyLevel: formValue.difficultyLevel!,
           maxAttendees: formValue.maxAttendees || undefined,

@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsAspireProjectResource>true</IsAspireProjectResource>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +25,7 @@
 
   <!-- NSwag TypeScript client generation target -->
   <Target Name="NSwag" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
-    <Exec ConsoleToMSBuild="true" ContinueOnError="true" Command="$(NSwagExe_Net80) run nswag.json /variables:Configuration=$(Configuration)">
+    <Exec ConsoleToMSBuild="true" ContinueOnError="true" Command="$(NSwagExe) run nswag.json /variables:Configuration=$(Configuration)">
       <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfNSwag" />
     </Exec>
     <Message Text="NSwag output: $(OutputOfNSwag)" Importance="high" />

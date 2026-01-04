@@ -1,11 +1,9 @@
 <!--
 Sync Impact Report:
-- Version change: 2.7.0 → 2.8.0 (MINOR: Enhanced SDK generation requirements)
-- Enhanced principle: VIII. Code Generation and Type Safety - Comprehensive Angular SDK generation with NSwag integration
-- New requirements: Complete TypeScript SDK including models, HTTP services, validation, testing utilities, and Observable patterns
-- Technical implementation: NSwag SDK generation, Angular service factories, type-safe HTTP clients with dependency injection
-- Templates requiring updates: ✅ Plan template updated / ✅ Plan.md constitution check completed
-- Follow-up TODOs: None - comprehensive Angular SDK generation fully specified
+- Version change: 2.8.0 → 2.9.0 (MINOR: Added Test Verification principle)
+- New principle: IX. Test Verification After Changes - Mandatory test execution after code modifications
+- Templates requiring updates: ✅ None required
+- Follow-up TODOs: None
 -->
 
 # AngularAspire Constitution
@@ -132,6 +130,27 @@ Requirements:
 **Projects affected**: All projects - Angular applications consume generated SDK instead of manual HTTP calls
 **Rationale**: SDK generation eliminates manual API client coding, ensures type consistency, reduces integration errors, and provides enterprise-grade client libraries with minimal maintenance overhead.
 
+### IX. Test Verification After Changes (NON-NEGOTIABLE)
+All code modifications MUST be validated by running the relevant test suites before considering the change complete.
+Requirements:
+- **Immediate Test Execution**: After any code change, run affected unit tests to verify correctness
+- **Build Verification**: Ensure the solution builds successfully before running tests
+- **Format Compliance**: Verify code formatting passes (`dotnet format --verify-no-changes`) before test execution
+- **Scope-Appropriate Testing**: Run unit tests for isolated changes, integration tests for cross-service changes
+- **CI/CD Parity**: Local test execution should mirror CI/CD pipeline behavior
+- **No Untested Changes**: Never commit or consider work complete without passing tests
+- **Test Failure Resolution**: If tests fail, fix the issue immediately before proceeding to other tasks
+
+**Test Execution Guidelines**:
+- **Single File Change**: Run tests in the affected test project
+- **Cross-Project Change**: Run tests across all affected projects
+- **API Contract Change**: Run integration tests and contract tests
+- **Database Schema Change**: Run full test suite including integration tests
+- **Angular Component Change**: Run component tests and affected E2E tests
+
+**Projects affected**: All projects - applies to .NET, Angular, and any other codebase changes
+**Rationale**: Running tests immediately after changes catches regressions early, reduces debugging time, and ensures code quality is maintained throughout the development process.
+
 ## Code Quality Standards
 
 All projects must maintain enterprise-grade code quality:
@@ -241,4 +260,4 @@ This constitution supersedes all other development practices and standards.
 - Cross-cutting changes require approval from both .NET and Angular team leads
 - Use `.specify/` templates and workflows for consistent multi-project development practices
 
-**Version**: 2.8.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2025-12-30
+**Version**: 2.9.0 | **Ratified**: 2025-12-30 | **Last Amended**: 2026-01-04

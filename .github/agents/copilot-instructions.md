@@ -8,6 +8,9 @@ Auto-generated from all feature plans. Last updated: 2025-12-30
 - Testing: xUnit (.NET), Vitest (Angular), Playwright (E2E) (001-event-management)
 - .NET 10, Angular 21, TypeScript 5.9, Node.js 22+ + Aspire 10, Entity Framework Core, FluentValidation, NSwag, SignalR, OpenTelemetry (001-event-management)
 - PostgreSQL (primary with JSON columns), Redis (caching), Azure Blob Storage (files) (001-event-management)
+- [e.g., .NET 10, Angular 21, TypeScript 5.9, or NEEDS CLARIFICATION] + [e.g., Aspire 10, gRPC, Entity Framework, OpenTelemetry, or NEEDS CLARIFICATION] (003-event-admin-ui)
+- [if applicable, e.g., SQL Server, PostgreSQL, Redis, or N/A] (003-event-admin-ui)
+- .NET 10, Angular 17+, TypeScript 5.x + Aspire, gRPC, Entity Framework Core, OpenTelemetry (003-event-admin-ui)
 
 ## Project Structure
 
@@ -77,9 +80,9 @@ dotnet build        # .NET compilation with NSwag SDK generation
 **Architecture**: IDesign service boundaries, business capabilities not technical layers
 
 ## Recent Changes
+- 003-event-admin-ui: Added .NET 10, Angular 17+, TypeScript 5.x + Aspire, gRPC, Entity Framework Core, OpenTelemetry
+- 003-event-admin-ui: Added [e.g., .NET 10, Angular 21, TypeScript 5.9, or NEEDS CLARIFICATION] + [e.g., Aspire 10, gRPC, Entity Framework, OpenTelemetry, or NEEDS CLARIFICATION]
 - 001-event-management: Added .NET 10, Angular 21, TypeScript 5.9, Node.js 22+ + Aspire 10, Entity Framework Core, FluentValidation, NSwag, SignalR, OpenTelemetry
-- 001-event-management: Implemented Angular dev servers as Aspire JavaScript apps with proxy-based service discovery
-- 001-event-management: Added NSwag complete Angular SDK generation from C# APIs  
 
 
 <!-- MANUAL ADDITIONS START -->

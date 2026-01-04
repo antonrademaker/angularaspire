@@ -329,7 +329,7 @@ public class RedisQueueService : IQueueService, IDisposable
             transaction.SortedSetAddAsync(queueKey, registrationId, score);
 
             // Store item details
-            transaction.StringSetAsync(itemKey, itemJson, 
+            transaction.StringSetAsync(itemKey, itemJson,
                 expirationMinutes.HasValue ? TimeSpan.FromMinutes(expirationMinutes.Value + 10) : (TimeSpan?)null);
 
             // Update queue statistics
@@ -456,7 +456,7 @@ public class RedisQueueService : IQueueService, IDisposable
 
             // Get highest priority items (highest score first)
             var items = await _database.SortedSetRangeByScoreWithScoresAsync(
-                queueKey, 
+                queueKey,
                 order: Order.Descending,
                 take: count);
 
@@ -471,11 +471,11 @@ public class RedisQueueService : IQueueService, IDisposable
             {
                 var registrationId = (int)item.Element;
                 var itemKey = GetQueueItemKey(eventId, registrationId);
-                
+
                 var itemJson = await _database.StringGetAsync(itemKey);
                 if (itemJson.HasValue)
                 {
-                        var queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
+                    var queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
                     if (queueItem != null)
                     {
                         queueItems.Add(queueItem);
@@ -483,7 +483,7 @@ public class RedisQueueService : IQueueService, IDisposable
                 }
             }
 
-            _logger.LogDebug("Retrieved {Count} next items from queue for event {EventId}", 
+            _logger.LogDebug("Retrieved {Count} next items from queue for event {EventId}",
                 queueItems.Count, eventId);
 
             return queueItems;
@@ -540,11 +540,11 @@ public class RedisQueueService : IQueueService, IDisposable
             // Parse statistics from Redis hash
             var statsDict = stats.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
 
-            if (statsDict.TryGetValue("total_enqueued", out var totalEnqueued) && 
+            if (statsDict.TryGetValue("total_enqueued", out var totalEnqueued) &&
                 int.TryParse(totalEnqueued, out var enqueuedCount))
             {
                 // Calculate processing rate based on enqueued vs dequeued
-                if (statsDict.TryGetValue("total_dequeued", out var totalDequeued) && 
+                if (statsDict.TryGetValue("total_dequeued", out var totalDequeued) &&
                     int.TryParse(totalDequeued, out var dequeuedCount))
                 {
                     queueStats.ProcessingRate = Math.Max(1, dequeuedCount / Math.Max(1, enqueuedCount / 60.0)); // per minute
@@ -569,7 +569,7 @@ public class RedisQueueService : IQueueService, IDisposable
 
             // Get oldest item timestamp
             var oldestItem = await _database.SortedSetRangeByScoreWithScoresAsync(
-                queueKey, 
+                queueKey,
                 order: Order.Ascending,
                 take: 1);
 
@@ -578,14 +578,14 @@ public class RedisQueueService : IQueueService, IDisposable
                 var oldestRegistrationId = (int)oldestItem[0].Element;
                 var itemKey = GetQueueItemKey(eventId, oldestRegistrationId);
                 var itemJson = await _database.StringGetAsync(itemKey);
-                
+
                 if (itemJson.HasValue)
                 {
                     var queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
                     if (queueItem != null)
                     {
                         queueStats.OldestItemTimestamp = queueItem.QueuedAt;
-                        
+
                         // Calculate average wait time based on oldest item
                         var waitTime = (DateTime.UtcNow - queueItem.QueuedAt).TotalMinutes;
                         queueStats.AverageWaitTimeMinutes = waitTime;
@@ -631,7 +631,7 @@ public class RedisQueueService : IQueueService, IDisposable
             // Reset statistics
             await _database.KeyDeleteAsync(GetQueueStatsKey(eventId));
 
-            _logger.LogWarning("Cleared entire queue for event {EventId}, removed {Count} items", 
+            _logger.LogWarning("Cleared entire queue for event {EventId}, removed {Count} items",
                 eventId, count);
 
             return count;
@@ -719,7 +719,7 @@ public class RedisQueueService : IQueueService, IDisposable
                     {
                         // Recalculate score based on current priority and queue time
                         var newScore = CalculateQueueScore(queueItem.Priority, queueItem.QueuedAt);
-                        
+
                         if (Math.Abs(newScore - item.Score) > 0.01) // Only update if score changed
                         {
                             await _database.SortedSetAddAsync(queueKey, registrationId, newScore);
@@ -729,7 +729,7 @@ public class RedisQueueService : IQueueService, IDisposable
                 }
             }
 
-            _logger.LogInformation("Updated {Count} queue priorities for event {EventId}", 
+            _logger.LogInformation("Updated {Count} queue priorities for event {EventId}",
                 updated, eventId);
 
             return updated;
@@ -762,7 +762,7 @@ public class RedisQueueService : IQueueService, IDisposable
             // Get Redis info
             var server = _connectionMultiplexer.GetServer(_connectionMultiplexer.GetEndPoints()[0]);
             health["redis_memory_used"] = await server.InfoAsync("memory");
-            
+
             health["status"] = "healthy";
         }
         catch (Exception ex)
@@ -796,7 +796,7 @@ public class RedisQueueService : IQueueService, IDisposable
         // Subtract seconds from epoch to prioritize earlier registrations within same priority
         // This ensures FIFO within priority levels
         var timeComponent = (DateTimeOffset.MaxValue.ToUnixTimeSeconds() - ((DateTimeOffset)queuedAt).ToUnixTimeSeconds()) / 1000.0;
-        
+
         return baseScore + timeComponent;
     }
 
@@ -833,7 +833,7 @@ public class RedisQueueService : IQueueService, IDisposable
 
         if (cleanedCount > 0)
         {
-            _logger.LogInformation("Cleaned up {Count} expired queue items for event {EventId}", 
+            _logger.LogInformation("Cleaned up {Count} expired queue items for event {EventId}",
                 cleanedCount, eventId);
         }
 

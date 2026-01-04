@@ -191,12 +191,12 @@ public class SubscriptionsController : ControllerBase
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                          ?? User.FindFirst("sub")?.Value;
-        
+
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
             throw new UnauthorizedAccessException("Invalid user identity");
         }
-        
+
         return userId;
     }
 
@@ -257,7 +257,7 @@ public class SubscriptionsController : ControllerBase
         }
 
         var availability = await _subscriptionService.CheckAvailabilityAsync(sessionId);
-        
+
         var response = new SessionAvailabilityResponse
         {
             SessionId = availability.SessionId,
@@ -325,12 +325,12 @@ public class SubscriptionsController : ControllerBase
         if (!result.IsSuccess)
         {
             var error = result.Errors.FirstOrDefault() ?? "Subscription failed";
-            
+
             if (error.Contains("not found", StringComparison.OrdinalIgnoreCase))
             {
                 return NotFound(new ApiError { Code = "NOT_FOUND", Message = error });
             }
-            
+
             if (error.Contains("already subscribed", StringComparison.OrdinalIgnoreCase))
             {
                 return Conflict(new ApiError { Code = "ALREADY_SUBSCRIBED", Message = error });
@@ -374,7 +374,7 @@ public class SubscriptionsController : ControllerBase
         if (!result.IsSuccess)
         {
             var error = result.Errors.FirstOrDefault() ?? "Unsubscribe failed";
-            
+
             if (error.Contains("not found", StringComparison.OrdinalIgnoreCase))
             {
                 return NotFound(new ApiError { Code = "NOT_FOUND", Message = error });
@@ -424,7 +424,7 @@ public class SubscriptionsController : ControllerBase
         var userId = GetUserId();
 
         var subscriptions = await _subscriptionService.GetUserSubscriptionsAsync(userId, eventId);
-        
+
         // Get session details for each subscription
         var sessionIds = subscriptions.Select(s => s.SessionId).Distinct().ToList();
         var responses = new List<SessionSubscriptionResponse>();
@@ -470,7 +470,7 @@ public class SubscriptionsController : ControllerBase
         if (!result.IsSuccess)
         {
             var error = result.Errors.FirstOrDefault() ?? "Check-in failed";
-            
+
             if (error.Contains("not found", StringComparison.OrdinalIgnoreCase))
             {
                 return NotFound(new ApiError { Code = "NOT_FOUND", Message = error });

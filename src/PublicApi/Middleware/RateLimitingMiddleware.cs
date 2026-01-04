@@ -34,11 +34,11 @@ public class RateLimitingMiddleware
 
         // Extract API key from request
         var apiKey = ExtractApiKey(context.Request);
-        
+
         if (string.IsNullOrEmpty(apiKey))
         {
-            await WriteErrorResponse(context, HttpStatusCode.Unauthorized, 
-                "MISSING_API_KEY", 
+            await WriteErrorResponse(context, HttpStatusCode.Unauthorized,
+                "MISSING_API_KEY",
                 "API key is required. Include it in the X-Api-Key header or api_key query parameter.");
             return;
         }
@@ -49,7 +49,7 @@ public class RateLimitingMiddleware
         // Validate the API key
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var validationResult = await apiKeyService.ValidateApiKeyAsync(
-            apiKey, 
+            apiKey,
             requiredScope: GetRequiredScope(context.Request),
             ipAddress: ipAddress);
 
@@ -59,7 +59,7 @@ public class RateLimitingMiddleware
             {
                 // Calculate retry-after (assume 1-minute window)
                 var retryAfter = 60 - DateTime.UtcNow.Second;
-                
+
                 await WriteRateLimitResponse(context, validationResult, retryAfter);
 
                 _logger.LogWarning(
@@ -104,7 +104,7 @@ public class RateLimitingMiddleware
         finally
         {
             stopwatch.Stop();
-            
+
             // Copy response back
             responseBody.Seek(0, SeekOrigin.Begin);
             await responseBody.CopyToAsync(originalBodyStream);
@@ -262,9 +262,9 @@ public class RateLimitingMiddleware
     /// Writes an error response
     /// </summary>
     private async Task WriteErrorResponse(
-        HttpContext context, 
-        HttpStatusCode statusCode, 
-        string errorCode, 
+        HttpContext context,
+        HttpStatusCode statusCode,
+        string errorCode,
         string message)
     {
         context.Response.StatusCode = (int)statusCode;
@@ -284,20 +284,20 @@ public class RateLimitingMiddleware
     /// Writes a rate limit exceeded response
     /// </summary>
     private async Task WriteRateLimitResponse(
-        HttpContext context, 
+        HttpContext context,
         ApiKeyValidationResult validation,
         int retryAfter)
     {
         context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
         context.Response.ContentType = "application/json";
-        
+
         // Add Retry-After header (seconds)
         context.Response.Headers["Retry-After"] = retryAfter.ToString();
-        
+
         // Add rate limit headers
         context.Response.Headers["X-RateLimit-Limit"] = validation.RateLimit.ToString();
         context.Response.Headers["X-RateLimit-Remaining"] = "0";
-        context.Response.Headers["X-RateLimit-Reset"] = 
+        context.Response.Headers["X-RateLimit-Reset"] =
             DateTimeOffset.UtcNow.AddSeconds(retryAfter).ToUnixTimeSeconds().ToString();
 
         var error = new RateLimitErrorResponse
@@ -356,7 +356,7 @@ public class RateLimitingOptions
     /// <summary>
     /// Paths that are excluded from API key authentication
     /// </summary>
-    public List<string> ExcludedPaths { get; set; } = 
+    public List<string> ExcludedPaths { get; set; } =
     [
         "/api/health",
         "/api/docs",
@@ -402,9 +402,9 @@ public static class RateLimitingMiddlewareExtensions
     {
         var options = new RateLimitingOptions();
         configure?.Invoke(options);
-        
+
         services.AddSingleton(options);
-        
+
         return services;
     }
 
@@ -451,8 +451,8 @@ public static class HttpContextApiKeyExtensions
     /// </summary>
     public static string[] GetApiKeyScopes(this HttpContext context)
     {
-        return context.Items.TryGetValue("ApiKeyScopes", out var value) 
-            ? value as string[] ?? [] 
+        return context.Items.TryGetValue("ApiKeyScopes", out var value)
+            ? value as string[] ?? []
             : [];
     }
 
@@ -461,8 +461,8 @@ public static class HttpContextApiKeyExtensions
     /// </summary>
     public static ApiKeyValidationResult? GetApiKeyValidation(this HttpContext context)
     {
-        return context.Items.TryGetValue("ApiKeyValidation", out var value) 
-            ? value as ApiKeyValidationResult 
+        return context.Items.TryGetValue("ApiKeyValidation", out var value)
+            ? value as ApiKeyValidationResult
             : null;
     }
 

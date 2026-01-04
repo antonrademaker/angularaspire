@@ -41,7 +41,7 @@ public class TracksController : ControllerBase
         try
         {
             var result = await _trackService.CreateTrackAsync(request);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("already exists") == true)
@@ -51,7 +51,7 @@ public class TracksController : ControllerBase
                 return BadRequest(new ApiError("INVALID_REQUEST", result.Error ?? "Failed to create track"));
             }
 
-            _logger.LogInformation("Track created: {TrackId} - {Name} for Event {EventId}", 
+            _logger.LogInformation("Track created: {TrackId} - {Name} for Event {EventId}",
                 result.Value?.Id, result.Value?.Name, request.EventId);
 
             return CreatedAtAction(nameof(GetTrack), new { id = result.Value!.Id }, result.Value);
@@ -76,7 +76,7 @@ public class TracksController : ControllerBase
         try
         {
             var track = await _trackService.GetTrackAsync(id);
-            
+
             if (track == null)
             {
                 return NotFound(new ApiError("TRACK_NOT_FOUND", $"Track with ID {id} was not found"));
@@ -107,7 +107,7 @@ public class TracksController : ControllerBase
         try
         {
             var result = await _trackService.UpdateTrackAsync(id, request);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)
@@ -146,7 +146,7 @@ public class TracksController : ControllerBase
         try
         {
             var result = await _trackService.DeleteTrackAsync(id);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)
@@ -202,12 +202,12 @@ public class TracksController : ControllerBase
     {
         try
         {
-            var result = await _trackService.ReorderTracksAsync(eventId, request.TrackOrders.Select(to => new TrackOrderItem 
-            { 
-                TrackId = to.TrackId, 
-                DisplayOrder = to.DisplayOrder 
+            var result = await _trackService.ReorderTracksAsync(eventId, request.TrackOrders.Select(to => new TrackOrderItem
+            {
+                TrackId = to.TrackId,
+                DisplayOrder = to.DisplayOrder
             }));
-            
+
             if (!result.IsSuccess)
             {
                 return BadRequest(new ApiError("INVALID_REQUEST", result.Error ?? "Failed to reorder tracks"));
@@ -239,7 +239,7 @@ public class TracksController : ControllerBase
         try
         {
             var result = await _trackService.UpdateTrackStatusAsync(id, request.IsActive);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)

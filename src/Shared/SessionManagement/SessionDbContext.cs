@@ -129,11 +129,11 @@ public class SessionDbContext : DbContext
                 .HasColumnType("jsonb");
 
             // Check constraints - InMemory doesn't support them but they'll be ignored
-            entity.HasCheckConstraint("CK_Session_EndTimeAfterStartTime", 
+            entity.HasCheckConstraint("CK_Session_EndTimeAfterStartTime",
                 "end_time > start_time");
-            entity.HasCheckConstraint("CK_Session_MaxAttendeesPositive", 
+            entity.HasCheckConstraint("CK_Session_MaxAttendeesPositive",
                 "max_attendees IS NULL OR max_attendees > 0");
-            entity.HasCheckConstraint("CK_Session_CurrentAttendeesNonNegative", 
+            entity.HasCheckConstraint("CK_Session_CurrentAttendeesNonNegative",
                 "current_attendees >= 0");
         });
 
@@ -236,7 +236,7 @@ public static class SessionDbContextExtensions
     /// <param name="configuration">The configuration</param>
     /// <returns>The service collection</returns>
     public static IServiceCollection AddSessionDbContext(
-        this IServiceCollection services, 
+        this IServiceCollection services,
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("eventdb")
@@ -275,7 +275,7 @@ public static class SessionDbContextExtensions
     /// <param name="databaseName">The in-memory database name</param>
     /// <returns>The service collection</returns>
     public static IServiceCollection AddSessionDbContextInMemory(
-        this IServiceCollection services, 
+        this IServiceCollection services,
         string? databaseName = null)
     {
         services.AddDbContext<SessionDbContext>(options =>

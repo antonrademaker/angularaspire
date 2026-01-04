@@ -45,7 +45,7 @@ public class EventDbContext : DbContext
             {
                 entity.ToTable("events", schema: "event_management");
             }
-            
+
             // Primary key
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id)

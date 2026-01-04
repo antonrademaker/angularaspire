@@ -97,7 +97,7 @@ public class ExternalApiController : ControllerBase
         }
 
         var @event = await _eventService.GetEventByIdAsync(id);
-        
+
         if (@event == null)
         {
             return NotFound(ExternalApiResponse<object>.CreateError("EVENT_NOT_FOUND", $"Event with ID {id} not found"));
@@ -131,7 +131,7 @@ public class ExternalApiController : ControllerBase
         if (tier == ApiKeyTier.Free)
         {
             return StatusCode(403, ExternalApiResponse<object>.CreateError(
-                "INSUFFICIENT_TIER", 
+                "INSUFFICIENT_TIER",
                 "Creating events requires Standard tier or above"));
         }
 
@@ -171,7 +171,7 @@ public class ExternalApiController : ControllerBase
         var createdEvent = await _eventService.CreateEventAsync(createRequest, userId.Value);
 
         var eventDto = MapToExternalDto(createdEvent);
-        return CreatedAtAction(nameof(GetEvent), new { id = eventDto.Id }, 
+        return CreatedAtAction(nameof(GetEvent), new { id = eventDto.Id },
             ExternalApiResponse<ExternalEventDto>.CreateSuccess(eventDto));
     }
 
@@ -254,7 +254,7 @@ public class ExternalApiController : ControllerBase
         if (tier < ApiKeyTier.Premium)
         {
             return StatusCode(403, ExternalApiResponse<object>.CreateError(
-                "INSUFFICIENT_TIER", 
+                "INSUFFICIENT_TIER",
                 "Deleting events requires Premium tier or above"));
         }
 
@@ -287,8 +287,8 @@ public class ExternalApiController : ControllerBase
         Guid eventId,
         CancellationToken cancellationToken = default)
     {
-        if (!HttpContext.HasApiKeyScope("social_events:read") && 
-            !HttpContext.HasApiKeyScope("events:read") && 
+        if (!HttpContext.HasApiKeyScope("social_events:read") &&
+            !HttpContext.HasApiKeyScope("events:read") &&
             !HttpContext.HasApiKeyScope("*"))
         {
             return Forbidden("social_events:read");
@@ -317,15 +317,15 @@ public class ExternalApiController : ControllerBase
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        if (!HttpContext.HasApiKeyScope("social_events:read") && 
-            !HttpContext.HasApiKeyScope("events:read") && 
+        if (!HttpContext.HasApiKeyScope("social_events:read") &&
+            !HttpContext.HasApiKeyScope("events:read") &&
             !HttpContext.HasApiKeyScope("*"))
         {
             return Forbidden("social_events:read");
         }
 
         var socialEvent = await _socialEventService.GetSocialEventByIdAsync(id, cancellationToken);
-        
+
         if (socialEvent == null)
         {
             return NotFound(ExternalApiResponse<object>.CreateError("SOCIAL_EVENT_NOT_FOUND", $"Social event with ID {id} not found"));
@@ -346,7 +346,7 @@ public class ExternalApiController : ControllerBase
     public IActionResult GetApiKeyInfo()
     {
         var validation = HttpContext.GetApiKeyValidation();
-        
+
         if (validation == null)
         {
             return Unauthorized(ExternalApiResponse<object>.CreateError("UNAUTHORIZED", "Invalid or missing API key"));
@@ -440,11 +440,11 @@ public class ExternalApiResponse<T>
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
     public static ExternalApiResponse<T> CreateSuccess(T data) => new() { Success = true, Data = data };
-    
-    public static ExternalApiResponse<T> CreateError(string code, string message) => new() 
-    { 
-        Success = false, 
-        Error = new ApiErrorInfo { Code = code, Message = message } 
+
+    public static ExternalApiResponse<T> CreateError(string code, string message) => new()
+    {
+        Success = false,
+        Error = new ApiErrorInfo { Code = code, Message = message }
     };
 }
 

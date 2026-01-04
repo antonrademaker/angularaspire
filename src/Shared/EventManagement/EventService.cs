@@ -17,7 +17,7 @@ public class EventService : IEventService
     private readonly bool _isInMemory;
 
     public EventService(
-        EventDbContext eventContext, 
+        EventDbContext eventContext,
         ILogger<EventService> logger,
         IOptions<DatabaseOptions>? databaseOptions = null)
     {
@@ -33,7 +33,7 @@ public class EventService : IEventService
         _logger.LogInformation("Searching events with criteria: {SearchText}", searchRequest.SearchText);
 
         var query = _eventContext.Events.AsQueryable();
-        
+
         // Only include user navigation when not using InMemory (avoids cross-context issues in tests)
         if (!_isInMemory)
         {
@@ -44,8 +44,8 @@ public class EventService : IEventService
         if (!string.IsNullOrWhiteSpace(searchRequest.SearchText))
         {
             var searchText = searchRequest.SearchText.ToLower();
-            query = query.Where(e => 
-                e.Title.ToLower().Contains(searchText) || 
+            query = query.Where(e =>
+                e.Title.ToLower().Contains(searchText) ||
                 e.Description.ToLower().Contains(searchText));
         }
 
@@ -426,7 +426,7 @@ public class EventService : IEventService
         var eventTags = JsonSerializer.Deserialize<List<string>>(tagsJson);
         if (eventTags == null || eventTags.Count == 0) return false;
 
-        return searchTags.Any(searchTag => 
+        return searchTags.Any(searchTag =>
             eventTags.Any(t => t.Equals(searchTag, StringComparison.OrdinalIgnoreCase)));
     }
 }

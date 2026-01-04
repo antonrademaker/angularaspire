@@ -71,7 +71,7 @@ public class MemoryHealthCheck : IHealthCheck
         CancellationToken cancellationToken = default)
     {
         var allocatedBytes = GC.GetTotalMemory(forceFullCollection: false);
-        
+
         var data = new Dictionary<string, object>
         {
             { "allocated_bytes", allocatedBytes },
@@ -123,7 +123,7 @@ public class RegistrationQueueHealthCheck : IHealthCheck
         {
             var db = _redis.GetDatabase();
             var queueLength = await db.ListLengthAsync("registration_queue");
-            
+
             var data = new Dictionary<string, object>
             {
                 { "queue_length", queueLength }

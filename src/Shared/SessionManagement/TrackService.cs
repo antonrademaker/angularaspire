@@ -73,7 +73,7 @@ public class TrackService : ITrackService
             _context.Tracks.Add(track);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Track created: {TrackId} - {Name} for Event {EventId}", 
+            _logger.LogInformation("Track created: {TrackId} - {Name} for Event {EventId}",
                 track.Id, track.Name, track.EventId);
 
             return Result<TrackResponse>.Success(await MapToTrackResponseAsync(track));
@@ -229,7 +229,7 @@ public class TrackService : ITrackService
         if (!string.IsNullOrEmpty(request.SearchText))
         {
             var searchLower = request.SearchText.ToLower();
-            query = query.Where(t => 
+            query = query.Where(t =>
                 t.Name.ToLower().Contains(searchLower) ||
                 t.Description.ToLower().Contains(searchLower));
         }
@@ -289,7 +289,7 @@ public class TrackService : ITrackService
 
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Tracks reordered for event {EventId}: {Count} tracks updated", 
+            _logger.LogInformation("Tracks reordered for event {EventId}: {Count} tracks updated",
                 eventId, tracks.Count);
 
             return Result.Success();

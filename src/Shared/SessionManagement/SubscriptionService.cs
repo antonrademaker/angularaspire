@@ -71,7 +71,7 @@ public class SubscriptionService : ISubscriptionService
 
         // Check capacity and determine if should be waitlisted
         var confirmedCount = await _context.Subscriptions
-            .CountAsync(s => s.SessionId == request.SessionId && 
+            .CountAsync(s => s.SessionId == request.SessionId &&
                             s.Status == SubscriptionStatus.Confirmed);
 
         var isWaitlisted = session.MaxAttendees.HasValue && confirmedCount >= session.MaxAttendees.Value;
@@ -246,8 +246,8 @@ public class SubscriptionService : ISubscriptionService
     {
         var waitlist = await _context.Subscriptions
             .Include(s => s.Session)
-            .Where(s => s.SessionId == sessionId && 
-                       s.IsWaitlisted && 
+            .Where(s => s.SessionId == sessionId &&
+                       s.IsWaitlisted &&
                        s.Status == SubscriptionStatus.Waitlisted)
             .OrderBy(s => s.WaitlistPosition)
             .ToListAsync();
@@ -278,8 +278,8 @@ public class SubscriptionService : ISubscriptionService
         var spotsToFill = count.HasValue ? Math.Min(count.Value, availableSpots) : availableSpots;
 
         var waitlistedUsers = await _context.Subscriptions
-            .Where(s => s.SessionId == sessionId && 
-                       s.IsWaitlisted && 
+            .Where(s => s.SessionId == sessionId &&
+                       s.IsWaitlisted &&
                        s.Status == SubscriptionStatus.Waitlisted)
             .OrderBy(s => s.WaitlistPosition)
             .Take(spotsToFill)
@@ -303,8 +303,8 @@ public class SubscriptionService : ISubscriptionService
 
         // Reorder remaining waitlist positions
         var remainingWaitlist = await _context.Subscriptions
-            .Where(s => s.SessionId == sessionId && 
-                       s.IsWaitlisted && 
+            .Where(s => s.SessionId == sessionId &&
+                       s.IsWaitlisted &&
                        s.Status == SubscriptionStatus.Waitlisted)
             .OrderBy(s => s.WaitlistPosition)
             .ToListAsync();
@@ -325,8 +325,8 @@ public class SubscriptionService : ISubscriptionService
     public async Task<int?> GetWaitlistPositionAsync(Guid sessionId, Guid userId)
     {
         var subscription = await _context.Subscriptions
-            .FirstOrDefaultAsync(s => s.SessionId == sessionId && 
-                                     s.UserId == userId && 
+            .FirstOrDefaultAsync(s => s.SessionId == sessionId &&
+                                     s.UserId == userId &&
                                      s.IsWaitlisted);
 
         return subscription?.WaitlistPosition;
@@ -450,8 +450,8 @@ public class SubscriptionService : ISubscriptionService
             .CountAsync(s => s.SessionId == sessionId && s.Status == SubscriptionStatus.Waitlisted);
 
         var hasCapacity = !session.MaxAttendees.HasValue || confirmedCount < session.MaxAttendees.Value;
-        var spotsRemaining = session.MaxAttendees.HasValue 
-            ? Math.Max(0, session.MaxAttendees.Value - confirmedCount) 
+        var spotsRemaining = session.MaxAttendees.HasValue
+            ? Math.Max(0, session.MaxAttendees.Value - confirmedCount)
             : (int?)null;
 
         return new SessionAvailability
@@ -463,7 +463,7 @@ public class SubscriptionService : ISubscriptionService
             CurrentAttendees = confirmedCount,
             SpotsRemaining = spotsRemaining,
             WaitlistCount = waitlistedCount,
-            Message = hasCapacity 
+            Message = hasCapacity
                 ? (spotsRemaining.HasValue ? $"{spotsRemaining} spots remaining" : "Unlimited capacity")
                 : "Session is at capacity - join waitlist"
         };
@@ -524,7 +524,7 @@ public class SubscriptionService : ISubscriptionService
     public async Task<int> CancelAllSubscriptionsAsync(Guid sessionId, string reason)
     {
         var subscriptions = await _context.Subscriptions
-            .Where(s => s.SessionId == sessionId && 
+            .Where(s => s.SessionId == sessionId &&
                        s.Status != SubscriptionStatus.Cancelled)
             .ToListAsync();
 
@@ -556,7 +556,7 @@ public class SubscriptionService : ISubscriptionService
     private async Task<Result<SubscriptionResponse>> ReactivateSubscriptionAsync(Subscription subscription, Session session)
     {
         var confirmedCount = await _context.Subscriptions
-            .CountAsync(s => s.SessionId == subscription.SessionId && 
+            .CountAsync(s => s.SessionId == subscription.SessionId &&
                             s.Status == SubscriptionStatus.Confirmed);
 
         var isWaitlisted = session.MaxAttendees.HasValue && confirmedCount >= session.MaxAttendees.Value;

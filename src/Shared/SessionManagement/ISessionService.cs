@@ -9,7 +9,7 @@ namespace Shared.SessionManagement;
 public interface ISessionService
 {
     // Session CRUD Operations
-    
+
     /// <summary>
     /// Create a new session
     /// </summary>

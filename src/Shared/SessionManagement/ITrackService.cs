@@ -176,7 +176,7 @@ public class TrackResponse
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public string CreatedByUserName { get; set; } = string.Empty;
-    
+
     // Statistics (populated when requested)
     public int? SessionCount { get; set; }
     public int? ActiveSessionCount { get; set; }

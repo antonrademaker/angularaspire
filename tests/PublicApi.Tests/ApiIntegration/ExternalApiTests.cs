@@ -41,10 +41,10 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<ExternalApiResponse<ExternalPagedResult>>(content, _jsonOptions);
-        
+
         Assert.NotNull(result);
         Assert.True(result.Success);
         Assert.NotNull(result.Data);
@@ -63,7 +63,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("success", content, StringComparison.OrdinalIgnoreCase);
     }
@@ -79,7 +79,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("success", content, StringComparison.OrdinalIgnoreCase);
         Assert.Contains(eventId.ToString(), content);
@@ -120,7 +120,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("success", content, StringComparison.OrdinalIgnoreCase);
         Assert.Contains(createRequest.title, content);
@@ -164,7 +164,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("Updated External API Test Event", content);
     }
@@ -180,7 +180,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         // Verify event is deleted
         var getResponse = await client.GetAsync($"/api/external/events/{eventId}");
         Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
@@ -217,7 +217,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("success", content, StringComparison.OrdinalIgnoreCase);
     }
@@ -251,7 +251,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("apiKeyId", content, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("tier", content, StringComparison.OrdinalIgnoreCase);
@@ -274,7 +274,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains(tierName, content);
         Assert.Contains(expectedRateLimit.ToString(), content);
@@ -295,7 +295,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("timestamp", content, StringComparison.OrdinalIgnoreCase);
     }
@@ -311,7 +311,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("success", content, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("false", content, StringComparison.OrdinalIgnoreCase);
@@ -354,7 +354,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         // Should limit page size to a reasonable maximum (typically 100)
         var result = JsonSerializer.Deserialize<ExternalApiResponse<ExternalPagedResult>>(content, _jsonOptions);
@@ -388,7 +388,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
     {
         using var scope = _factory.Services.CreateScope();
         var apiKeyService = scope.ServiceProvider.GetRequiredService<IApiKeyService>();
-        
+
         var userId = Guid.NewGuid();
         var scopes = tier switch
         {
@@ -409,15 +409,15 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
         };
 
         var result = await apiKeyService.CreateApiKeyAsync(request, userId);
-        
+
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Api-Key", result.RawKey!);
-        
+
         return client;
     }
 
     private async Task<(HttpClient client, Guid eventId)> CreateAuthenticatedClientWithTestEvent(
-        ApiKeyTier tier = ApiKeyTier.Standard, 
+        ApiKeyTier tier = ApiKeyTier.Standard,
         bool skipDelete = false)
     {
         using var scope = _factory.Services.CreateScope();
@@ -467,7 +467,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
         };
 
         var result = await apiKeyService.CreateApiKeyAsync(apiKeyRequest, createdUser.Id);
-        
+
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Api-Key", result.RawKey!);
 

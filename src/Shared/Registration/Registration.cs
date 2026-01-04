@@ -15,27 +15,27 @@ public enum RegistrationStatus
     /// Registration is pending confirmation (initial state)
     /// </summary>
     Pending = 0,
-    
+
     /// <summary>
     /// Registration has been confirmed and is active
     /// </summary>
     Confirmed = 1,
-    
+
     /// <summary>
     /// Registration is in queue waiting for availability
     /// </summary>
     Queued = 2,
-    
+
     /// <summary>
     /// Registration has been cancelled by user or system
     /// </summary>
     Cancelled = 3,
-    
+
     /// <summary>
     /// User attended the event (post-event status)
     /// </summary>
     Attended = 4,
-    
+
     /// <summary>
     /// User was no-show for the event
     /// </summary>
@@ -51,12 +51,12 @@ public enum RegistrationPriority
     /// Standard priority registration
     /// </summary>
     Normal = 0,
-    
+
     /// <summary>
     /// High priority registration (e.g., early bird, VIP)
     /// </summary>
     High = 1,
-    
+
     /// <summary>
     /// Premium priority registration (highest tier)
     /// </summary>
@@ -289,7 +289,7 @@ public class Registration
         get
         {
             if (!IsQueued || !QueuePosition.HasValue) return null;
-            
+
             // Simple estimation: assume 2 minutes per position in queue
             // In real implementation, this could be more sophisticated based on historical data
             return QueuePosition.Value * 2;

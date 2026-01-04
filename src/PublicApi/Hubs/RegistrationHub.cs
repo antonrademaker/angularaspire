@@ -26,8 +26,8 @@ public class RegistrationHub : Hub
     {
         var userId = GetCurrentUserId();
         var connectionId = Context.ConnectionId;
-        
-        _logger.LogInformation("User {UserId} connected to RegistrationHub with connection {ConnectionId}", 
+
+        _logger.LogInformation("User {UserId} connected to RegistrationHub with connection {ConnectionId}",
             userId, connectionId);
 
         if (userId.HasValue)
@@ -47,8 +47,8 @@ public class RegistrationHub : Hub
     {
         var userId = GetCurrentUserId();
         var connectionId = Context.ConnectionId;
-        
-        _logger.LogInformation("User {UserId} disconnected from RegistrationHub with connection {ConnectionId}. Exception: {Exception}", 
+
+        _logger.LogInformation("User {UserId} disconnected from RegistrationHub with connection {ConnectionId}. Exception: {Exception}",
             userId, connectionId, exception?.Message);
 
         if (userId.HasValue)
@@ -79,9 +79,9 @@ public class RegistrationHub : Hub
 
             var eventGroup = GetEventGroup(eventGuid);
             await Groups.AddToGroupAsync(Context.ConnectionId, eventGroup);
-            
+
             _logger.LogInformation("User {UserId} joined event {EventId} updates group", GetCurrentUserId(), eventGuid);
-            
+
             // Send confirmation to client
             await Clients.Caller.SendAsync("JoinedEventUpdates", eventId);
         }
@@ -109,9 +109,9 @@ public class RegistrationHub : Hub
 
             var eventGroup = GetEventGroup(eventGuid);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, eventGroup);
-            
+
             _logger.LogInformation("User {UserId} left event {EventId} updates group", GetCurrentUserId(), eventGuid);
-            
+
             // Send confirmation to client
             await Clients.Caller.SendAsync("LeftEventUpdates", eventId);
         }
@@ -138,7 +138,7 @@ public class RegistrationHub : Hub
             }
 
             _logger.LogDebug("User {UserId} requested queue status for event {EventId}", GetCurrentUserId(), eventGuid);
-            
+
             // Send request acknowledgment - actual status will be sent via IRegistrationService
             await Clients.Caller.SendAsync("QueueStatusRequested", eventId);
         }
@@ -273,7 +273,7 @@ public static class RegistrationHubExtensions
         List<Guid> confirmedUserIds)
     {
         var eventGroup = $"event_{eventId}";
-        
+
         // Notify all event watchers
         await hubContext.Clients.Group(eventGroup).SendAsync("QueueProcessed", new
         {

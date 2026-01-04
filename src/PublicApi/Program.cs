@@ -48,12 +48,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 // Support SignalR authentication via query string token
                 var accessToken = context.Request.Query["access_token"];
                 var path = context.HttpContext.Request.Path;
-                
+
                 if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
                 {
                     context.Token = accessToken;
                 }
-                
+
                 return Task.CompletedTask;
             }
         };
@@ -69,7 +69,7 @@ builder.Services.AddAuthorization(options =>
     // Optional auth policy (allows anonymous or authenticated)
     options.AddPolicy("OptionalAuth", policy =>
         policy.RequireAssertion(context =>
-            !context.User.Identity?.IsAuthenticated == true || 
+            !context.User.Identity?.IsAuthenticated == true ||
             context.User.Identity.IsAuthenticated));
 });
 
@@ -93,9 +93,9 @@ builder.Services.AddApiRateLimiting(options =>
 {
     // Configure protected paths for external API
     options.ProtectedPaths = ["/api/external"];
-    
+
     // Configure excluded paths
-    options.ExcludedPaths = 
+    options.ExcludedPaths =
     [
         "/api/health",
         "/api/docs",
@@ -131,11 +131,11 @@ builder.Services.AddSignalR(options =>
     {
         options.EnableDetailedErrors = true;
     }
-    
+
     // Configure message size limits
     options.MaximumReceiveMessageSize = 32 * 1024; // 32KB
     options.StreamBufferCapacity = 10;
-    
+
     // Client timeout settings
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);

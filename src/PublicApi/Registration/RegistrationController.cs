@@ -739,7 +739,7 @@ public class RegistrationController : ControllerBase
 
     private async Task<RegistrationResponse> MapToRegistrationResponse(Shared.Registration.Registration registration)
     {
-        var queuePosition = registration.IsQueued 
+        var queuePosition = registration.IsQueued
             ? await _registrationService.GetUserQueuePositionAsync(registration.UserId, registration.EventId)
             : null;
 
@@ -772,7 +772,7 @@ public class RegistrationController : ControllerBase
             EstimatedWaitTimeMinutes = registration.EstimatedWaitTimeMinutes,
             RegistrationData = registration.RegistrationData,
             CanBeCancelled = registration.CanBeCancelled,
-            ConfirmationUrl = registration.ConfirmationToken != null 
+            ConfirmationUrl = registration.ConfirmationToken != null
                 ? Url.Action(nameof(ConfirmRegistrationAsync), "Registration", new { token = registration.ConfirmationToken }, Request.Scheme)
                 : null
         };

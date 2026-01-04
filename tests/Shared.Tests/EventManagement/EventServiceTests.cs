@@ -22,7 +22,7 @@ public class EventServiceTests : IDisposable
 
         _context = new EventDbContext(options);
         _mockLogger = new Mock<ILogger<EventService>>();
-        
+
         // Configure DatabaseOptions to indicate InMemory mode
         var databaseOptions = Options.Create(new DatabaseOptions { UseInMemoryDatabase = true });
         _eventService = new EventService(_context, _mockLogger.Object, databaseOptions);
@@ -176,7 +176,7 @@ public class EventServiceTests : IDisposable
 
         // Assert
         Assert.True(result);
-        
+
         var deletedEvent = await _eventService.GetEventByIdAsync(createdEvent.Id);
         Assert.Null(deletedEvent);
     }
@@ -250,7 +250,7 @@ public class EventServiceTests : IDisposable
 
         var userId = Guid.NewGuid();
         var createdEvent = await _eventService.CreateEventAsync(createRequest, userId);
-        
+
         // Publish the event (required for registration to be available)
         await _eventService.ChangeEventStatusAsync(createdEvent.Id, EventStatus.Published, userId);
 

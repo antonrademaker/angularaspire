@@ -26,7 +26,7 @@ public class UserDbContext : DbContext
         {
             // Table configuration
             entity.ToTable("users", schema: "user_management");
-            
+
             // Primary key
             entity.HasKey(u => u.Id);
             entity.Property(u => u.Id)

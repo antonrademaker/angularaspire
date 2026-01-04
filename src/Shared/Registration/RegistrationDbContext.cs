@@ -47,7 +47,7 @@ public class RegistrationDbContext : DbContext
         if (!optionsBuilder.IsConfigured)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            
+
             if (string.IsNullOrEmpty(connectionString))
             {
                 throw new InvalidOperationException("DefaultConnection string is not configured");
@@ -88,12 +88,12 @@ public class RegistrationDbContext : DbContext
         ConfigureRegistration(modelBuilder);
         ConfigureIndexes(modelBuilder);
         ConfigureConstraints(modelBuilder);
-        
+
         // Configure table naming convention (snake_case)
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
             entity.SetTableName(entity.GetTableName()?.ToSnakeCase());
-            
+
             foreach (var property in entity.GetProperties())
             {
                 property.SetColumnName(property.GetColumnName().ToSnakeCase());
@@ -271,27 +271,27 @@ public class RegistrationDbContext : DbContext
 
         // Check constraints for business rules
         registration
-            .HasCheckConstraint("ck_registrations_queue_position_positive", 
+            .HasCheckConstraint("ck_registrations_queue_position_positive",
                 "queue_position IS NULL OR queue_position > 0");
 
         registration
-            .HasCheckConstraint("ck_registrations_reminder_emails_non_negative", 
+            .HasCheckConstraint("ck_registrations_reminder_emails_non_negative",
                 "reminder_emails_sent >= 0");
 
         registration
-            .HasCheckConstraint("ck_registrations_dates_logical", 
+            .HasCheckConstraint("ck_registrations_dates_logical",
                 "registered_at <= COALESCE(confirmed_at, registered_at) AND " +
                 "registered_at <= updated_at");
 
         // Ensure queue position is only set for queued registrations
         registration
-            .HasCheckConstraint("ck_registrations_queue_position_status", 
+            .HasCheckConstraint("ck_registrations_queue_position_status",
                 "(status = 2 AND queue_position IS NOT NULL) OR " +
                 "(status != 2 AND queue_position IS NULL)");
 
         // Ensure confirmation token is only set for pending/queued registrations
         registration
-            .HasCheckConstraint("ck_registrations_confirmation_token", 
+            .HasCheckConstraint("ck_registrations_confirmation_token",
                 "(status IN (0, 2) AND confirmation_token IS NOT NULL) OR " +
                 "(status NOT IN (0, 2) AND confirmation_token IS NULL)");
     }
@@ -336,7 +336,7 @@ public class RegistrationDbContext : DbContext
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Confirmed registrations</returns>
     public async Task<List<Registration>> GetConfirmedRegistrationsAsync(
-        Guid eventId, 
+        Guid eventId,
         CancellationToken cancellationToken = default)
     {
         return await Registrations
@@ -353,7 +353,7 @@ public class RegistrationDbContext : DbContext
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Queued registrations in processing order</returns>
     public async Task<List<Registration>> GetQueuedRegistrationsAsync(
-        Guid eventId, 
+        Guid eventId,
         CancellationToken cancellationToken = default)
     {
         return await Registrations
@@ -373,8 +373,8 @@ public class RegistrationDbContext : DbContext
         CancellationToken cancellationToken = default)
     {
         return await Registrations
-            .Where(r => r.ExpiresAt != null && 
-                       r.ExpiresAt < DateTime.UtcNow && 
+            .Where(r => r.ExpiresAt != null &&
+                       r.ExpiresAt < DateTime.UtcNow &&
                        r.Status == RegistrationStatus.Pending)
             .ToListAsync(cancellationToken);
     }
@@ -387,8 +387,8 @@ public class RegistrationDbContext : DbContext
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Count of registrations</returns>
     public async Task<int> GetRegistrationCountAsync(
-        Guid eventId, 
-        RegistrationStatus status, 
+        Guid eventId,
+        RegistrationStatus status,
         CancellationToken cancellationToken = default)
     {
         return await Registrations
@@ -403,7 +403,7 @@ public class RegistrationDbContext : DbContext
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Registration if found</returns>
     public async Task<Registration?> FindByConfirmationTokenAsync(
-        string token, 
+        string token,
         CancellationToken cancellationToken = default)
     {
         return await Registrations
@@ -425,7 +425,7 @@ public static class StringExtensions
     {
         if (string.IsNullOrEmpty(input)) return input;
 
-        return System.Text.RegularExpressions.Regex.Replace(input, 
+        return System.Text.RegularExpressions.Regex.Replace(input,
             "([a-z0-9])([A-Z])", "$1_$2").ToLower();
     }
 }

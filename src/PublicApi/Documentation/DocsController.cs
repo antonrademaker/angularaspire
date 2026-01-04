@@ -28,7 +28,7 @@ public class DocsController : ControllerBase
     public IActionResult GetApiOverview()
     {
         var baseUrl = $"{Request.Scheme}://{Request.Host}";
-        
+
         var overview = new ApiOverview
         {
             Name = "Event Management External API",
@@ -48,7 +48,7 @@ public class DocsController : ControllerBase
             RateLimits = GetRateLimits(),
             GettingStarted = new GettingStartedGuide
             {
-                Steps = 
+                Steps =
                 [
                     new GettingStartedStep { Order = 1, Title = "Get an API Key", Description = "Create an API key from the admin portal. You'll need to select a tier based on your usage needs." },
                     new GettingStartedStep { Order = 2, Title = "Include your API key", Description = "Add the X-Api-Key header to all requests, or use the Bearer scheme in the Authorization header." },
@@ -116,7 +116,7 @@ public class DocsController : ControllerBase
   ""timestamp"": ""2025-01-15T12:00:00Z""
 }"
             },
-            BestPractices = 
+            BestPractices =
             [
                 "Monitor the X-RateLimit-Remaining header and slow down requests when approaching the limit",
                 "Implement exponential backoff when receiving 429 responses",
@@ -139,7 +139,7 @@ public class DocsController : ControllerBase
         var docs = new AuthenticationDocumentation
         {
             Overview = "The External API uses API keys for authentication. Each API key is associated with a user account and has specific permissions based on its tier and scopes.",
-            Methods = 
+            Methods =
             [
                 new AuthMethodDoc
                 {
@@ -213,7 +213,7 @@ public class DocsController : ControllerBase
     public IActionResult GetEndpointsDocs()
     {
         var baseUrl = $"{Request.Scheme}://{Request.Host}";
-        
+
         var docs = new EndpointsDocumentation
         {
             BaseUrl = $"{baseUrl}/api/external",
@@ -242,7 +242,7 @@ public class DocsController : ControllerBase
   },
   ""timestamp"": ""2025-01-15T12:00:00Z""
 }",
-            StatusCodes = 
+            StatusCodes =
             [
                 new StatusCodeDoc { Code = 200, Name = "OK", Description = "Request succeeded" },
                 new StatusCodeDoc { Code = 201, Name = "Created", Description = "Resource created successfully" },
@@ -254,7 +254,7 @@ public class DocsController : ControllerBase
                 new StatusCodeDoc { Code = 429, Name = "Too Many Requests", Description = "Rate limit exceeded" },
                 new StatusCodeDoc { Code = 500, Name = "Internal Server Error", Description = "Server error occurred" }
             ],
-            ErrorCodes = 
+            ErrorCodes =
             [
                 new ErrorCodeDoc { Code = "MISSING_API_KEY", Description = "API key was not provided", HttpStatus = 401 },
                 new ErrorCodeDoc { Code = "INVALID_API_KEY", Description = "API key is invalid, expired, or revoked", HttpStatus = 401 },
@@ -313,7 +313,7 @@ public class DocsController : ControllerBase
                 Description = "List all events with pagination",
                 RequiredScope = "events:read",
                 MinTier = "Free",
-                Parameters = 
+                Parameters =
                 [
                     new ParamDoc { Name = "page", Type = "integer", Location = "query", Description = "Page number (default: 1)" },
                     new ParamDoc { Name = "pageSize", Type = "integer", Location = "query", Description = "Items per page (default: 20, max: 100)" },
@@ -355,7 +355,7 @@ public class DocsController : ControllerBase
                 Description = "Get event by ID",
                 RequiredScope = "events:read",
                 MinTier = "Free",
-                Parameters = 
+                Parameters =
                 [
                     new ParamDoc { Name = "id", Type = "guid", Location = "path", Description = "Event unique identifier", Required = true }
                 ],
@@ -386,7 +386,7 @@ public class DocsController : ControllerBase
                 Description = "Update an existing event",
                 RequiredScope = "events:write",
                 MinTier = "Standard",
-                Parameters = 
+                Parameters =
                 [
                     new ParamDoc { Name = "id", Type = "guid", Location = "path", Description = "Event unique identifier", Required = true }
                 ],
@@ -399,7 +399,7 @@ public class DocsController : ControllerBase
                 Description = "Delete an event",
                 RequiredScope = "events:delete",
                 MinTier = "Premium",
-                Parameters = 
+                Parameters =
                 [
                     new ParamDoc { Name = "id", Type = "guid", Location = "path", Description = "Event unique identifier", Required = true }
                 ],
@@ -412,7 +412,7 @@ public class DocsController : ControllerBase
                 Description = "List social events for a parent event",
                 RequiredScope = "social_events:read",
                 MinTier = "Free",
-                Parameters = 
+                Parameters =
                 [
                     new ParamDoc { Name = "eventId", Type = "guid", Location = "path", Description = "Parent event ID", Required = true }
                 ],
@@ -425,7 +425,7 @@ public class DocsController : ControllerBase
                 Description = "Get social event by ID",
                 RequiredScope = "social_events:read",
                 MinTier = "Free",
-                Parameters = 
+                Parameters =
                 [
                     new ParamDoc { Name = "id", Type = "guid", Location = "path", Description = "Social event unique identifier", Required = true }
                 ],

@@ -155,7 +155,7 @@ public class EmailService : IEmailService, IDisposable
                     _smtpClient.Credentials = new NetworkCredential(_settings.SmtpUsername, _settings.SmtpPassword);
                 }
 
-                _logger.LogInformation("Email service initialized with SMTP host {SmtpHost}:{SmtpPort}", 
+                _logger.LogInformation("Email service initialized with SMTP host {SmtpHost}:{SmtpPort}",
                     _settings.SmtpHost, _settings.SmtpPort);
             }
             catch (Exception ex)
@@ -175,7 +175,7 @@ public class EmailService : IEmailService, IDisposable
     {
         var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         var subject = $"Registration Confirmed: {eventDetails.Title}";
-        
+
         var htmlBody = BuildConfirmationEmailHtml(emailData);
         var plainTextBody = BuildConfirmationEmailText(emailData);
 
@@ -186,9 +186,9 @@ public class EmailService : IEmailService, IDisposable
     {
         var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         emailData.QueuePosition = queuePosition;
-        
+
         var subject = $"Registration Queued: {eventDetails.Title}";
-        
+
         var htmlBody = BuildQueuedEmailHtml(emailData);
         var plainTextBody = BuildQueuedEmailText(emailData);
 
@@ -199,7 +199,7 @@ public class EmailService : IEmailService, IDisposable
     {
         var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         var subject = $"Registration Confirmed: {eventDetails.Title} - You're In!";
-        
+
         var htmlBody = BuildConfirmedFromQueueEmailHtml(emailData);
         var plainTextBody = BuildConfirmedFromQueueEmailText(emailData);
 
@@ -210,7 +210,7 @@ public class EmailService : IEmailService, IDisposable
     {
         var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         var subject = $"Registration Cancelled: {eventDetails.Title}";
-        
+
         var htmlBody = BuildCancelledEmailHtml(emailData, reason);
         var plainTextBody = BuildCancelledEmailText(emailData, reason);
 
@@ -222,9 +222,9 @@ public class EmailService : IEmailService, IDisposable
         var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         emailData.QueuePosition = newPosition;
         emailData.EstimatedWaitMinutes = estimatedWaitMinutes;
-        
+
         var subject = $"Queue Update: {eventDetails.Title} - Position #{newPosition}";
-        
+
         var htmlBody = BuildQueueUpdateEmailHtml(emailData);
         var plainTextBody = BuildQueueUpdateEmailText(emailData);
 
@@ -264,7 +264,7 @@ public class EmailService : IEmailService, IDisposable
             }
 
             await _smtpClient.SendMailAsync(mailMessage, cancellationToken);
-            
+
             _logger.LogInformation("Email sent successfully to {Email}: {Subject}", to, subject);
             return true;
         }
@@ -375,8 +375,8 @@ Do not reply to this email";
 
     private string BuildQueuedEmailHtml(RegistrationEmailData data)
     {
-        var waitTimeText = data.EstimatedWaitMinutes.HasValue 
-            ? $"<p><strong>Estimated wait time:</strong> {data.EstimatedWaitMinutes} minutes</p>" 
+        var waitTimeText = data.EstimatedWaitMinutes.HasValue
+            ? $"<p><strong>Estimated wait time:</strong> {data.EstimatedWaitMinutes} minutes</p>"
             : "";
 
         return $@"
@@ -437,8 +437,8 @@ Do not reply to this email";
 
     private string BuildQueuedEmailText(RegistrationEmailData data)
     {
-        var waitTimeText = data.EstimatedWaitMinutes.HasValue 
-            ? $"Estimated wait time: {data.EstimatedWaitMinutes} minutes" 
+        var waitTimeText = data.EstimatedWaitMinutes.HasValue
+            ? $"Estimated wait time: {data.EstimatedWaitMinutes} minutes"
             : "";
 
         return $@"Registration Queued
@@ -559,8 +559,8 @@ Do not reply to this email";
 
     private string BuildQueueUpdateEmailHtml(RegistrationEmailData data)
     {
-        var waitTimeText = data.EstimatedWaitMinutes.HasValue 
-            ? $"<p><strong>Estimated wait time:</strong> {data.EstimatedWaitMinutes} minutes</p>" 
+        var waitTimeText = data.EstimatedWaitMinutes.HasValue
+            ? $"<p><strong>Estimated wait time:</strong> {data.EstimatedWaitMinutes} minutes</p>"
             : "";
 
         return $@"
@@ -609,8 +609,8 @@ Do not reply to this email";
 
     private string BuildQueueUpdateEmailText(RegistrationEmailData data)
     {
-        var waitTimeText = data.EstimatedWaitMinutes.HasValue 
-            ? $"Estimated wait time: {data.EstimatedWaitMinutes} minutes" 
+        var waitTimeText = data.EstimatedWaitMinutes.HasValue
+            ? $"Estimated wait time: {data.EstimatedWaitMinutes} minutes"
             : "";
 
         return $@"Queue Update
@@ -654,10 +654,10 @@ public static class EmailServiceExtensions
     /// </summary>
     public static IServiceCollection AddEmailService(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<EmailSettings>(options => 
+        services.Configure<EmailSettings>(options =>
             configuration.GetSection(EmailSettings.SectionName).Bind(options));
         services.AddTransient<IEmailService, EmailService>();
-        
+
         return services;
     }
 }

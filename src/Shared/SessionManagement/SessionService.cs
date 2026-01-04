@@ -329,7 +329,7 @@ public class SessionService : ISessionService
         if (!string.IsNullOrEmpty(request.SearchText))
         {
             var searchLower = request.SearchText.ToLower();
-            query = query.Where(s => 
+            query = query.Where(s =>
                 s.Title.ToLower().Contains(searchLower) ||
                 s.Description.ToLower().Contains(searchLower) ||
                 (s.Abstract != null && s.Abstract.ToLower().Contains(searchLower)));
@@ -515,7 +515,7 @@ public class SessionService : ISessionService
 
             // Check availability
             var availability = await CheckSessionAvailabilityAsync(sessionId);
-            
+
             var subscription = new Subscription
             {
                 SessionId = sessionId,
@@ -542,7 +542,7 @@ public class SessionService : ISessionService
             _context.Subscriptions.Add(subscription);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("User subscribed to session: UserId={UserId}, SessionId={SessionId}, Status={Status}", 
+            _logger.LogInformation("User subscribed to session: UserId={UserId}, SessionId={SessionId}, Status={Status}",
                 userId, sessionId, subscription.Status);
 
             return Result<SubscriptionResponse>.Success(await MapToSubscriptionResponseAsync(subscription));
@@ -759,7 +759,7 @@ public class SessionService : ISessionService
 
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Marked attendance for session: {SessionId}, {Count} attendances processed", 
+            _logger.LogInformation("Marked attendance for session: {SessionId}, {Count} attendances processed",
                 sessionId, attendanceList.Count);
 
             return Result.Success();
@@ -852,7 +852,7 @@ public class SessionService : ISessionService
 
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Session cancelled: {SessionId} - {Title}, Reason: {Reason}", 
+            _logger.LogInformation("Session cancelled: {SessionId} - {Title}, Reason: {Reason}",
                 session.Id, session.Title, reason);
 
             return Result.Success();

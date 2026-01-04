@@ -211,12 +211,12 @@ public record CreateApiKeyResult
 {
     public bool Success { get; init; }
     public ApiKeyResponse? ApiKey { get; init; }
-    
+
     /// <summary>
     /// The raw API key value - only shown once at creation
     /// </summary>
     public string? RawKey { get; init; }
-    
+
     public string? ErrorMessage { get; init; }
 
     public static CreateApiKeyResult Succeeded(ApiKeyResponse apiKey, string rawKey) =>
@@ -276,15 +276,15 @@ public record ApiKeyValidationResult
         string[] scopes,
         int rateLimit,
         int currentRequests) => new()
-    {
-        IsValid = true,
-        ApiKeyId = apiKeyId,
-        UserId = userId,
-        Tier = tier,
-        Scopes = scopes,
-        RateLimit = rateLimit,
-        CurrentWindowRequests = currentRequests
-    };
+        {
+            IsValid = true,
+            ApiKeyId = apiKeyId,
+            UserId = userId,
+            Tier = tier,
+            Scopes = scopes,
+            RateLimit = rateLimit,
+            CurrentWindowRequests = currentRequests
+        };
 
     public static ApiKeyValidationResult Invalid(string error) => new()
     {
@@ -296,14 +296,14 @@ public record ApiKeyValidationResult
         Guid apiKeyId,
         int rateLimit,
         int currentRequests) => new()
-    {
-        IsValid = false,
-        ApiKeyId = apiKeyId,
-        RateLimit = rateLimit,
-        CurrentWindowRequests = currentRequests,
-        RateLimitExceeded = true,
-        ErrorMessage = $"Rate limit exceeded. Limit: {rateLimit}/min, Current: {currentRequests}"
-    };
+        {
+            IsValid = false,
+            ApiKeyId = apiKeyId,
+            RateLimit = rateLimit,
+            CurrentWindowRequests = currentRequests,
+            RateLimitExceeded = true,
+            ErrorMessage = $"Rate limit exceeded. Limit: {rateLimit}/min, Current: {currentRequests}"
+        };
 }
 
 /// <summary>

@@ -18,9 +18,9 @@ public static class RegistrationServiceExtensions
         // Register database context
         services.AddDbContext<RegistrationDbContext>(options =>
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection") 
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? "Host=localhost;Database=EventManagement;Username=dev;Password=dev123;";
-            
+
             options.UseNpgsql(connectionString, npgsql =>
             {
                 npgsql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null);
@@ -33,7 +33,7 @@ public static class RegistrationServiceExtensions
         // Register Redis connection for queue management
         services.AddSingleton<IConnectionMultiplexer>(provider =>
         {
-            var connectionString = configuration.GetConnectionString("Redis") 
+            var connectionString = configuration.GetConnectionString("Redis")
                 ?? "localhost:6379";
             return ConnectionMultiplexer.Connect(connectionString);
         });
@@ -51,9 +51,9 @@ public static class RegistrationServiceExtensions
     {
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<RegistrationDbContext>();
-        
+
         await context.Database.EnsureCreatedAsync();
-        
+
         return serviceProvider;
     }
 }

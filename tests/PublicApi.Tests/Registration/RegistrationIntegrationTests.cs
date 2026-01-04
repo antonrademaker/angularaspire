@@ -70,7 +70,7 @@ public class RegistrationIntegrationTests : IClassFixture<TestWebApplicationFact
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var result = await response.Content.ReadFromJsonAsync<RegistrationResult>();
         Assert.NotNull(result);
         Assert.True(result.Success);
@@ -122,7 +122,7 @@ public class RegistrationIntegrationTests : IClassFixture<TestWebApplicationFact
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var registration = await response.Content.ReadFromJsonAsync<Shared.Registration.Registration>();
         Assert.NotNull(registration);
         Assert.Equal(registrationResult.Registration.Id, registration.Id);

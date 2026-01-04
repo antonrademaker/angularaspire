@@ -39,7 +39,7 @@ public class TokenService : ITokenService
     public TokenService(IConfiguration configuration)
     {
         _configuration = configuration;
-        
+
         // Get JWT configuration
         var jwtKey = _configuration["Jwt:Key"] ?? throw new ArgumentException("JWT Key not configured");
         var jwtIssuer = _configuration["Jwt:Issuer"] ?? throw new ArgumentException("JWT Issuer not configured");

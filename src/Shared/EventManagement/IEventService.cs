@@ -10,7 +10,7 @@ namespace Shared.EventManagement;
 public interface IEventService
 {
     // Event Discovery Operations
-    
+
     /// <summary>
     /// Search for events by various criteria with pagination
     /// </summary>

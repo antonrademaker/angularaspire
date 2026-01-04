@@ -41,7 +41,7 @@ public class SessionsController : ControllerBase
         try
         {
             var result = await _sessionService.CreateSessionAsync(request);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("conflicts") == true)
@@ -55,7 +55,7 @@ public class SessionsController : ControllerBase
                 return BadRequest(new ApiError("INVALID_REQUEST", result.Error ?? "Failed to create session"));
             }
 
-            _logger.LogInformation("Session created: {SessionId} - {Title} for Event {EventId}", 
+            _logger.LogInformation("Session created: {SessionId} - {Title} for Event {EventId}",
                 result.Value?.Id, result.Value?.Title, request.EventId);
 
             return CreatedAtAction(nameof(GetSession), new { id = result.Value!.Id }, result.Value);
@@ -80,7 +80,7 @@ public class SessionsController : ControllerBase
         try
         {
             var session = await _sessionService.GetSessionAsync(id);
-            
+
             if (session == null)
             {
                 return NotFound(new ApiError("SESSION_NOT_FOUND", $"Session with ID {id} was not found"));
@@ -111,7 +111,7 @@ public class SessionsController : ControllerBase
         try
         {
             var result = await _sessionService.UpdateSessionAsync(id, request);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)
@@ -154,7 +154,7 @@ public class SessionsController : ControllerBase
         try
         {
             var result = await _sessionService.DeleteSessionAsync(id);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)
@@ -255,7 +255,7 @@ public class SessionsController : ControllerBase
         try
         {
             var result = await _sessionService.PublishSessionAsync(id);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)
@@ -290,7 +290,7 @@ public class SessionsController : ControllerBase
         try
         {
             var result = await _sessionService.UnpublishSessionAsync(id);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)
@@ -412,8 +412,8 @@ public class SessionsController : ControllerBase
         try
         {
             var promotedCount = await _sessionService.ProcessWaitlistAsync(id, request.Count);
-            
-            _logger.LogInformation("Processed waitlist for session {SessionId}: {Count} users promoted", 
+
+            _logger.LogInformation("Processed waitlist for session {SessionId}: {Count} users promoted",
                 id, promotedCount);
 
             return Ok(new WaitlistProcessResult { PromotedCount = promotedCount });
@@ -439,7 +439,7 @@ public class SessionsController : ControllerBase
         try
         {
             var result = await _sessionService.StartSessionAsync(id);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)
@@ -474,7 +474,7 @@ public class SessionsController : ControllerBase
         try
         {
             var result = await _sessionService.CompleteSessionAsync(id);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)
@@ -510,7 +510,7 @@ public class SessionsController : ControllerBase
         try
         {
             var result = await _sessionService.CancelSessionAsync(id, request.Reason);
-            
+
             if (!result.IsSuccess)
             {
                 if (result.Error?.Contains("not found") == true)
@@ -546,13 +546,13 @@ public class SessionsController : ControllerBase
         try
         {
             var result = await _sessionService.MarkAttendanceAsync(id, request.Attendances);
-            
+
             if (!result.IsSuccess)
             {
                 return BadRequest(new ApiError("INVALID_REQUEST", result.Error ?? "Failed to mark attendance"));
             }
 
-            _logger.LogInformation("Attendance marked for session {SessionId}: {Count} attendances processed", 
+            _logger.LogInformation("Attendance marked for session {SessionId}: {Count} attendances processed",
                 id, request.Attendances.Count);
 
             return NoContent();

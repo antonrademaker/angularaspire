@@ -681,7 +681,7 @@ public class SessionServiceTests : IDisposable
         };
 
         var firstResult = await _sessionService.CreateSessionAsync(createRequest);
-        
+
         // Publish first session
         var firstSession = await _context.Sessions.FindAsync(firstResult.Value!.Id);
         firstSession!.IsPublished = true;
@@ -824,9 +824,9 @@ public class SessionServiceTests : IDisposable
     // Helper Methods
 
     private async Task<Shared.Common.Result<SessionResponse>> CreateTestSession(
-        string title, 
-        string slug, 
-        SessionType type, 
+        string title,
+        string slug,
+        SessionType type,
         SessionDifficulty difficulty = SessionDifficulty.Intermediate,
         int? maxAttendees = null)
     {

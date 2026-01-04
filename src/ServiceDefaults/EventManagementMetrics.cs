@@ -9,7 +9,7 @@ namespace EventManagement.ServiceDefaults;
 public sealed class EventManagementMetrics : IDisposable
 {
     private readonly Meter _meter;
-    
+
     // Counters
     private readonly Counter<long> _eventsCreated;
     private readonly Counter<long> _registrationsCompleted;
@@ -18,12 +18,12 @@ public sealed class EventManagementMetrics : IDisposable
     private readonly Counter<long> _apiKeyCreated;
     private readonly Counter<long> _apiRequests;
     private readonly Counter<long> _rateLimitExceeded;
-    
+
     // Histograms
     private readonly Histogram<double> _registrationProcessingTime;
     private readonly Histogram<double> _eventSearchTime;
     private readonly Histogram<double> _queueWaitTime;
-    
+
     // Observable gauges
     private int _activeRegistrations;
     private int _queuedRegistrations;
@@ -32,76 +32,76 @@ public sealed class EventManagementMetrics : IDisposable
     public EventManagementMetrics(IMeterFactory meterFactory)
     {
         _meter = meterFactory.Create("EventManagement");
-        
+
         // Event metrics
         _eventsCreated = _meter.CreateCounter<long>(
             "eventmanagement.events.created",
             unit: "{event}",
             description: "Number of events created");
-        
+
         // Registration metrics
         _registrationsCompleted = _meter.CreateCounter<long>(
             "eventmanagement.registrations.completed",
             unit: "{registration}",
             description: "Number of successful registrations");
-        
+
         _registrationsFailed = _meter.CreateCounter<long>(
             "eventmanagement.registrations.failed",
             unit: "{registration}",
             description: "Number of failed registrations");
-        
+
         _registrationProcessingTime = _meter.CreateHistogram<double>(
             "eventmanagement.registrations.processing_time",
             unit: "ms",
             description: "Time to process a registration");
-        
+
         // Session metrics
         _sessionsSubscribed = _meter.CreateCounter<long>(
             "eventmanagement.sessions.subscribed",
             unit: "{subscription}",
             description: "Number of session subscriptions");
-        
+
         // API metrics
         _apiKeyCreated = _meter.CreateCounter<long>(
             "eventmanagement.api.keys_created",
             unit: "{key}",
             description: "Number of API keys created");
-        
+
         _apiRequests = _meter.CreateCounter<long>(
             "eventmanagement.api.requests",
             unit: "{request}",
             description: "Number of API requests");
-        
+
         _rateLimitExceeded = _meter.CreateCounter<long>(
             "eventmanagement.api.rate_limit_exceeded",
             unit: "{request}",
             description: "Number of rate limit exceeded responses");
-        
+
         // Search metrics
         _eventSearchTime = _meter.CreateHistogram<double>(
             "eventmanagement.search.time",
             unit: "ms",
             description: "Time to execute event search");
-        
+
         // Queue metrics
         _queueWaitTime = _meter.CreateHistogram<double>(
             "eventmanagement.queue.wait_time",
             unit: "ms",
             description: "Time spent waiting in registration queue");
-        
+
         // Observable gauges for current state
         _meter.CreateObservableGauge(
             "eventmanagement.registrations.active",
             () => _activeRegistrations,
             unit: "{registration}",
             description: "Number of active registrations being processed");
-        
+
         _meter.CreateObservableGauge(
             "eventmanagement.registrations.queued",
             () => _queuedRegistrations,
             unit: "{registration}",
             description: "Number of registrations in queue");
-        
+
         _meter.CreateObservableGauge(
             "eventmanagement.api.active_keys",
             () => _activeApiKeys,
@@ -174,7 +174,7 @@ public sealed class EventManagementMetrics : IDisposable
     // Search metrics methods
     public void RecordEventSearchTime(double milliseconds, int resultCount)
     {
-        _eventSearchTime.Record(milliseconds, 
+        _eventSearchTime.Record(milliseconds,
             new KeyValuePair<string, object?>("result_count", resultCount));
     }
 

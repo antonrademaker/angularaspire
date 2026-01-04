@@ -13,7 +13,7 @@ public class ApiKeyService : IApiKeyService
 {
     private readonly ApiKeyDbContext _context;
     private readonly ILogger<ApiKeyService> _logger;
-    
+
     // Rate limit window duration
     private static readonly TimeSpan RateLimitWindow = TimeSpan.FromMinutes(1);
 
@@ -274,9 +274,9 @@ public class ApiKeyService : IApiKeyService
         // Check rate limit
         var rateLimit = key.GetRateLimit();
         var now = DateTime.UtcNow;
-        
+
         // Reset window if needed
-        if (!key.CurrentWindowStart.HasValue || 
+        if (!key.CurrentWindowStart.HasValue ||
             now - key.CurrentWindowStart.Value > RateLimitWindow)
         {
             key.CurrentWindowStart = now;
@@ -480,12 +480,12 @@ public class ApiKeyService : IApiKeyService
             {
                 return true;
             }
-            
+
             // Simple CIDR support (e.g., "192.168.1.0/24")
             if (allowed.Contains('/'))
             {
                 var parts = allowed.Split('/');
-                if (parts.Length == 2 && 
+                if (parts.Length == 2 &&
                     int.TryParse(parts[1], out var prefixLength) &&
                     IsIpInCidr(ipAddress, parts[0], prefixLength))
                 {
@@ -503,7 +503,7 @@ public class ApiKeyService : IApiKeyService
         {
             var ipParts = ipAddress.Split('.').Select(int.Parse).ToArray();
             var baseParts = cidrBase.Split('.').Select(int.Parse).ToArray();
-            
+
             if (ipParts.Length != 4 || baseParts.Length != 4)
                 return false;
 

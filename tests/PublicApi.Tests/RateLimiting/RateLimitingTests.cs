@@ -34,7 +34,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("API key is required", content, StringComparison.OrdinalIgnoreCase);
     }
@@ -59,7 +59,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var apiKeyService = scope.ServiceProvider.GetRequiredService<IApiKeyService>();
-        
+
         // Create a test API key
         var createResult = await CreateTestApiKeyAsync(apiKeyService, ApiKeyTier.Standard);
         var client = _factory.CreateClient();
@@ -78,7 +78,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var apiKeyService = scope.ServiceProvider.GetRequiredService<IApiKeyService>();
-        
+
         var createResult = await CreateTestApiKeyAsync(apiKeyService, ApiKeyTier.Standard);
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {createResult.RawKey}");
@@ -100,7 +100,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var apiKeyService = scope.ServiceProvider.GetRequiredService<IApiKeyService>();
-        
+
         var createResult = await CreateTestApiKeyAsync(apiKeyService, ApiKeyTier.Standard);
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Api-Key", createResult.RawKey!);
@@ -110,14 +110,14 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         Assert.True(response.Headers.Contains("X-RateLimit-Limit"));
         Assert.True(response.Headers.Contains("X-RateLimit-Remaining"));
         Assert.True(response.Headers.Contains("X-RateLimit-Reset"));
 
         var limit = response.Headers.GetValues("X-RateLimit-Limit").First();
         var remaining = response.Headers.GetValues("X-RateLimit-Remaining").First();
-        
+
         Assert.True(int.TryParse(limit, out var limitValue));
         Assert.True(int.TryParse(remaining, out var remainingValue));
         Assert.True(limitValue > 0);
@@ -134,7 +134,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var apiKeyService = scope.ServiceProvider.GetRequiredService<IApiKeyService>();
-        
+
         var createResult = await CreateTestApiKeyAsync(apiKeyService, tier);
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Api-Key", createResult.RawKey!);
@@ -144,7 +144,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var limit = response.Headers.GetValues("X-RateLimit-Limit").First();
         Assert.Equal(expectedLimit.ToString(), limit);
     }
@@ -186,7 +186,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         // Assert
         Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
         Assert.True(response.Headers.Contains("Retry-After"));
-        
+
         var retryAfter = response.Headers.GetValues("Retry-After").First();
         Assert.True(int.TryParse(retryAfter, out var retrySeconds));
         Assert.True(retrySeconds > 0 && retrySeconds <= 60);
@@ -226,7 +226,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
         Assert.True(response.Headers.Contains("X-RateLimit-Limit"));
         Assert.True(response.Headers.Contains("X-RateLimit-Remaining"));
-        
+
         var remaining = response.Headers.GetValues("X-RateLimit-Remaining").First();
         Assert.Equal("0", remaining);
     }
@@ -241,7 +241,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var apiKeyService = scope.ServiceProvider.GetRequiredService<IApiKeyService>();
-        
+
         // Create a Free tier API key (read-only)
         var createResult = await CreateTestApiKeyAsync(apiKeyService, ApiKeyTier.Free);
         var client = _factory.CreateClient();
@@ -271,7 +271,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var apiKeyService = scope.ServiceProvider.GetRequiredService<IApiKeyService>();
-        
+
         var createResult = await CreateTestApiKeyAsync(apiKeyService, ApiKeyTier.Standard);
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Api-Key", createResult.RawKey!);
@@ -325,7 +325,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var apiKeyService = scope.ServiceProvider.GetRequiredService<IApiKeyService>();
-        
+
         var createResult = await CreateTestApiKeyAsync(apiKeyService, ApiKeyTier.Standard);
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Api-Key", createResult.RawKey!);
@@ -340,7 +340,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
         var remaining2 = int.Parse(response2.Headers.GetValues("X-RateLimit-Remaining").First());
 
         // Assert - Remaining should decrease (or stay same if tracking isn't per-request)
-        Assert.True(remaining2 <= remaining1, 
+        Assert.True(remaining2 <= remaining1,
             $"Expected remaining to decrease or stay same. First: {remaining1}, Second: {remaining2}");
     }
 
@@ -435,7 +435,7 @@ public class RateLimitingTests : IClassFixture<TestWebApplicationFactory>
     #region Helper Methods
 
     private async Task<CreateApiKeyResult> CreateTestApiKeyAsync(
-        IApiKeyService apiKeyService, 
+        IApiKeyService apiKeyService,
         ApiKeyTier tier)
     {
         var userId = Guid.NewGuid();

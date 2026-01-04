@@ -34,7 +34,7 @@ public class RegistrationServiceTests : IDisposable
         var mockConfig = new Mock<IConfiguration>();
         var mockEnvironment = new Mock<IHostEnvironment>();
         var mockRegLogger = new Mock<ILogger<RegistrationDbContext>>();
-        
+
         _registrationContext = new RegistrationDbContext(registrationOptions, mockConfig.Object, mockEnvironment.Object, mockRegLogger.Object);
 
         _mockLogger = new Mock<ILogger<RegistrationService>>();
@@ -139,7 +139,7 @@ public class RegistrationServiceTests : IDisposable
         // Verify registration is cancelled
         var cancelledRegistration = await _registrationContext.Registrations
             .FirstOrDefaultAsync(r => r.Id == registrationId);
-        
+
         Assert.NotNull(cancelledRegistration);
         Assert.Equal(RegistrationStatus.Cancelled, cancelledRegistration.Status);
         Assert.NotNull(cancelledRegistration.CancelledAt);

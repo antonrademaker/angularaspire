@@ -58,7 +58,7 @@ public class RegistrationService : IRegistrationService
                 {
                     Success = false,
                     Message = string.Join("; ", validation.Errors),
-                    ErrorCode = validation.AlreadyRegistered ? "ALREADY_REGISTERED" 
+                    ErrorCode = validation.AlreadyRegistered ? "ALREADY_REGISTERED"
                              : validation.AtCapacity ? "AT_CAPACITY"
                              : validation.RegistrationClosed ? "REGISTRATION_CLOSED"
                              : validation.EventCancelled ? "EVENT_CANCELLED"
@@ -69,7 +69,7 @@ public class RegistrationService : IRegistrationService
             // Get user and event details
             var user = await _userService.GetUserByIdAsync(request.UserId, cancellationToken);
             var eventDetails = await _eventService.GetEventByIdAsync(request.EventId, true);
-            
+
             if (user == null || eventDetails == null)
             {
                 return new RegistrationResult
@@ -86,7 +86,7 @@ public class RegistrationService : IRegistrationService
             {
                 transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             }
-            
+
             try
             {
                 // Check current capacity and determine if registration should be queued
@@ -94,7 +94,7 @@ public class RegistrationService : IRegistrationService
                     .Where(r => r.EventId == request.EventId && r.Status == RegistrationStatus.Confirmed)
                     .CountAsync(cancellationToken);
 
-                var shouldQueue = eventDetails.MaxCapacity.HasValue && 
+                var shouldQueue = eventDetails.MaxCapacity.HasValue &&
                                 currentCount >= eventDetails.MaxCapacity.Value;
 
                 // Create the registration
@@ -132,14 +132,14 @@ public class RegistrationService : IRegistrationService
                     });
 
                     await _redis.ListRightPushAsync(queueKey, queueData);
-                    
+
                     // Get queue position (1-based)
                     var queueLength = await _redis.ListLengthAsync(queueKey);
                     queuePosition = (int)queueLength;
-                    
+
                     // Calculate estimated wait time
                     estimatedWaitTime = await CalculateEstimatedWaitTimeAsync(request.EventId, queuePosition.Value);
-                    
+
                     registration.QueuePosition = queuePosition;
                     await _context.SaveChangesAsync(cancellationToken);
                 }
@@ -164,7 +164,7 @@ public class RegistrationService : IRegistrationService
 
                 if (!emailSent)
                 {
-                    _logger.LogWarning("Failed to send registration email to user {UserId} for event {EventId}", 
+                    _logger.LogWarning("Failed to send registration email to user {UserId} for event {EventId}",
                         request.UserId, request.EventId);
                 }
 
@@ -172,7 +172,7 @@ public class RegistrationService : IRegistrationService
                 {
                     Success = true,
                     Registration = registration,
-                    Message = shouldQueue 
+                    Message = shouldQueue
                         ? $"Registration queued at position #{queuePosition}"
                         : "Registration confirmed successfully",
                     IsQueued = shouldQueue,
@@ -195,9 +195,9 @@ public class RegistrationService : IRegistrationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to register user {UserId} for event {EventId}", 
+            _logger.LogError(ex, "Failed to register user {UserId} for event {EventId}",
                 request.UserId, request.EventId);
-            
+
             return new RegistrationResult
             {
                 Success = false,
@@ -217,7 +217,7 @@ public class RegistrationService : IRegistrationService
             {
                 query = query.Include(r => r.User).Include(r => r.Event);
             }
-            
+
             var registration = await query
                 .FirstOrDefaultAsync(r => r.Id == registrationId && r.UserId == userId, cancellationToken);
 
@@ -237,7 +237,7 @@ public class RegistrationService : IRegistrationService
             {
                 transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             }
-            
+
             try
             {
                 var wasQueued = registration.Status == RegistrationStatus.Queued;
@@ -260,7 +260,7 @@ public class RegistrationService : IRegistrationService
                 if (wasConfirmed && !_isInMemory)
                 {
                     var promoted = await ProcessEventQueueAsync(registration.EventId, 1, cancellationToken);
-                    _logger.LogInformation("Promoted {Count} registrations from queue for event {EventId} after cancellation", 
+                    _logger.LogInformation("Promoted {Count} registrations from queue for event {EventId} after cancellation",
                         promoted, registration.EventId);
                 }
 
@@ -273,7 +273,7 @@ public class RegistrationService : IRegistrationService
                 if (!_isInMemory)
                 {
                     var emailSent = await _emailService.SendRegistrationCancelledAsync(
-                        registration.User!, registration.Event!, registration, 
+                        registration.User!, registration.Event!, registration,
                         registration.CancellationReason, cancellationToken);
 
                     if (!emailSent)
@@ -295,7 +295,7 @@ public class RegistrationService : IRegistrationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to cancel registration {RegistrationId} for user {UserId}", 
+            _logger.LogError(ex, "Failed to cancel registration {RegistrationId} for user {UserId}",
                 registrationId, userId);
             return false;
         }
@@ -349,7 +349,7 @@ public class RegistrationService : IRegistrationService
                         registration.Status = RegistrationStatus.Confirmed;
                         registration.ConfirmedAt = DateTime.UtcNow;
                         registration.QueuePosition = null;
-                        
+
                         await _context.SaveChangesAsync(cancellationToken);
 
                         // Send confirmation email
@@ -358,18 +358,18 @@ public class RegistrationService : IRegistrationService
 
                         if (!emailSent)
                         {
-                            _logger.LogWarning("Failed to send queue confirmation email for registration {RegistrationId}", 
+                            _logger.LogWarning("Failed to send queue confirmation email for registration {RegistrationId}",
                                 registrationId);
                         }
 
                         promoted++;
-                        _logger.LogInformation("Promoted registration {RegistrationId} from queue for event {EventId}", 
+                        _logger.LogInformation("Promoted registration {RegistrationId} from queue for event {EventId}",
                             registrationId, eventId);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to process queue item for event {EventId}: {QueueItem}", 
+                    _logger.LogError(ex, "Failed to process queue item for event {EventId}: {QueueItem}",
                         eventId, queueItem);
                 }
             }
@@ -396,7 +396,7 @@ public class RegistrationService : IRegistrationService
         {
             var rateKey = PROCESSING_RATE_KEY_PREFIX + eventId;
             var rateValue = await _redis.StringGetAsync(rateKey);
-            
+
             var processingRate = 1.0; // Default: 1 registration per minute
             if (rateValue.HasValue && double.TryParse(rateValue.ToString(), out var rate))
             {
@@ -418,13 +418,13 @@ public class RegistrationService : IRegistrationService
         {
             var queueKey = QUEUE_KEY_PREFIX + eventId;
             var queueItems = await _redis.ListRangeAsync(queueKey);
-            
+
             foreach (var item in queueItems)
             {
                 var queueData = JsonSerializer.Deserialize<dynamic>(item!.ToString());
                 var itemRegistrationIdString = ((JsonElement)queueData).GetProperty("RegistrationId").GetString();
                 var itemRegistrationId = Guid.Parse(itemRegistrationIdString!);
-                
+
                 if (itemRegistrationId == registrationId)
                 {
                     await _redis.ListRemoveAsync(queueKey, item);
@@ -434,7 +434,7 @@ public class RegistrationService : IRegistrationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to remove registration {RegistrationId} from queue for event {EventId}", 
+            _logger.LogError(ex, "Failed to remove registration {RegistrationId} from queue for event {EventId}",
                 registrationId, eventId);
         }
     }
@@ -462,7 +462,7 @@ public class RegistrationService : IRegistrationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to update queue positions for event {EventId} after promoting {Count} registrations", 
+            _logger.LogError(ex, "Failed to update queue positions for event {EventId} after promoting {Count} registrations",
                 eventId, promotedCount);
         }
     }
@@ -471,20 +471,20 @@ public class RegistrationService : IRegistrationService
     public async Task<RegistrationResult> ConfirmRegistrationAsync(string confirmationToken, CancellationToken cancellationToken = default)
     {
         // Basic implementation - in a real system, you'd store confirmation tokens
-        return new RegistrationResult 
-        { 
-            Success = false, 
-            Message = "Confirmation not implemented yet" 
+        return new RegistrationResult
+        {
+            Success = false,
+            Message = "Confirmation not implemented yet"
         };
     }
 
     public async Task<Registration?> GetRegistrationAsync(Guid registrationId, bool includeUser = true, bool includeEvent = true, CancellationToken cancellationToken = default)
     {
         var query = _context.Registrations.AsQueryable();
-        
+
         if (includeUser) query = query.Include(r => r.User);
         if (includeEvent) query = query.Include(r => r.Event);
-        
+
         return await query.FirstOrDefaultAsync(r => r.Id == registrationId, cancellationToken);
     }
 
@@ -529,7 +529,7 @@ public class RegistrationService : IRegistrationService
 
         // Check if already registered
         var existingRegistration = await _context.Registrations
-            .FirstOrDefaultAsync(r => r.UserId == userId && r.EventId == eventId && 
+            .FirstOrDefaultAsync(r => r.UserId == userId && r.EventId == eventId &&
                 r.Status != RegistrationStatus.Cancelled, cancellationToken);
 
         if (existingRegistration != null)

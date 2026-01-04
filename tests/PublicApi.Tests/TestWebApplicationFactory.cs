@@ -35,7 +35,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 
             // Remove ALL DbContext-related registrations to avoid provider conflicts
             // This is more aggressive - we remove everything that could conflict
-            var descriptorsToRemove = services.Where(d => 
+            var descriptorsToRemove = services.Where(d =>
                 d.ServiceType == typeof(UserDbContext) ||
                 d.ServiceType == typeof(EventDbContext) ||
                 d.ServiceType == typeof(SessionDbContext) ||
@@ -99,19 +99,19 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
             var redisDescriptors = services.Where(d => d.ServiceType == typeof(IConnectionMultiplexer)).ToList();
             foreach (var d in redisDescriptors)
                 services.Remove(d);
-            
+
             // Create a mock Redis connection that doesn't actually connect
             var mockMultiplexer = new Mock<IConnectionMultiplexer>();
             var mockDatabase = new Mock<IDatabase>();
             var mockBatch = new Mock<IBatch>();
-            
+
             mockMultiplexer.Setup(m => m.GetDatabase(It.IsAny<int>(), It.IsAny<object>()))
                 .Returns(mockDatabase.Object);
             mockMultiplexer.Setup(m => m.IsConnected).Returns(true);
             mockDatabase.Setup(d => d.CreateBatch(It.IsAny<object>())).Returns(mockBatch.Object);
-            
+
             services.AddSingleton<IConnectionMultiplexer>(mockMultiplexer.Object);
-            
+
             // Also add ISubscriptionService if missing (used by SubscriptionsController)
             if (!services.Any(d => d.ServiceType == typeof(ISubscriptionService)))
             {

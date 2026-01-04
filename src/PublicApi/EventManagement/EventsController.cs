@@ -75,7 +75,7 @@ public class EventsController : ControllerBase
 
             var result = await _eventService.SearchEventsAsync(searchRequest);
 
-            _logger.LogInformation("Event search returned {Count} events (page {Page})", 
+            _logger.LogInformation("Event search returned {Count} events (page {Page})",
                 result.Events.Count(), result.CurrentPage);
 
             return Ok(result);
@@ -270,8 +270,8 @@ public class EventsController : ControllerBase
             var isAvailable = await _eventService.IsRegistrationAvailableAsync(id);
             var stats = await _eventService.GetEventStatsAsync(id);
 
-            return Ok(new 
-            { 
+            return Ok(new
+            {
                 eventId = id,
                 registrationAvailable = isAvailable,
                 currentAttendees = stats?.CurrentAttendees ?? 0,

@@ -264,28 +264,28 @@ public class ApiKeyUsageLog
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid ApiKeyId { get; set; }
-    
+
     [ForeignKey(nameof(ApiKeyId))]
     public ApiKey? ApiKey { get; set; }
-    
+
     [MaxLength(100)]
     public string Endpoint { get; set; } = string.Empty;
-    
+
     [MaxLength(10)]
     public string HttpMethod { get; set; } = string.Empty;
-    
+
     public int StatusCode { get; set; }
-    
+
     [MaxLength(50)]
     public string? IpAddress { get; set; }
-    
+
     [MaxLength(500)]
     public string? UserAgent { get; set; }
-    
+
     public long ResponseTimeMs { get; set; }
-    
+
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-    
+
     [MaxLength(1000)]
     public string? ErrorMessage { get; set; }
 }

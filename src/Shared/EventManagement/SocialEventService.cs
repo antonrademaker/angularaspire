@@ -968,8 +968,8 @@ public class SocialEventService : ISocialEventService
             : int.MaxValue;
 
         // Convert Tags JSON string to IEnumerable<string> for response
-        var tags = !string.IsNullOrEmpty(socialEvent.Tags) 
-            ? JsonSerializer.Deserialize<List<string>>(socialEvent.Tags) 
+        var tags = !string.IsNullOrEmpty(socialEvent.Tags)
+            ? JsonSerializer.Deserialize<List<string>>(socialEvent.Tags)
             : null;
 
         return new SocialEventResponse(

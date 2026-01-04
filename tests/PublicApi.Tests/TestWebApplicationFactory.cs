@@ -98,7 +98,9 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
             // Remove Redis IConnectionMultiplexer and replace with mock
             var redisDescriptors = services.Where(d => d.ServiceType == typeof(IConnectionMultiplexer)).ToList();
             foreach (var d in redisDescriptors)
+            {
                 services.Remove(d);
+            }
 
             // Create a mock Redis connection that doesn't actually connect
             var mockMultiplexer = new Mock<IConnectionMultiplexer>();

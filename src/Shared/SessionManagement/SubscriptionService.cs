@@ -26,7 +26,7 @@ public class SubscriptionService : ISubscriptionService
     public async Task<Result<SubscriptionResponse>> SubscribeAsync(SubscribeRequest request)
     {
         // Validate session exists and is subscribable
-        var session = await _context.Sessions
+        Session? session = await _context.Sessions
             .FirstOrDefaultAsync(s => s.Id == request.SessionId);
 
         if (session == null)
@@ -55,7 +55,7 @@ public class SubscriptionService : ISubscriptionService
         }
 
         // Check if user already has a subscription
-        var existingSubscription = await _context.Subscriptions
+        Subscription? existingSubscription = await _context.Subscriptions
             .FirstOrDefaultAsync(s => s.SessionId == request.SessionId && s.UserId == request.UserId);
 
         if (existingSubscription != null)
@@ -122,7 +122,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<Result> UnsubscribeAsync(Guid sessionId, Guid userId, string? reason = null)
     {
-        var subscription = await _context.Subscriptions
+        Subscription? subscription = await _context.Subscriptions
             .Include(s => s.Session)
             .FirstOrDefaultAsync(s => s.SessionId == sessionId && s.UserId == userId);
 
@@ -169,7 +169,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<SubscriptionResponse?> GetSubscriptionAsync(Guid subscriptionId)
     {
-        var subscription = await _context.Subscriptions
+        Subscription? subscription = await _context.Subscriptions
             .Include(s => s.Session)
             .FirstOrDefaultAsync(s => s.Id == subscriptionId);
 
@@ -181,7 +181,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<SubscriptionResponse?> GetUserSessionSubscriptionAsync(Guid sessionId, Guid userId)
     {
-        var subscription = await _context.Subscriptions
+        Subscription? subscription = await _context.Subscriptions
             .Include(s => s.Session)
             .FirstOrDefaultAsync(s => s.SessionId == sessionId && s.UserId == userId);
 
@@ -193,7 +193,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<IEnumerable<SubscriptionResponse>> GetUserSubscriptionsAsync(Guid userId, Guid? eventId = null)
     {
-        var query = _context.Subscriptions
+        IQueryable<Subscription> query = _context.Subscriptions
             .Include(s => s.Session)
             .Where(s => s.UserId == userId);
 
@@ -202,7 +202,7 @@ public class SubscriptionService : ISubscriptionService
             query = query.Where(s => s.Session != null && s.Session.EventId == eventId.Value);
         }
 
-        var subscriptions = await query
+        List<Subscription> subscriptions = await query
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
 
@@ -214,7 +214,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<IEnumerable<SubscriptionResponse>> GetSessionSubscriptionsAsync(Guid sessionId, bool includeWaitlisted = true, bool includeCancelled = false)
     {
-        var query = _context.Subscriptions
+        IQueryable<Subscription> query = _context.Subscriptions
             .Include(s => s.Session)
             .Where(s => s.SessionId == sessionId);
 
@@ -228,7 +228,7 @@ public class SubscriptionService : ISubscriptionService
             query = query.Where(s => s.Status != SubscriptionStatus.Cancelled);
         }
 
-        var subscriptions = await query
+        List<Subscription> subscriptions = await query
             .OrderBy(s => s.IsWaitlisted)
             .ThenBy(s => s.WaitlistPosition)
             .ThenBy(s => s.CreatedAt)
@@ -244,7 +244,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<IEnumerable<SubscriptionResponse>> GetWaitlistAsync(Guid sessionId)
     {
-        var waitlist = await _context.Subscriptions
+        List<Subscription> waitlist = await _context.Subscriptions
             .Include(s => s.Session)
             .Where(s => s.SessionId == sessionId &&
                        s.IsWaitlisted &&
@@ -260,7 +260,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<int> ProcessWaitlistAsync(Guid sessionId, int? count = null)
     {
-        var session = await _context.Sessions.FindAsync(sessionId);
+        Session? session = await _context.Sessions.FindAsync(sessionId);
         if (session == null || !session.MaxAttendees.HasValue)
         {
             return 0;
@@ -277,7 +277,7 @@ public class SubscriptionService : ISubscriptionService
 
         var spotsToFill = count.HasValue ? Math.Min(count.Value, availableSpots) : availableSpots;
 
-        var waitlistedUsers = await _context.Subscriptions
+        List<Subscription> waitlistedUsers = await _context.Subscriptions
             .Where(s => s.SessionId == sessionId &&
                        s.IsWaitlisted &&
                        s.Status == SubscriptionStatus.Waitlisted)
@@ -286,7 +286,7 @@ public class SubscriptionService : ISubscriptionService
             .ToListAsync();
 
         var promoted = 0;
-        foreach (var subscription in waitlistedUsers)
+        foreach (Subscription? subscription in waitlistedUsers)
         {
             subscription.Status = SubscriptionStatus.Confirmed;
             subscription.IsWaitlisted = false;
@@ -302,7 +302,7 @@ public class SubscriptionService : ISubscriptionService
         }
 
         // Reorder remaining waitlist positions
-        var remainingWaitlist = await _context.Subscriptions
+        List<Subscription> remainingWaitlist = await _context.Subscriptions
             .Where(s => s.SessionId == sessionId &&
                        s.IsWaitlisted &&
                        s.Status == SubscriptionStatus.Waitlisted)
@@ -324,7 +324,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<int?> GetWaitlistPositionAsync(Guid sessionId, Guid userId)
     {
-        var subscription = await _context.Subscriptions
+        Subscription? subscription = await _context.Subscriptions
             .FirstOrDefaultAsync(s => s.SessionId == sessionId &&
                                      s.UserId == userId &&
                                      s.IsWaitlisted);
@@ -339,7 +339,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<Result> CheckInAsync(Guid sessionId, Guid userId)
     {
-        var subscription = await _context.Subscriptions
+        Subscription? subscription = await _context.Subscriptions
             .FirstOrDefaultAsync(s => s.SessionId == sessionId && s.UserId == userId);
 
         if (subscription == null)
@@ -372,20 +372,20 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<Result> MarkAttendanceAsync(Guid sessionId, IEnumerable<AttendanceRecord> attendances)
     {
-        var session = await _context.Sessions.FindAsync(sessionId);
+        Session? session = await _context.Sessions.FindAsync(sessionId);
         if (session == null)
         {
             return Result.Failure("Session not found");
         }
 
         var userIds = attendances.Select(a => a.UserId).ToList();
-        var subscriptions = await _context.Subscriptions
+        Dictionary<Guid, Subscription> subscriptions = await _context.Subscriptions
             .Where(s => s.SessionId == sessionId && userIds.Contains(s.UserId))
             .ToDictionaryAsync(s => s.UserId);
 
-        foreach (var attendance in attendances)
+        foreach (AttendanceRecord attendance in attendances)
         {
-            if (subscriptions.TryGetValue(attendance.UserId, out var subscription))
+            if (subscriptions.TryGetValue(attendance.UserId, out Subscription? subscription))
             {
                 subscription.Attended = attendance.Attended;
                 subscription.Status = attendance.Attended ? SubscriptionStatus.Attended : SubscriptionStatus.NoShow;
@@ -408,7 +408,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<AttendanceStats> GetAttendanceStatsAsync(Guid sessionId)
     {
-        var subscriptions = await _context.Subscriptions
+        List<Subscription> subscriptions = await _context.Subscriptions
             .Where(s => s.SessionId == sessionId)
             .ToListAsync();
 
@@ -432,7 +432,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<SessionAvailability> CheckAvailabilityAsync(Guid sessionId)
     {
-        var session = await _context.Sessions.FindAsync(sessionId);
+        Session? session = await _context.Sessions.FindAsync(sessionId);
         if (session == null)
         {
             return new SessionAvailability
@@ -474,7 +474,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<Result> UpdateCapacityAsync(Guid sessionId, int? maxAttendees)
     {
-        var session = await _context.Sessions.FindAsync(sessionId);
+        Session? session = await _context.Sessions.FindAsync(sessionId);
         if (session == null)
         {
             return Result.Failure("Session not found");
@@ -506,7 +506,7 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<Dictionary<Guid, IEnumerable<SubscriptionResponse>>> GetBulkSessionSubscriptionsAsync(IEnumerable<Guid> sessionIds)
     {
-        var subscriptions = await _context.Subscriptions
+        List<Subscription> subscriptions = await _context.Subscriptions
             .Include(s => s.Session)
             .Where(s => sessionIds.Contains(s.SessionId) && s.Status != SubscriptionStatus.Cancelled)
             .ToListAsync();
@@ -523,12 +523,12 @@ public class SubscriptionService : ISubscriptionService
     /// </summary>
     public async Task<int> CancelAllSubscriptionsAsync(Guid sessionId, string reason)
     {
-        var subscriptions = await _context.Subscriptions
+        List<Subscription> subscriptions = await _context.Subscriptions
             .Where(s => s.SessionId == sessionId &&
                        s.Status != SubscriptionStatus.Cancelled)
             .ToListAsync();
 
-        foreach (var subscription in subscriptions)
+        foreach (Subscription? subscription in subscriptions)
         {
             subscription.Status = SubscriptionStatus.Cancelled;
             subscription.CancelledAt = DateTime.UtcNow;
@@ -536,7 +536,7 @@ public class SubscriptionService : ISubscriptionService
             subscription.UpdatedAt = DateTime.UtcNow;
         }
 
-        var session = await _context.Sessions.FindAsync(sessionId);
+        Session? session = await _context.Sessions.FindAsync(sessionId);
         if (session != null)
         {
             session.CurrentAttendees = 0;

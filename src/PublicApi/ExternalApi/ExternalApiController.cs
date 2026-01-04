@@ -379,7 +379,11 @@ public class ExternalApiController : ControllerBase
 
     private static EventStatus? ParseEventStatus(string? status)
     {
-        if (string.IsNullOrEmpty(status)) return null;
+        if (string.IsNullOrEmpty(status))
+        {
+            return null;
+        }
+
         return Enum.TryParse<EventStatus>(status, true, out var result) ? result : null;
     }
 

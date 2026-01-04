@@ -216,13 +216,31 @@ public class RateLimitingMiddleware
 
         // Determine resource from path
         string? resource = null;
-        if (path.Contains("/events")) resource = "events";
-        else if (path.Contains("/registrations")) resource = "registrations";
-        else if (path.Contains("/sessions")) resource = "sessions";
-        else if (path.Contains("/speakers")) resource = "speakers";
-        else if (path.Contains("/social-events")) resource = "social_events";
+        if (path.Contains("/events"))
+        {
+            resource = "events";
+        }
+        else if (path.Contains("/registrations"))
+        {
+            resource = "registrations";
+        }
+        else if (path.Contains("/sessions"))
+        {
+            resource = "sessions";
+        }
+        else if (path.Contains("/speakers"))
+        {
+            resource = "speakers";
+        }
+        else if (path.Contains("/social-events"))
+        {
+            resource = "social_events";
+        }
 
-        if (resource == null) return null;
+        if (resource == null)
+        {
+            return null;
+        }
 
         // Determine operation from method
         var operation = method switch

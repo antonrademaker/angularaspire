@@ -49,8 +49,8 @@ public static class RegistrationServiceExtensions
     /// </summary>
     public static async Task<IServiceProvider> EnsureRegistrationDatabaseAsync(this IServiceProvider serviceProvider)
     {
-        using var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<RegistrationDbContext>();
+        using IServiceScope scope = serviceProvider.CreateScope();
+        RegistrationDbContext context = scope.ServiceProvider.GetRequiredService<RegistrationDbContext>();
 
         await context.Database.EnsureCreatedAsync();
 

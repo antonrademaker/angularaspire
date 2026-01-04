@@ -51,7 +51,7 @@ public class RegistrationService : IRegistrationService
         try
         {
             // Validate the registration request
-            var validation = await ValidateRegistrationAsync(request.UserId, request.EventId, cancellationToken);
+            RegistrationValidationResult validation = await ValidateRegistrationAsync(request.UserId, request.EventId, cancellationToken);
             if (!validation.IsValid)
             {
                 return new RegistrationResult
@@ -67,8 +67,8 @@ public class RegistrationService : IRegistrationService
             }
 
             // Get user and event details
-            var user = await _userService.GetUserByIdAsync(request.UserId, cancellationToken);
-            var eventDetails = await _eventService.GetEventByIdAsync(request.EventId, true);
+            User? user = await _userService.GetUserByIdAsync(request.UserId, cancellationToken);
+            Event? eventDetails = await _eventService.GetEventByIdAsync(request.EventId, true);
 
             if (user == null || eventDetails == null)
             {
@@ -212,13 +212,13 @@ public class RegistrationService : IRegistrationService
         try
         {
             // InMemory provider doesn't support Include across different contexts
-            var query = _context.Registrations.AsQueryable();
+            IQueryable<Registration> query = _context.Registrations.AsQueryable();
             if (!_isInMemory)
             {
                 query = query.Include(r => r.User).Include(r => r.Event);
             }
 
-            var registration = await query
+            Registration? registration = await query
                 .FirstOrDefaultAsync(r => r.Id == registrationId && r.UserId == userId, cancellationToken);
 
             if (registration == null)
@@ -305,7 +305,7 @@ public class RegistrationService : IRegistrationService
     {
         try
         {
-            var eventDetails = await _eventService.GetEventByIdAsync(eventId, true);
+            Event? eventDetails = await _eventService.GetEventByIdAsync(eventId, true);
             if (eventDetails == null || !eventDetails.MaxCapacity.HasValue)
             {
                 return 0;
@@ -327,7 +327,7 @@ public class RegistrationService : IRegistrationService
 
             for (int i = 0; i < processCount; i++)
             {
-                var queueItem = await _redis.ListLeftPopAsync(queueKey);
+                RedisValue queueItem = await _redis.ListLeftPopAsync(queueKey);
                 if (!queueItem.HasValue)
                 {
                     break; // Queue is empty
@@ -335,11 +335,11 @@ public class RegistrationService : IRegistrationService
 
                 try
                 {
-                    var queueData = JsonSerializer.Deserialize<dynamic>(queueItem!.ToString());
+                    dynamic? queueData = JsonSerializer.Deserialize<dynamic>(queueItem!.ToString());
                     var registrationIdString = ((JsonElement)queueData).GetProperty("RegistrationId").GetString();
                     var registrationId = Guid.Parse(registrationIdString!);
 
-                    var registration = await _context.Registrations
+                    Registration? registration = await _context.Registrations
                         .Include(r => r.User)
                         .Include(r => r.Event)
                         .FirstOrDefaultAsync(r => r.Id == registrationId && r.Status == RegistrationStatus.Queued, cancellationToken);
@@ -395,7 +395,7 @@ public class RegistrationService : IRegistrationService
         try
         {
             var rateKey = PROCESSING_RATE_KEY_PREFIX + eventId;
-            var rateValue = await _redis.StringGetAsync(rateKey);
+            RedisValue rateValue = await _redis.StringGetAsync(rateKey);
 
             var processingRate = 1.0; // Default: 1 registration per minute
             if (rateValue.HasValue && double.TryParse(rateValue.ToString(), out var rate))
@@ -417,11 +417,11 @@ public class RegistrationService : IRegistrationService
         try
         {
             var queueKey = QUEUE_KEY_PREFIX + eventId;
-            var queueItems = await _redis.ListRangeAsync(queueKey);
+            RedisValue[] queueItems = await _redis.ListRangeAsync(queueKey);
 
-            foreach (var item in queueItems)
+            foreach (RedisValue item in queueItems)
             {
-                var queueData = JsonSerializer.Deserialize<dynamic>(item!.ToString());
+                dynamic? queueData = JsonSerializer.Deserialize<dynamic>(item!.ToString());
                 var itemRegistrationIdString = ((JsonElement)queueData).GetProperty("RegistrationId").GetString();
                 var itemRegistrationId = Guid.Parse(itemRegistrationIdString!);
 
@@ -444,7 +444,7 @@ public class RegistrationService : IRegistrationService
         try
         {
             // Update queue positions in database
-            var queuedRegistrations = await _context.Registrations
+            List<Registration> queuedRegistrations = await _context.Registrations
                 .Where(r => r.EventId == eventId && r.Status == RegistrationStatus.Queued)
                 .OrderBy(r => r.RegisteredAt)
                 .ToListAsync();
@@ -480,10 +480,17 @@ public class RegistrationService : IRegistrationService
 
     public async Task<Registration?> GetRegistrationAsync(Guid registrationId, bool includeUser = true, bool includeEvent = true, CancellationToken cancellationToken = default)
     {
-        var query = _context.Registrations.AsQueryable();
+        IQueryable<Registration> query = _context.Registrations.AsQueryable();
 
-        if (includeUser) query = query.Include(r => r.User);
-        if (includeEvent) query = query.Include(r => r.Event);
+        if (includeUser)
+        {
+            query = query.Include(r => r.User);
+        }
+
+        if (includeEvent)
+        {
+            query = query.Include(r => r.Event);
+        }
 
         return await query.FirstOrDefaultAsync(r => r.Id == registrationId, cancellationToken);
     }
@@ -506,7 +513,7 @@ public class RegistrationService : IRegistrationService
             .Where(r => r.EventId == eventId && r.Status == RegistrationStatus.Queued)
             .CountAsync(cancellationToken);
 
-        var eventDetails = await _eventService.GetEventByIdAsync(eventId, true);
+        Event? eventDetails = await _eventService.GetEventByIdAsync(eventId, true);
         var maxCapacity = eventDetails?.MaxCapacity;
         var availableSpots = maxCapacity.HasValue ? maxCapacity.Value - confirmedCount : (int?)null;
 
@@ -528,7 +535,7 @@ public class RegistrationService : IRegistrationService
         var result = new RegistrationValidationResult { IsValid = true };
 
         // Check if already registered
-        var existingRegistration = await _context.Registrations
+        Registration? existingRegistration = await _context.Registrations
             .FirstOrDefaultAsync(r => r.UserId == userId && r.EventId == eventId &&
                 r.Status != RegistrationStatus.Cancelled, cancellationToken);
 

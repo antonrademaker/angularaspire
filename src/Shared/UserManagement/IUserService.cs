@@ -87,9 +87,11 @@ public class UserService : IUserService
 
     public async Task<bool> DeleteUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var user = await _context.Users.FindAsync(new object[] { userId }, cancellationToken);
+        User? user = await _context.Users.FindAsync(new object[] { userId }, cancellationToken);
         if (user == null)
+        {
             return false;
+        }
 
         _context.Users.Remove(user);
         await _context.SaveChangesAsync(cancellationToken);

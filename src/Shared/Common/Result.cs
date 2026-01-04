@@ -145,27 +145,34 @@ public class Result<T> : Result
 /// Represents a paged result containing items and pagination information
 /// </summary>
 /// <typeparam name="T">The type of items in the result</typeparam>
-public class PagedResult<T>
+/// <remarks>
+/// Initializes a new PagedResult
+/// </remarks>
+/// <param name="items">The items on the current page</param>
+/// <param name="totalCount">Total number of items</param>
+/// <param name="currentPage">Current page number</param>
+/// <param name="pageSize">Items per page</param>
+public class PagedResult<T>(IEnumerable<T> items, int totalCount, int currentPage, int pageSize)
 {
     /// <summary>
     /// The items on the current page
     /// </summary>
-    public IEnumerable<T> Items { get; set; }
+    public IEnumerable<T> Items { get; set; } = items;
 
     /// <summary>
     /// Total number of items across all pages
     /// </summary>
-    public int TotalCount { get; set; }
+    public int TotalCount { get; set; } = totalCount;
 
     /// <summary>
     /// Current page number (1-based)
     /// </summary>
-    public int CurrentPage { get; set; }
+    public int CurrentPage { get; set; } = currentPage;
 
     /// <summary>
     /// Number of items per page
     /// </summary>
-    public int PageSize { get; set; }
+    public int PageSize { get; set; } = pageSize;
 
     /// <summary>
     /// Total number of pages
@@ -181,21 +188,6 @@ public class PagedResult<T>
     /// Whether there is a next page
     /// </summary>
     public bool HasNext => CurrentPage < TotalPages;
-
-    /// <summary>
-    /// Initializes a new PagedResult
-    /// </summary>
-    /// <param name="items">The items on the current page</param>
-    /// <param name="totalCount">Total number of items</param>
-    /// <param name="currentPage">Current page number</param>
-    /// <param name="pageSize">Items per page</param>
-    public PagedResult(IEnumerable<T> items, int totalCount, int currentPage, int pageSize)
-    {
-        Items = items;
-        TotalCount = totalCount;
-        CurrentPage = currentPage;
-        PageSize = pageSize;
-    }
 }
 
 /// <summary>

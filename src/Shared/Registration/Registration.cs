@@ -198,7 +198,9 @@ public class Registration
         get
         {
             if (string.IsNullOrWhiteSpace(RegistrationDataJson))
+            {
                 return null;
+            }
 
             try
             {
@@ -288,7 +290,10 @@ public class Registration
     {
         get
         {
-            if (!IsQueued || !QueuePosition.HasValue) return null;
+            if (!IsQueued || !QueuePosition.HasValue)
+            {
+                return null;
+            }
 
             // Simple estimation: assume 2 minutes per position in queue
             // In real implementation, this could be more sophisticated based on historical data
@@ -303,7 +308,7 @@ public class Registration
     /// <param name="value">The data value</param>
     public void SetRegistrationData(string key, object value)
     {
-        var data = RegistrationData ?? new Dictionary<string, object>();
+        Dictionary<string, object> data = RegistrationData ?? new Dictionary<string, object>();
         data[key] = value;
         RegistrationData = data;
     }
@@ -316,9 +321,11 @@ public class Registration
     /// <returns>The value cast to T, or default(T) if not found</returns>
     public T? GetRegistrationData<T>(string key)
     {
-        var data = RegistrationData;
+        Dictionary<string, object>? data = RegistrationData;
         if (data == null || !data.TryGetValue(key, out var value))
+        {
             return default(T);
+        }
 
         if (value is JsonElement jsonElement)
         {
@@ -348,7 +355,9 @@ public class Registration
     public void Confirm()
     {
         if (Status != RegistrationStatus.Pending && Status != RegistrationStatus.Queued)
+        {
             throw new InvalidOperationException($"Cannot confirm registration in status: {Status}");
+        }
 
         Status = RegistrationStatus.Confirmed;
         ConfirmedAt = DateTime.UtcNow;
@@ -363,7 +372,9 @@ public class Registration
     public void AddToQueue(int position)
     {
         if (Status != RegistrationStatus.Pending)
+        {
             throw new InvalidOperationException($"Cannot queue registration in status: {Status}");
+        }
 
         Status = RegistrationStatus.Queued;
         QueuePosition = position;
@@ -377,7 +388,9 @@ public class Registration
     public void Cancel(string? reason = null)
     {
         if (!CanBeCancelled)
+        {
             throw new InvalidOperationException($"Cannot cancel registration in status: {Status}");
+        }
 
         Status = RegistrationStatus.Cancelled;
         CancelledAt = DateTime.UtcNow;
@@ -392,7 +405,9 @@ public class Registration
     public void MarkAsAttended()
     {
         if (Status != RegistrationStatus.Confirmed)
+        {
             throw new InvalidOperationException($"Cannot mark as attended registration in status: {Status}");
+        }
 
         Status = RegistrationStatus.Attended;
         UpdatedAt = DateTime.UtcNow;
@@ -404,7 +419,9 @@ public class Registration
     public void MarkAsNoShow()
     {
         if (Status != RegistrationStatus.Confirmed)
+        {
             throw new InvalidOperationException($"Cannot mark as no-show registration in status: {Status}");
+        }
 
         Status = RegistrationStatus.NoShow;
         UpdatedAt = DateTime.UtcNow;
@@ -417,7 +434,9 @@ public class Registration
     public void UpdateQueuePosition(int newPosition)
     {
         if (Status != RegistrationStatus.Queued)
+        {
             throw new InvalidOperationException($"Cannot update queue position for registration not in queue");
+        }
 
         QueuePosition = newPosition;
         UpdatedAt = DateTime.UtcNow;

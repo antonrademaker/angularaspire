@@ -323,7 +323,7 @@ public class RedisQueueService : IQueueService, IDisposable
             var score = CalculateQueueScore(priority, DateTime.UtcNow);
 
             // Use transaction to ensure atomicity
-            var transaction = _database.CreateTransaction();
+            ITransaction transaction = _database.CreateTransaction();
 
             // Add to sorted set (queue)
             transaction.SortedSetAddAsync(queueKey, registrationId, score);
@@ -393,13 +393,13 @@ public class RedisQueueService : IQueueService, IDisposable
             var itemKey = GetQueueItemKey(eventId, registrationId);
 
             // Use transaction for atomicity
-            var transaction = _database.CreateTransaction();
+            ITransaction transaction = _database.CreateTransaction();
 
             // Remove from queue
-            var removedTask = transaction.SortedSetRemoveAsync(queueKey, registrationId);
+            Task<bool> removedTask = transaction.SortedSetRemoveAsync(queueKey, registrationId);
 
             // Remove item details
-            var deletedTask = transaction.KeyDeleteAsync(itemKey);
+            Task<bool> deletedTask = transaction.KeyDeleteAsync(itemKey);
 
             // Update statistics
             _ = transaction.HashIncrementAsync(GetQueueStatsKey(eventId), "total_dequeued", 1);
@@ -455,7 +455,7 @@ public class RedisQueueService : IQueueService, IDisposable
             var queueKey = GetQueueKey(eventId);
 
             // Get highest priority items (highest score first)
-            var items = await _database.SortedSetRangeByScoreWithScoresAsync(
+            SortedSetEntry[] items = await _database.SortedSetRangeByScoreWithScoresAsync(
                 queueKey,
                 order: Order.Descending,
                 take: count);
@@ -467,15 +467,15 @@ public class RedisQueueService : IQueueService, IDisposable
 
             var queueItems = new List<QueueItem>();
 
-            foreach (var item in items)
+            foreach (SortedSetEntry item in items)
             {
                 var registrationId = (int)item.Element;
                 var itemKey = GetQueueItemKey(eventId, registrationId);
 
-                var itemJson = await _database.StringGetAsync(itemKey);
+                RedisValue itemJson = await _database.StringGetAsync(itemKey);
                 if (itemJson.HasValue)
                 {
-                    var queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
+                    QueueItem? queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
                     if (queueItem != null)
                     {
                         queueItems.Add(queueItem);
@@ -529,7 +529,7 @@ public class RedisQueueService : IQueueService, IDisposable
             var statsKey = GetQueueStatsKey(eventId);
 
             var queueLength = await _database.SortedSetLengthAsync(queueKey);
-            var stats = await _database.HashGetAllAsync(statsKey);
+            HashEntry[] stats = await _database.HashGetAllAsync(statsKey);
 
             var queueStats = new QueueStatistics
             {
@@ -538,7 +538,7 @@ public class RedisQueueService : IQueueService, IDisposable
             };
 
             // Parse statistics from Redis hash
-            var statsDict = stats.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
+            Dictionary<string, string> statsDict = stats.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
 
             if (statsDict.TryGetValue("total_enqueued", out var totalEnqueued) &&
                 int.TryParse(totalEnqueued, out var enqueuedCount))
@@ -552,7 +552,7 @@ public class RedisQueueService : IQueueService, IDisposable
             }
 
             // Get priority distribution
-            foreach (var priority in Enum.GetValues<RegistrationPriority>())
+            foreach (RegistrationPriority priority in Enum.GetValues<RegistrationPriority>())
             {
                 if (statsDict.TryGetValue($"priority_{(int)priority}", out var priorityCount) &&
                     long.TryParse(priorityCount, out var count))
@@ -568,7 +568,7 @@ public class RedisQueueService : IQueueService, IDisposable
             }
 
             // Get oldest item timestamp
-            var oldestItem = await _database.SortedSetRangeByScoreWithScoresAsync(
+            SortedSetEntry[] oldestItem = await _database.SortedSetRangeByScoreWithScoresAsync(
                 queueKey,
                 order: Order.Ascending,
                 take: 1);
@@ -577,11 +577,11 @@ public class RedisQueueService : IQueueService, IDisposable
             {
                 var oldestRegistrationId = (int)oldestItem[0].Element;
                 var itemKey = GetQueueItemKey(eventId, oldestRegistrationId);
-                var itemJson = await _database.StringGetAsync(itemKey);
+                RedisValue itemJson = await _database.StringGetAsync(itemKey);
 
                 if (itemJson.HasValue)
                 {
-                    var queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
+                    QueueItem? queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
                     if (queueItem != null)
                     {
                         queueStats.OldestItemTimestamp = queueItem.QueuedAt;
@@ -616,7 +616,7 @@ public class RedisQueueService : IQueueService, IDisposable
             var count = await _database.SortedSetLengthAsync(queueKey);
 
             // Get all items to clean up their detail keys
-            var allItems = await _database.SortedSetRangeByScoreAsync(queueKey);
+            RedisValue[] allItems = await _database.SortedSetRangeByScoreAsync(queueKey);
 
             // Delete the queue
             await _database.KeyDeleteAsync(queueKey);
@@ -624,7 +624,7 @@ public class RedisQueueService : IQueueService, IDisposable
             // Clean up individual item keys
             if (allItems.Length > 0)
             {
-                var itemKeys = allItems.Select(item => (RedisKey)GetQueueItemKey(eventId, (int)item)).ToArray();
+                RedisKey[] itemKeys = allItems.Select(item => (RedisKey)GetQueueItemKey(eventId, (int)item)).ToArray();
                 await _database.KeyDeleteAsync(itemKeys);
             }
 
@@ -700,21 +700,24 @@ public class RedisQueueService : IQueueService, IDisposable
         try
         {
             var queueKey = GetQueueKey(eventId);
-            var allItems = await _database.SortedSetRangeByScoreWithScoresAsync(queueKey);
+            SortedSetEntry[] allItems = await _database.SortedSetRangeByScoreWithScoresAsync(queueKey);
 
-            if (allItems.Length == 0) return 0;
+            if (allItems.Length == 0)
+            {
+                return 0;
+            }
 
             int updated = 0;
 
-            foreach (var item in allItems)
+            foreach (SortedSetEntry item in allItems)
             {
                 var registrationId = (int)item.Element;
                 var itemKey = GetQueueItemKey(eventId, registrationId);
-                var itemJson = await _database.StringGetAsync(itemKey);
+                RedisValue itemJson = await _database.StringGetAsync(itemKey);
 
                 if (itemJson.HasValue)
                 {
-                    var queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
+                    QueueItem? queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
                     if (queueItem != null)
                     {
                         // Recalculate score based on current priority and queue time
@@ -755,12 +758,12 @@ public class RedisQueueService : IQueueService, IDisposable
         try
         {
             // Test Redis connectivity
-            var pingResult = await _database.PingAsync();
+            TimeSpan pingResult = await _database.PingAsync();
             health["redis_ping_ms"] = pingResult.TotalMilliseconds;
             health["redis_connected"] = _connectionMultiplexer.IsConnected;
 
             // Get Redis info
-            var server = _connectionMultiplexer.GetServer(_connectionMultiplexer.GetEndPoints()[0]);
+            IServer server = _connectionMultiplexer.GetServer(_connectionMultiplexer.GetEndPoints()[0]);
             health["redis_memory_used"] = await server.InfoAsync("memory");
 
             health["status"] = "healthy";
@@ -803,19 +806,19 @@ public class RedisQueueService : IQueueService, IDisposable
     private async Task<long> CleanupExpiredItemsForEventAsync(int eventId)
     {
         var queueKey = GetQueueKey(eventId);
-        var allItems = await _database.SortedSetRangeByScoreAsync(queueKey);
+        RedisValue[] allItems = await _database.SortedSetRangeByScoreAsync(queueKey);
 
         long cleanedCount = 0;
 
-        foreach (var item in allItems)
+        foreach (RedisValue item in allItems)
         {
             var registrationId = (int)item;
             var itemKey = GetQueueItemKey(eventId, registrationId);
-            var itemJson = await _database.StringGetAsync(itemKey);
+            RedisValue itemJson = await _database.StringGetAsync(itemKey);
 
             if (itemJson.HasValue)
             {
-                var queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
+                QueueItem? queueItem = JsonSerializer.Deserialize<QueueItem>(itemJson.ToString());
                 if (queueItem != null && queueItem.ExpiresAt.HasValue && queueItem.ExpiresAt < DateTime.UtcNow)
                 {
                     // Remove expired item
@@ -843,9 +846,20 @@ public class RedisQueueService : IQueueService, IDisposable
     private static string DetermineQueueHealth(QueueStatistics stats)
     {
         // Simple health determination logic
-        if (stats.QueueLength > 10000) return "Critical"; // Very large queue
-        if (stats.QueueLength > 1000) return "Warning";   // Large queue
-        if (stats.AverageWaitTimeMinutes > 60) return "Warning"; // Long wait times
+        if (stats.QueueLength > 10000)
+        {
+            return "Critical"; // Very large queue
+        }
+
+        if (stats.QueueLength > 1000)
+        {
+            return "Warning";   // Large queue
+        }
+
+        if (stats.AverageWaitTimeMinutes > 60)
+        {
+            return "Warning"; // Long wait times
+        }
 
         return "Healthy";
     }

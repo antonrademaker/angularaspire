@@ -32,7 +32,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Searching events with criteria: {SearchText}", searchRequest.SearchText);
 
-        var query = _eventContext.Events.AsQueryable();
+        IQueryable<Event> query = _eventContext.Events.AsQueryable();
 
         // Only include user navigation when not using InMemory (avoids cross-context issues in tests)
         if (!_isInMemory)
@@ -99,7 +99,7 @@ public class EventService : IEventService
         var totalCount = await query.CountAsync();
 
         // Apply pagination
-        var events = await query
+        List<Event> events = await query
             .Skip((searchRequest.Page - 1) * searchRequest.PageSize)
             .Take(searchRequest.PageSize)
             .ToListAsync();
@@ -117,7 +117,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Getting event by ID: {EventId}", eventId);
 
-        var query = _eventContext.Events.AsQueryable();
+        IQueryable<Event> query = _eventContext.Events.AsQueryable();
 
         // Only include user navigation when not using InMemory and includeDetails is true
         if (includeDetails && !_isInMemory)
@@ -132,7 +132,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Getting event by slug: {Slug}", slug);
 
-        var query = _eventContext.Events.AsQueryable();
+        IQueryable<Event> query = _eventContext.Events.AsQueryable();
 
         // Only include user navigation when not using InMemory and includeDetails is true
         if (includeDetails && !_isInMemory)
@@ -147,7 +147,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Getting upcoming events (limit: {Limit})", limit);
 
-        var query = _eventContext.Events
+        IQueryable<Event> query = _eventContext.Events
             .Where(e => e.StartDate > DateTime.UtcNow)
             .Where(e => e.Status == EventStatus.Published);
 
@@ -168,14 +168,14 @@ public class EventService : IEventService
         _logger.LogInformation("Getting events by tags: {Tags}", string.Join(", ", tags));
 
         // PostgreSQL JSON queries for tag matching
-        var events = await _eventContext.Events
+        List<Event> events = await _eventContext.Events
             .Where(e => e.Status == EventStatus.Published)
             .Where(e => e.Visibility == EventVisibility.Public)
             .Where(e => e.Tags != null)
             .ToListAsync(); // Execute query first, then filter in memory
 
         // Filter by tags in memory (PostgreSQL JSON querying can be complex)
-        var filteredEvents = events
+        IEnumerable<Event> filteredEvents = events
             .Where(e => e.Tags != null && ContainsAnyTag(e.Tags, tags))
             .OrderBy(e => e.StartDate)
             .Take(limit);
@@ -190,7 +190,7 @@ public class EventService : IEventService
         _logger.LogInformation("Creating new event: {Title}", eventData.Title);
 
         // Validate slug uniqueness
-        var existingEvent = await _eventContext.Events
+        Event? existingEvent = await _eventContext.Events
             .FirstOrDefaultAsync(e => e.Slug == eventData.Slug);
         if (existingEvent != null)
         {
@@ -245,7 +245,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Updating event: {EventId}", eventId);
 
-        var existingEvent = await _eventContext.Events.FindAsync(eventId);
+        Event? existingEvent = await _eventContext.Events.FindAsync(eventId);
         if (existingEvent == null)
         {
             return null;
@@ -313,7 +313,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Deleting event: {EventId} by user: {UserId}", eventId, deletedByUserId);
 
-        var existingEvent = await _eventContext.Events.FindAsync(eventId);
+        Event? existingEvent = await _eventContext.Events.FindAsync(eventId);
         if (existingEvent == null)
         {
             return false;
@@ -330,7 +330,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Changing event status: {EventId} to {Status}", eventId, newStatus);
 
-        var existingEvent = await _eventContext.Events.FindAsync(eventId);
+        Event? existingEvent = await _eventContext.Events.FindAsync(eventId);
         if (existingEvent == null)
         {
             return null;
@@ -349,16 +349,29 @@ public class EventService : IEventService
 
     public async Task<bool> IsRegistrationAvailableAsync(Guid eventId)
     {
-        var eventItem = await _eventContext.Events.FindAsync(eventId);
-        if (eventItem == null) return false;
+        Event? eventItem = await _eventContext.Events.FindAsync(eventId);
+        if (eventItem == null)
+        {
+            return false;
+        }
 
         // Check if event is published and registration is open
-        if (eventItem.Status != EventStatus.Published) return false;
+        if (eventItem.Status != EventStatus.Published)
+        {
+            return false;
+        }
 
         // Check registration dates
-        var now = DateTime.UtcNow;
-        if (eventItem.RegistrationOpenDate.HasValue && now < eventItem.RegistrationOpenDate.Value) return false;
-        if (eventItem.RegistrationCloseDate.HasValue && now > eventItem.RegistrationCloseDate.Value) return false;
+        DateTime now = DateTime.UtcNow;
+        if (eventItem.RegistrationOpenDate.HasValue && now < eventItem.RegistrationOpenDate.Value)
+        {
+            return false;
+        }
+
+        if (eventItem.RegistrationCloseDate.HasValue && now > eventItem.RegistrationCloseDate.Value)
+        {
+            return false;
+        }
 
         // Check capacity
         return eventItem.CurrentAttendees < eventItem.MaxAttendees;
@@ -366,7 +379,7 @@ public class EventService : IEventService
 
     public async Task<int> UpdateAttendeeCountAsync(Guid eventId, int increment)
     {
-        var eventItem = await _eventContext.Events.FindAsync(eventId);
+        Event? eventItem = await _eventContext.Events.FindAsync(eventId);
         if (eventItem == null)
         {
             throw new InvalidOperationException($"Event with ID {eventId} not found");
@@ -384,7 +397,7 @@ public class EventService : IEventService
 
     public async Task<IEnumerable<Event>> GetEventsByOrganizerAsync(Guid organizerUserId, bool includeStats = false)
     {
-        var query = _eventContext.Events
+        IOrderedQueryable<Event> query = _eventContext.Events
             .Where(e => e.CreatedByUserId == organizerUserId)
             .OrderByDescending(e => e.CreatedAt);
 
@@ -393,8 +406,11 @@ public class EventService : IEventService
 
     public async Task<EventRegistrationStats?> GetEventStatsAsync(Guid eventId)
     {
-        var eventItem = await _eventContext.Events.FindAsync(eventId);
-        if (eventItem == null) return null;
+        Event? eventItem = await _eventContext.Events.FindAsync(eventId);
+        if (eventItem == null)
+        {
+            return null;
+        }
 
         return new EventRegistrationStats
         {
@@ -421,10 +437,16 @@ public class EventService : IEventService
 
     private bool ContainsAnyTag(string? tagsJson, string[] searchTags)
     {
-        if (string.IsNullOrEmpty(tagsJson)) return false;
+        if (string.IsNullOrEmpty(tagsJson))
+        {
+            return false;
+        }
 
-        var eventTags = JsonSerializer.Deserialize<List<string>>(tagsJson);
-        if (eventTags == null || eventTags.Count == 0) return false;
+        List<string>? eventTags = JsonSerializer.Deserialize<List<string>>(tagsJson);
+        if (eventTags == null || eventTags.Count == 0)
+        {
+            return false;
+        }
 
         return searchTags.Any(searchTag =>
             eventTags.Any(t => t.Equals(searchTag, StringComparison.OrdinalIgnoreCase)));

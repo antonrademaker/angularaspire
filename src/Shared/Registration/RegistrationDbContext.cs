@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -90,11 +93,11 @@ public class RegistrationDbContext : DbContext
         ConfigureConstraints(modelBuilder);
 
         // Configure table naming convention (snake_case)
-        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        foreach (IMutableEntityType entity in modelBuilder.Model.GetEntityTypes())
         {
             entity.SetTableName(entity.GetTableName()?.ToSnakeCase());
 
-            foreach (var property in entity.GetProperties())
+            foreach (IMutableProperty property in entity.GetProperties())
             {
                 property.SetColumnName(property.GetColumnName().ToSnakeCase());
             }
@@ -106,7 +109,7 @@ public class RegistrationDbContext : DbContext
     /// </summary>
     private static void ConfigureRegistration(ModelBuilder modelBuilder)
     {
-        var registration = modelBuilder.Entity<Registration>();
+        EntityTypeBuilder<Registration> registration = modelBuilder.Entity<Registration>();
 
         // Primary key
         registration.HasKey(r => r.Id);
@@ -196,7 +199,7 @@ public class RegistrationDbContext : DbContext
     /// </summary>
     private static void ConfigureIndexes(ModelBuilder modelBuilder)
     {
-        var registration = modelBuilder.Entity<Registration>();
+        EntityTypeBuilder<Registration> registration = modelBuilder.Entity<Registration>();
 
         // Composite index for user-event lookups (most common query)
         registration
@@ -267,7 +270,7 @@ public class RegistrationDbContext : DbContext
     /// </summary>
     private static void ConfigureConstraints(ModelBuilder modelBuilder)
     {
-        var registration = modelBuilder.Entity<Registration>();
+        EntityTypeBuilder<Registration> registration = modelBuilder.Entity<Registration>();
 
         // Check constraints for business rules
         registration
@@ -323,7 +326,7 @@ public class RegistrationDbContext : DbContext
             .Where(e => e.State == EntityState.Modified)
             .ToList();
 
-        foreach (var entry in entries)
+        foreach (EntityEntry<Registration>? entry in entries)
         {
             entry.Entity.UpdatedAt = DateTime.UtcNow;
         }
@@ -423,7 +426,10 @@ public static class StringExtensions
     /// </summary>
     public static string ToSnakeCase(this string input)
     {
-        if (string.IsNullOrEmpty(input)) return input;
+        if (string.IsNullOrEmpty(input))
+        {
+            return input;
+        }
 
         return System.Text.RegularExpressions.Regex.Replace(input,
             "([a-z0-9])([A-Z])", "$1_$2").ToLower();

@@ -109,7 +109,7 @@ public class TokenService : ITokenService
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+        SecurityToken securityToken = tokenHandler.CreateToken(tokenDescriptor);
         var token = tokenHandler.WriteToken(securityToken);
 
         return Task.FromResult(token);
@@ -123,7 +123,7 @@ public class TokenService : ITokenService
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var principal = tokenHandler.ValidateToken(token, _validationParameters, out _);
+            ClaimsPrincipal principal = tokenHandler.ValidateToken(token, _validationParameters, out _);
             return Task.FromResult<ClaimsPrincipal?>(principal);
         }
         catch (SecurityTokenException)
@@ -143,10 +143,13 @@ public class TokenService : ITokenService
     /// </summary>
     public async Task<Guid?> GetUserIdFromTokenAsync(string token)
     {
-        var principal = await ValidateTokenAsync(token);
-        if (principal == null) return null;
+        ClaimsPrincipal? principal = await ValidateTokenAsync(token);
+        if (principal == null)
+        {
+            return null;
+        }
 
         var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+        return Guid.TryParse(userIdClaim, out Guid userId) ? userId : null;
     }
 }

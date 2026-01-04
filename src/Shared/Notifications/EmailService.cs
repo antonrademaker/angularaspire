@@ -173,7 +173,7 @@ public class EmailService : IEmailService, IDisposable
 
     public async Task<bool> SendRegistrationConfirmationAsync(User user, Event eventDetails, Shared.Registration.Registration registration, CancellationToken cancellationToken = default)
     {
-        var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
+        RegistrationEmailData emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         var subject = $"Registration Confirmed: {eventDetails.Title}";
 
         var htmlBody = BuildConfirmationEmailHtml(emailData);
@@ -184,7 +184,7 @@ public class EmailService : IEmailService, IDisposable
 
     public async Task<bool> SendRegistrationQueuedAsync(User user, Event eventDetails, Shared.Registration.Registration registration, int queuePosition, CancellationToken cancellationToken = default)
     {
-        var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
+        RegistrationEmailData emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         emailData.QueuePosition = queuePosition;
 
         var subject = $"Registration Queued: {eventDetails.Title}";
@@ -197,7 +197,7 @@ public class EmailService : IEmailService, IDisposable
 
     public async Task<bool> SendRegistrationConfirmedFromQueueAsync(User user, Event eventDetails, Shared.Registration.Registration registration, CancellationToken cancellationToken = default)
     {
-        var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
+        RegistrationEmailData emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         var subject = $"Registration Confirmed: {eventDetails.Title} - You're In!";
 
         var htmlBody = BuildConfirmedFromQueueEmailHtml(emailData);
@@ -208,7 +208,7 @@ public class EmailService : IEmailService, IDisposable
 
     public async Task<bool> SendRegistrationCancelledAsync(User user, Event eventDetails, Shared.Registration.Registration registration, string reason, CancellationToken cancellationToken = default)
     {
-        var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
+        RegistrationEmailData emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         var subject = $"Registration Cancelled: {eventDetails.Title}";
 
         var htmlBody = BuildCancelledEmailHtml(emailData, reason);
@@ -219,7 +219,7 @@ public class EmailService : IEmailService, IDisposable
 
     public async Task<bool> SendQueuePositionUpdateAsync(User user, Event eventDetails, Shared.Registration.Registration registration, int newPosition, int? estimatedWaitMinutes = null, CancellationToken cancellationToken = default)
     {
-        var emailData = CreateRegistrationEmailData(user, eventDetails, registration);
+        RegistrationEmailData emailData = CreateRegistrationEmailData(user, eventDetails, registration);
         emailData.QueuePosition = newPosition;
         emailData.EstimatedWaitMinutes = estimatedWaitMinutes;
 
@@ -318,7 +318,7 @@ public class EmailService : IEmailService, IDisposable
     <div class='content'>
         <p>Hi {data.UserName},</p>
         <p>Great news! Your registration for <strong>{data.EventTitle}</strong> has been confirmed.</p>
-        
+
         <div class='event-details'>
             <h3>📅 Event Details</h3>
             <p><strong>Event:</strong> {data.EventTitle}</p>
@@ -329,13 +329,13 @@ public class EmailService : IEmailService, IDisposable
         </div>
 
         <p>Your registration ID is: <strong>{data.RegistrationId}</strong></p>
-        
+
         <p>
             <a href='{data.ConfirmationUrl}' class='button'>View Registration Details</a>
         </p>
-        
+
         <p>We look forward to seeing you at the event!</p>
-        
+
         <p><small>If you need to cancel your registration, you can do so by clicking <a href='{data.CancellationUrl}'>here</a>.</small></p>
     </div>
     <div class='footer'>
@@ -403,7 +403,7 @@ Do not reply to this email";
     <div class='content'>
         <p>Hi {data.UserName},</p>
         <p>Thank you for your interest in <strong>{data.EventTitle}</strong>! The event is currently at capacity, but you've been added to the queue.</p>
-        
+
         <div class='queue-info'>
             <h3>📍 Your Queue Status</h3>
             <p><strong>Queue Position:</strong> #{data.QueuePosition}</p>
@@ -421,11 +421,11 @@ Do not reply to this email";
         </div>
 
         <p>Your registration ID is: <strong>{data.RegistrationId}</strong></p>
-        
+
         <p>
             <a href='{data.ConfirmationUrl}' class='button'>Check Queue Status</a>
         </p>
-        
+
         <p><small>If you need to cancel your registration, you can do so by clicking <a href='{data.CancellationUrl}'>here</a>.</small></p>
     </div>
     <div class='footer'>
@@ -508,7 +508,7 @@ Do not reply to this email";
     <div class='content'>
         <p>Hi {data.UserName},</p>
         <p>Your registration for <strong>{data.EventTitle}</strong> has been cancelled.</p>
-        
+
         <p><strong>Reason:</strong> {reason}</p>
 
         <div class='event-details'>
@@ -519,9 +519,9 @@ Do not reply to this email";
         </div>
 
         <p>Your registration ID was: <strong>{data.RegistrationId}</strong></p>
-        
+
         <p>If you'd like to register again, please visit our events page.</p>
-        
+
         <p>We hope to see you at future events!</p>
     </div>
     <div class='footer'>
@@ -586,7 +586,7 @@ Do not reply to this email";
     <div class='content'>
         <p>Hi {data.UserName},</p>
         <p>Good news! Your queue position for <strong>{data.EventTitle}</strong> has been updated.</p>
-        
+
         <div class='queue-info'>
             <h3>📍 Your New Queue Status</h3>
             <p><strong>Queue Position:</strong> #{data.QueuePosition}</p>
@@ -597,7 +597,7 @@ Do not reply to this email";
         <p>
             <a href='{data.ConfirmationUrl}' class='button'>Check Current Status</a>
         </p>
-        
+
         <p><small>If you need to cancel your registration, you can do so by clicking <a href='{data.CancellationUrl}'>here</a>.</small></p>
     </div>
     <div class='footer'>

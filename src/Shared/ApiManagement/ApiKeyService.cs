@@ -33,7 +33,7 @@ public class ApiKeyService : IApiKeyService
         try
         {
             // Generate the raw API key
-            var (rawKey, keyHash, keyPrefix) = GenerateApiKey(request.Tier);
+            (string? rawKey, string? keyHash, string? keyPrefix) = GenerateApiKey(request.Tier);
 
             var apiKey = new ApiKey
             {
@@ -74,7 +74,7 @@ public class ApiKeyService : IApiKeyService
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        var apiKey = await _context.ApiKeys
+        ApiKey? apiKey = await _context.ApiKeys
             .Include(k => k.User)
             .FirstOrDefaultAsync(k => k.Id == id, cancellationToken);
 
@@ -85,7 +85,7 @@ public class ApiKeyService : IApiKeyService
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        var apiKeys = await _context.ApiKeys
+        List<ApiKey> apiKeys = await _context.ApiKeys
             .Include(k => k.User)
             .Where(k => k.UserId == userId)
             .OrderByDescending(k => k.CreatedAt)
@@ -99,7 +99,7 @@ public class ApiKeyService : IApiKeyService
         UpdateApiKeyRequest request,
         CancellationToken cancellationToken = default)
     {
-        var apiKey = await _context.ApiKeys
+        ApiKey? apiKey = await _context.ApiKeys
             .Include(k => k.User)
             .FirstOrDefaultAsync(k => k.Id == id, cancellationToken);
 
@@ -109,21 +109,45 @@ public class ApiKeyService : IApiKeyService
         }
 
         if (request.Name != null)
+        {
             apiKey.Name = request.Name;
+        }
+
         if (request.Description != null)
+        {
             apiKey.Description = request.Description;
+        }
+
         if (request.Tier.HasValue)
+        {
             apiKey.Tier = request.Tier.Value;
+        }
+
         if (request.Status.HasValue)
+        {
             apiKey.Status = request.Status.Value;
+        }
+
         if (request.Scopes != null)
+        {
             apiKey.Scopes = request.Scopes;
+        }
+
         if (request.AllowedIpAddresses != null)
+        {
             apiKey.AllowedIpAddresses = request.AllowedIpAddresses;
+        }
+
         if (request.AllowedOrigins != null)
+        {
             apiKey.AllowedOrigins = request.AllowedOrigins;
+        }
+
         if (request.ExpiresAt.HasValue)
+        {
             apiKey.ExpiresAt = request.ExpiresAt.Value;
+        }
+
         if (request.WebhooksEnabled.HasValue)
         {
             apiKey.WebhooksEnabled = request.WebhooksEnabled.Value;
@@ -133,7 +157,9 @@ public class ApiKeyService : IApiKeyService
             }
         }
         if (request.WebhookUrl != null)
+        {
             apiKey.WebhookUrl = request.WebhookUrl;
+        }
 
         apiKey.UpdatedAt = DateTime.UtcNow;
 
@@ -148,7 +174,7 @@ public class ApiKeyService : IApiKeyService
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        var apiKey = await _context.ApiKeys
+        ApiKey? apiKey = await _context.ApiKeys
             .Include(k => k.User)
             .FirstOrDefaultAsync(k => k.Id == id, cancellationToken);
 
@@ -157,7 +183,7 @@ public class ApiKeyService : IApiKeyService
             return null;
         }
 
-        var (rawKey, keyHash, keyPrefix) = GenerateApiKey(apiKey.Tier);
+        (string? rawKey, string? keyHash, string? keyPrefix) = GenerateApiKey(apiKey.Tier);
 
         apiKey.KeyHash = keyHash;
         apiKey.KeyPrefix = keyPrefix;
@@ -177,7 +203,7 @@ public class ApiKeyService : IApiKeyService
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        var apiKey = await _context.ApiKeys
+        ApiKey? apiKey = await _context.ApiKeys
             .FirstOrDefaultAsync(k => k.Id == id, cancellationToken);
 
         if (apiKey == null)
@@ -199,7 +225,7 @@ public class ApiKeyService : IApiKeyService
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        var apiKey = await _context.ApiKeys
+        ApiKey? apiKey = await _context.ApiKeys
             .FirstOrDefaultAsync(k => k.Id == id, cancellationToken);
 
         if (apiKey == null)
@@ -233,7 +259,7 @@ public class ApiKeyService : IApiKeyService
         // Hash the provided key
         var keyHash = HashApiKey(apiKey);
 
-        var key = await _context.ApiKeys
+        ApiKey? key = await _context.ApiKeys
             .FirstOrDefaultAsync(k => k.KeyHash == keyHash, cancellationToken);
 
         if (key == null)
@@ -273,7 +299,7 @@ public class ApiKeyService : IApiKeyService
 
         // Check rate limit
         var rateLimit = key.GetRateLimit();
-        var now = DateTime.UtcNow;
+        DateTime now = DateTime.UtcNow;
 
         // Reset window if needed
         if (!key.CurrentWindowStart.HasValue ||
@@ -340,7 +366,7 @@ public class ApiKeyService : IApiKeyService
         ApiKeySearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.ApiKeys
+        IQueryable<ApiKey> query = _context.ApiKeys
             .Include(k => k.User)
             .AsQueryable();
 
@@ -370,7 +396,7 @@ public class ApiKeyService : IApiKeyService
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        List<ApiKey> items = await query
             .OrderByDescending(k => k.CreatedAt)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
@@ -390,7 +416,7 @@ public class ApiKeyService : IApiKeyService
         DateTime? to = null,
         CancellationToken cancellationToken = default)
     {
-        var apiKey = await _context.ApiKeys
+        ApiKey? apiKey = await _context.ApiKeys
             .FirstOrDefaultAsync(k => k.Id == apiKeyId, cancellationToken);
 
         if (apiKey == null)
@@ -398,10 +424,10 @@ public class ApiKeyService : IApiKeyService
             return new ApiKeyUsageStats { ApiKeyId = apiKeyId };
         }
 
-        var fromDate = from ?? DateTime.UtcNow.AddDays(-30);
-        var toDate = to ?? DateTime.UtcNow;
+        DateTime fromDate = from ?? DateTime.UtcNow.AddDays(-30);
+        DateTime toDate = to ?? DateTime.UtcNow;
 
-        var logs = await _context.ApiKeyUsageLogs
+        List<ApiKeyUsageLog> logs = await _context.ApiKeyUsageLogs
             .Where(l => l.ApiKeyId == apiKeyId &&
                         l.Timestamp >= fromDate &&
                         l.Timestamp <= toDate)
@@ -505,7 +531,9 @@ public class ApiKeyService : IApiKeyService
             var baseParts = cidrBase.Split('.').Select(int.Parse).ToArray();
 
             if (ipParts.Length != 4 || baseParts.Length != 4)
+            {
                 return false;
+            }
 
             var ipBits = (ipParts[0] << 24) | (ipParts[1] << 16) | (ipParts[2] << 8) | ipParts[3];
             var baseBits = (baseParts[0] << 24) | (baseParts[1] << 16) | (baseParts[2] << 8) | baseParts[3];

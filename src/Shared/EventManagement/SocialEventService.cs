@@ -28,7 +28,7 @@ public class SocialEventService : ISocialEventService
         bool publishedOnly = true,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.SocialEvents
+        IQueryable<SocialEvent> query = _context.SocialEvents
             .Where(se => se.EventId == eventId);
 
         if (publishedOnly)
@@ -36,7 +36,7 @@ public class SocialEventService : ISocialEventService
             query = query.Where(se => se.IsPublished && se.Status != SocialEventStatus.Cancelled);
         }
 
-        var socialEvents = await query
+        List<SocialEvent> socialEvents = await query
             .OrderBy(se => se.DisplayOrder)
             .ThenBy(se => se.StartTime)
             .ToListAsync(cancellationToken);
@@ -48,7 +48,7 @@ public class SocialEventService : ISocialEventService
         Guid socialEventId,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.Id == socialEventId, cancellationToken);
 
         return socialEvent != null ? MapToResponse(socialEvent) : null;
@@ -59,7 +59,7 @@ public class SocialEventService : ISocialEventService
         string slug,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.EventId == eventId && se.Slug == slug, cancellationToken);
 
         return socialEvent != null ? MapToResponse(socialEvent) : null;
@@ -69,7 +69,7 @@ public class SocialEventService : ISocialEventService
         SocialEventSearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.SocialEvents.AsQueryable();
+        IQueryable<SocialEvent> query = _context.SocialEvents.AsQueryable();
 
         // Apply filters
         if (request.EventId.HasValue)
@@ -130,7 +130,7 @@ public class SocialEventService : ISocialEventService
         };
 
         // Apply pagination
-        var socialEvents = await query
+        List<SocialEvent> socialEvents = await query
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync(cancellationToken);
@@ -225,7 +225,7 @@ public class SocialEventService : ISocialEventService
         UpdateSocialEventRequest request,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.Id == socialEventId, cancellationToken);
 
         if (socialEvent == null)
@@ -235,7 +235,9 @@ public class SocialEventService : ISocialEventService
 
         // Update fields if provided
         if (!string.IsNullOrWhiteSpace(request.Title))
+        {
             socialEvent.Title = request.Title;
+        }
 
         if (!string.IsNullOrWhiteSpace(request.Slug))
         {
@@ -251,64 +253,104 @@ public class SocialEventService : ISocialEventService
         }
 
         if (!string.IsNullOrWhiteSpace(request.Description))
+        {
             socialEvent.Description = request.Description;
+        }
 
         if (request.Type.HasValue)
+        {
             socialEvent.Type = request.Type.Value;
+        }
 
         if (request.StartTime.HasValue)
+        {
             socialEvent.StartTime = request.StartTime.Value;
+        }
 
         if (request.EndTime.HasValue)
+        {
             socialEvent.EndTime = request.EndTime.Value;
+        }
 
         if (request.Location != null)
+        {
             socialEvent.Location = request.Location;
+        }
 
         if (request.Room != null)
+        {
             socialEvent.Room = request.Room;
+        }
 
         if (request.MaxCapacity.HasValue)
+        {
             socialEvent.MaxCapacity = request.MaxCapacity.Value > 0 ? request.MaxCapacity.Value : null;
+        }
 
         if (request.RsvpRequired.HasValue)
+        {
             socialEvent.RsvpRequired = request.RsvpRequired.Value;
+        }
 
         if (request.RsvpDeadline.HasValue)
+        {
             socialEvent.RsvpDeadline = request.RsvpDeadline.Value;
+        }
 
         if (request.GuestsAllowed.HasValue)
+        {
             socialEvent.GuestsAllowed = request.GuestsAllowed.Value;
+        }
 
         if (request.MaxGuestsPerAttendee.HasValue)
+        {
             socialEvent.MaxGuestsPerAttendee = request.MaxGuestsPerAttendee.Value;
+        }
 
         if (request.DressCode != null)
+        {
             socialEvent.DressCode = request.DressCode;
+        }
 
         if (request.CostPerPerson.HasValue)
+        {
             socialEvent.CostPerPerson = request.CostPerPerson.Value;
+        }
 
         if (!string.IsNullOrWhiteSpace(request.Currency))
+        {
             socialEvent.Currency = request.Currency;
+        }
 
         if (request.DietaryInfo != null)
+        {
             socialEvent.DietaryInfo = request.DietaryInfo;
+        }
 
         if (request.Notes != null)
+        {
             socialEvent.Notes = request.Notes;
+        }
 
         if (request.ImageUrl != null)
+        {
             socialEvent.ImageUrl = request.ImageUrl;
+        }
 
         if (request.Status.HasValue)
+        {
             socialEvent.Status = request.Status.Value;
+        }
 
         if (request.DisplayOrder.HasValue)
+        {
             socialEvent.DisplayOrder = request.DisplayOrder.Value;
+        }
 
         if (request.IsPublished.HasValue)
+        {
             socialEvent.IsPublished = request.IsPublished.Value;
+        }
 
         if (request.Tags != null)
         {
@@ -332,7 +374,7 @@ public class SocialEventService : ISocialEventService
         Guid socialEventId,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.Id == socialEventId, cancellationToken);
 
         if (socialEvent == null)
@@ -354,7 +396,7 @@ public class SocialEventService : ISocialEventService
         Guid socialEventId,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.Id == socialEventId, cancellationToken);
 
         if (socialEvent == null)
@@ -380,7 +422,7 @@ public class SocialEventService : ISocialEventService
         string? cancellationReason = null,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.Id == socialEventId, cancellationToken);
 
         if (socialEvent == null)
@@ -417,7 +459,7 @@ public class SocialEventService : ISocialEventService
         CreateRsvpRequest request,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.Id == socialEventId, cancellationToken);
 
         if (socialEvent == null)
@@ -441,7 +483,7 @@ public class SocialEventService : ISocialEventService
         }
 
         // Check if user already has an RSVP
-        var existingRsvp = await _context.SocialEventRsvps
+        SocialEventRsvp? existingRsvp = await _context.SocialEventRsvps
             .FirstOrDefaultAsync(r => r.SocialEventId == socialEventId && r.UserId == userId, cancellationToken);
 
         if (existingRsvp != null && existingRsvp.Status != SocialEventRsvpStatus.Cancelled)
@@ -546,7 +588,7 @@ public class SocialEventService : ISocialEventService
         UpdateRsvpRequest request,
         CancellationToken cancellationToken = default)
     {
-        var rsvp = await _context.SocialEventRsvps
+        SocialEventRsvp? rsvp = await _context.SocialEventRsvps
             .Include(r => r.SocialEvent)
             .FirstOrDefaultAsync(r => r.Id == rsvpId, cancellationToken);
 
@@ -575,7 +617,7 @@ public class SocialEventService : ISocialEventService
         if (request.Status.HasValue)
         {
             // Handle status change
-            var oldStatus = rsvp.Status;
+            SocialEventRsvpStatus oldStatus = rsvp.Status;
             rsvp.Status = request.Status.Value;
 
             if (request.Status.Value == SocialEventRsvpStatus.Declined)
@@ -587,7 +629,9 @@ public class SocialEventService : ISocialEventService
                 {
                     rsvp.SocialEvent.CurrentRsvpCount -= (1 + rsvp.GuestCount);
                     if (rsvp.SocialEvent.CurrentRsvpCount < 0)
+                    {
                         rsvp.SocialEvent.CurrentRsvpCount = 0;
+                    }
                 }
             }
         }
@@ -605,13 +649,19 @@ public class SocialEventService : ISocialEventService
         }
 
         if (request.GuestNames != null)
+        {
             rsvp.GuestNames = request.GuestNames;
+        }
 
         if (request.DietaryRequirements != null)
+        {
             rsvp.DietaryRequirements = request.DietaryRequirements;
+        }
 
         if (request.Notes != null)
+        {
             rsvp.Notes = request.Notes;
+        }
 
         rsvp.UpdatedAt = DateTime.UtcNow;
 
@@ -626,7 +676,7 @@ public class SocialEventService : ISocialEventService
         Guid rsvpId,
         CancellationToken cancellationToken = default)
     {
-        var rsvp = await _context.SocialEventRsvps
+        SocialEventRsvp? rsvp = await _context.SocialEventRsvps
             .Include(r => r.SocialEvent)
             .FirstOrDefaultAsync(r => r.Id == rsvpId, cancellationToken);
 
@@ -645,13 +695,17 @@ public class SocialEventService : ISocialEventService
         {
             rsvp.SocialEvent.CurrentRsvpCount -= (1 + rsvp.GuestCount);
             if (rsvp.SocialEvent.CurrentRsvpCount < 0)
+            {
                 rsvp.SocialEvent.CurrentRsvpCount = 0;
+            }
         }
         else if (rsvp.IsWaitlisted)
         {
             rsvp.SocialEvent.WaitlistCount--;
             if (rsvp.SocialEvent.WaitlistCount < 0)
+            {
                 rsvp.SocialEvent.WaitlistCount = 0;
+            }
         }
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -672,7 +726,7 @@ public class SocialEventService : ISocialEventService
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        var rsvp = await _context.SocialEventRsvps
+        SocialEventRsvp? rsvp = await _context.SocialEventRsvps
             .Include(r => r.SocialEvent)
             .Include(r => r.User)
             .FirstOrDefaultAsync(r => r.SocialEventId == socialEventId && r.UserId == userId, cancellationToken);
@@ -690,7 +744,7 @@ public class SocialEventService : ISocialEventService
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        var rsvps = await _context.SocialEventRsvps
+        List<SocialEventRsvp> rsvps = await _context.SocialEventRsvps
             .Include(r => r.SocialEvent)
             .Include(r => r.User)
             .Where(r => r.SocialEvent!.EventId == eventId && r.UserId == userId)
@@ -704,7 +758,7 @@ public class SocialEventService : ISocialEventService
         RsvpSearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.Id == socialEventId, cancellationToken);
 
         if (socialEvent == null)
@@ -712,7 +766,7 @@ public class SocialEventService : ISocialEventService
             return new PagedResult<SocialEventRsvpResponse>([], 0, request.Page, request.PageSize);
         }
 
-        var query = _context.SocialEventRsvps
+        IQueryable<SocialEventRsvp> query = _context.SocialEventRsvps
             .Include(r => r.User)
             .Where(r => r.SocialEventId == socialEventId);
 
@@ -752,7 +806,7 @@ public class SocialEventService : ISocialEventService
             _ => request.SortDescending ? query.OrderByDescending(r => r.RegisteredAt) : query.OrderBy(r => r.RegisteredAt)
         };
 
-        var rsvps = await query
+        List<SocialEventRsvp> rsvps = await query
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .ToListAsync(cancellationToken);
@@ -773,7 +827,7 @@ public class SocialEventService : ISocialEventService
         int requestedSpots = 1,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.Id == socialEventId, cancellationToken);
 
         if (socialEvent == null)
@@ -810,7 +864,7 @@ public class SocialEventService : ISocialEventService
         Guid socialEventId,
         CancellationToken cancellationToken = default)
     {
-        var socialEvent = await _context.SocialEvents
+        SocialEvent? socialEvent = await _context.SocialEvents
             .FirstOrDefaultAsync(se => se.Id == socialEventId, cancellationToken);
 
         if (socialEvent == null || !socialEvent.MaxCapacity.HasValue)
@@ -825,7 +879,7 @@ public class SocialEventService : ISocialEventService
         }
 
         // Get waitlisted RSVPs in order
-        var waitlistedRsvps = await _context.SocialEventRsvps
+        List<SocialEventRsvp> waitlistedRsvps = await _context.SocialEventRsvps
             .Where(r => r.SocialEventId == socialEventId && r.IsWaitlisted)
             .OrderBy(r => r.WaitlistPosition)
             .ThenBy(r => r.RegisteredAt)
@@ -833,7 +887,7 @@ public class SocialEventService : ISocialEventService
 
         var promotedCount = 0;
 
-        foreach (var rsvp in waitlistedRsvps)
+        foreach (SocialEventRsvp? rsvp in waitlistedRsvps)
         {
             var spotsNeeded = 1 + rsvp.GuestCount;
             if (availableSpots >= spotsNeeded)
@@ -882,7 +936,7 @@ public class SocialEventService : ISocialEventService
         Guid rsvpId,
         CancellationToken cancellationToken = default)
     {
-        var rsvp = await _context.SocialEventRsvps
+        SocialEventRsvp? rsvp = await _context.SocialEventRsvps
             .FirstOrDefaultAsync(r => r.Id == rsvpId, cancellationToken);
 
         if (rsvp == null)
@@ -905,7 +959,7 @@ public class SocialEventService : ISocialEventService
         Guid rsvpId,
         CancellationToken cancellationToken = default)
     {
-        var rsvp = await _context.SocialEventRsvps
+        SocialEventRsvp? rsvp = await _context.SocialEventRsvps
             .FirstOrDefaultAsync(r => r.Id == rsvpId, cancellationToken);
 
         if (rsvp == null)
@@ -928,7 +982,7 @@ public class SocialEventService : ISocialEventService
         Guid rsvpId,
         CancellationToken cancellationToken = default)
     {
-        var rsvp = await _context.SocialEventRsvps
+        SocialEventRsvp? rsvp = await _context.SocialEventRsvps
             .FirstOrDefaultAsync(r => r.Id == rsvpId, cancellationToken);
 
         if (rsvp == null)
@@ -968,7 +1022,7 @@ public class SocialEventService : ISocialEventService
             : int.MaxValue;
 
         // Convert Tags JSON string to IEnumerable<string> for response
-        var tags = !string.IsNullOrEmpty(socialEvent.Tags)
+        List<string>? tags = !string.IsNullOrEmpty(socialEvent.Tags)
             ? JsonSerializer.Deserialize<List<string>>(socialEvent.Tags)
             : null;
 

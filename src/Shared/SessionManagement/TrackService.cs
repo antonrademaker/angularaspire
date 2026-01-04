@@ -87,7 +87,7 @@ public class TrackService : ITrackService
 
     public async Task<TrackResponse?> GetTrackAsync(Guid trackId)
     {
-        var track = await _context.Tracks
+        Track? track = await _context.Tracks
             .FirstOrDefaultAsync(t => t.Id == trackId);
 
         return track != null ? await MapToTrackResponseAsync(track) : null;
@@ -95,7 +95,7 @@ public class TrackService : ITrackService
 
     public async Task<TrackResponse?> GetTrackBySlugAsync(Guid eventId, string slug)
     {
-        var track = await _context.Tracks
+        Track? track = await _context.Tracks
             .FirstOrDefaultAsync(t => t.EventId == eventId && t.Slug == slug);
 
         return track != null ? await MapToTrackResponseAsync(track) : null;
@@ -105,7 +105,7 @@ public class TrackService : ITrackService
     {
         try
         {
-            var track = await _context.Tracks
+            Track? track = await _context.Tracks
                 .FirstOrDefaultAsync(t => t.Id == trackId);
 
             if (track == null)
@@ -115,9 +115,15 @@ public class TrackService : ITrackService
 
             // Update properties if provided
             if (!string.IsNullOrEmpty(request.Name))
+            {
                 track.Name = request.Name;
+            }
+
             if (!string.IsNullOrEmpty(request.Description))
+            {
                 track.Description = request.Description;
+            }
+
             if (!string.IsNullOrEmpty(request.Slug))
             {
                 // Check for duplicate slug
@@ -130,23 +136,49 @@ public class TrackService : ITrackService
                 track.Slug = request.Slug;
             }
             if (request.Color != null)
+            {
                 track.Color = request.Color;
+            }
+
             if (request.Icon != null)
+            {
                 track.Icon = request.Icon;
+            }
+
             if (request.AudienceLevel.HasValue)
+            {
                 track.AudienceLevel = request.AudienceLevel.Value;
+            }
+
             if (request.Category.HasValue)
+            {
                 track.Category = request.Category.Value;
+            }
+
             if (request.DisplayOrder.HasValue)
+            {
                 track.DisplayOrder = request.DisplayOrder.Value;
+            }
+
             if (request.IsActive.HasValue)
+            {
                 track.IsActive = request.IsActive.Value;
+            }
+
             if (request.MaxConcurrentSessions.HasValue)
+            {
                 track.MaxConcurrentSessions = request.MaxConcurrentSessions.Value;
+            }
+
             if (request.Tags != null)
-                track.Tags = request.Tags.Any() ? JsonSerializer.Serialize(request.Tags) : null;
+            {
+                track.Tags = request.Tags.Count != 0 ? JsonSerializer.Serialize(request.Tags) : null;
+            }
+
             if (request.CustomFields != null)
-                track.CustomFields = request.CustomFields.Any() ? JsonSerializer.Serialize(request.CustomFields) : null;
+            {
+                track.CustomFields = request.CustomFields.Count != 0 ? JsonSerializer.Serialize(request.CustomFields) : null;
+            }
 
             track.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
@@ -166,7 +198,7 @@ public class TrackService : ITrackService
     {
         try
         {
-            var track = await _context.Tracks
+            Track? track = await _context.Tracks
                 .Include(t => t.Sessions)
                 .FirstOrDefaultAsync(t => t.Id == trackId);
 
@@ -199,18 +231,20 @@ public class TrackService : ITrackService
 
     public async Task<IEnumerable<TrackResponse>> GetEventTracksAsync(Guid eventId, bool includeInactive = false)
     {
-        var query = _context.Tracks
+        IQueryable<Track> query = _context.Tracks
             .Where(t => t.EventId == eventId);
 
         if (!includeInactive)
+        {
             query = query.Where(t => t.IsActive);
+        }
 
-        var tracks = await query
+        List<Track> tracks = await query
             .OrderBy(t => t.DisplayOrder)
             .ToListAsync();
 
         var responses = new List<TrackResponse>();
-        foreach (var track in tracks)
+        foreach (Track? track in tracks)
         {
             responses.Add(await MapToTrackResponseAsync(track));
         }
@@ -220,11 +254,13 @@ public class TrackService : ITrackService
 
     public async Task<PagedResult<TrackResponse>> SearchTracksAsync(TrackSearchRequest request)
     {
-        var query = _context.Tracks.AsQueryable();
+        IQueryable<Track> query = _context.Tracks.AsQueryable();
 
         // Apply filters
         if (request.EventId.HasValue)
+        {
             query = query.Where(t => t.EventId == request.EventId.Value);
+        }
 
         if (!string.IsNullOrEmpty(request.SearchText))
         {
@@ -235,13 +271,19 @@ public class TrackService : ITrackService
         }
 
         if (request.AudienceLevels?.Any() == true)
+        {
             query = query.Where(t => request.AudienceLevels.Contains(t.AudienceLevel));
+        }
 
         if (request.Categories?.Any() == true)
+        {
             query = query.Where(t => request.Categories.Contains(t.Category));
+        }
 
         if (request.IsActive.HasValue)
+        {
             query = query.Where(t => t.IsActive == request.IsActive.Value);
+        }
 
         // Get total count
         var totalCount = await query.CountAsync();
@@ -251,10 +293,10 @@ public class TrackService : ITrackService
                      .Skip(request.Skip)
                      .Take(request.PageSize);
 
-        var tracks = await query.ToListAsync();
+        List<Track> tracks = await query.ToListAsync();
         var trackResponses = new List<TrackResponse>();
 
-        foreach (var track in tracks)
+        foreach (Track? track in tracks)
         {
             trackResponses.Add(await MapToTrackResponseAsync(track));
         }
@@ -271,7 +313,7 @@ public class TrackService : ITrackService
             var trackOrdersList = trackOrders.ToList();
             var trackIds = trackOrdersList.Select(to => to.TrackId).ToList();
 
-            var tracks = await _context.Tracks
+            List<Track> tracks = await _context.Tracks
                 .Where(t => t.EventId == eventId && trackIds.Contains(t.Id))
                 .ToListAsync();
 
@@ -280,9 +322,9 @@ public class TrackService : ITrackService
                 return Result.Failure("Some tracks were not found");
             }
 
-            foreach (var trackOrder in trackOrdersList)
+            foreach (TrackOrderItem? trackOrder in trackOrdersList)
             {
-                var track = tracks.First(t => t.Id == trackOrder.TrackId);
+                Track track = tracks.First(t => t.Id == trackOrder.TrackId);
                 track.DisplayOrder = trackOrder.DisplayOrder;
                 track.UpdatedAt = DateTime.UtcNow;
             }
@@ -305,7 +347,7 @@ public class TrackService : ITrackService
     {
         try
         {
-            var track = await _context.Tracks
+            Track? track = await _context.Tracks
                 .FirstOrDefaultAsync(t => t.Id == trackId);
 
             if (track == null)
@@ -333,7 +375,7 @@ public class TrackService : ITrackService
 
     public async Task<TrackStatistics> GetTrackStatisticsAsync(Guid trackId)
     {
-        var track = await _context.Tracks
+        Track? track = await _context.Tracks
             .Include(t => t.Sessions)
             .ThenInclude(s => s.Subscriptions)
             .FirstOrDefaultAsync(t => t.Id == trackId);
@@ -343,7 +385,7 @@ public class TrackService : ITrackService
             return new TrackStatistics { TrackId = trackId, TrackName = "Unknown Track" };
         }
 
-        var sessions = track.Sessions;
+        ICollection<Session> sessions = track.Sessions;
         var subscriptions = sessions.SelectMany(s => s.Subscriptions).ToList();
 
         var totalCapacity = sessions.Where(s => s.MaxAttendees.HasValue).Sum(s => s.MaxAttendees!.Value);
@@ -374,13 +416,13 @@ public class TrackService : ITrackService
 
     public async Task<IEnumerable<TrackStatistics>> GetEventTrackStatisticsAsync(Guid eventId)
     {
-        var tracks = await _context.Tracks
+        List<Track> tracks = await _context.Tracks
             .Where(t => t.EventId == eventId)
             .ToListAsync();
 
         var statistics = new List<TrackStatistics>();
 
-        foreach (var track in tracks)
+        foreach (Track? track in tracks)
         {
             statistics.Add(await GetTrackStatisticsAsync(track.Id));
         }
@@ -393,8 +435,8 @@ public class TrackService : ITrackService
     private async Task<TrackResponse> MapToTrackResponseAsync(Track track)
     {
         // Deserialize JSON strings for response
-        var tags = !string.IsNullOrEmpty(track.Tags) ? JsonSerializer.Deserialize<List<string>>(track.Tags) : null;
-        var customFields = !string.IsNullOrEmpty(track.CustomFields) ? JsonSerializer.Deserialize<Dictionary<string, object>>(track.CustomFields) : null;
+        List<string>? tags = !string.IsNullOrEmpty(track.Tags) ? JsonSerializer.Deserialize<List<string>>(track.Tags) : null;
+        Dictionary<string, object>? customFields = !string.IsNullOrEmpty(track.CustomFields) ? JsonSerializer.Deserialize<Dictionary<string, object>>(track.CustomFields) : null;
 
         // Get session count if sessions are loaded
         int? sessionCount = null;

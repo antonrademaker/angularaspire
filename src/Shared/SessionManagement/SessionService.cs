@@ -54,10 +54,10 @@ public class SessionService : ISessionService
             }
 
             // Check for time conflicts
-            var conflicts = await DetectSessionConflictsAsync(Guid.Empty, request.StartTime, request.EndTime, request.Room);
+            IEnumerable<SessionConflict> conflicts = await DetectSessionConflictsAsync(Guid.Empty, request.StartTime, request.EndTime, request.Room);
             if (conflicts.Any())
             {
-                var conflictMessages = conflicts.Select(c => $"{c.ConflictType}: {c.ConflictingSessionTitle}");
+                IEnumerable<string> conflictMessages = conflicts.Select(c => $"{c.ConflictType}: {c.ConflictingSessionTitle}");
                 return Result<SessionResponse>.Failure($"Schedule conflicts detected: {string.Join(", ", conflictMessages)}");
             }
 
@@ -108,7 +108,7 @@ public class SessionService : ISessionService
 
     public async Task<SessionResponse?> GetSessionAsync(Guid sessionId)
     {
-        var session = await _context.Sessions
+        Session? session = await _context.Sessions
             .Include(s => s.Track)
             .Include(s => s.SessionSpeakers)
             .FirstOrDefaultAsync(s => s.Id == sessionId);
@@ -118,7 +118,7 @@ public class SessionService : ISessionService
 
     public async Task<SessionResponse?> GetSessionBySlugAsync(Guid eventId, string slug)
     {
-        var session = await _context.Sessions
+        Session? session = await _context.Sessions
             .Include(s => s.Track)
             .Include(s => s.SessionSpeakers)
             .FirstOrDefaultAsync(s => s.EventId == eventId && s.Slug == slug);
@@ -130,7 +130,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var session = await _context.Sessions
+            Session? session = await _context.Sessions
                 .Include(s => s.Track)
                 .FirstOrDefaultAsync(s => s.Id == sessionId);
 
@@ -141,11 +141,20 @@ public class SessionService : ISessionService
 
             // Update properties if provided
             if (!string.IsNullOrEmpty(request.Title))
+            {
                 session.Title = request.Title;
+            }
+
             if (!string.IsNullOrEmpty(request.Description))
+            {
                 session.Description = request.Description;
+            }
+
             if (request.Abstract != null)
+            {
                 session.Abstract = request.Abstract;
+            }
+
             if (!string.IsNullOrEmpty(request.Slug))
             {
                 // Check for duplicate slug
@@ -158,53 +167,112 @@ public class SessionService : ISessionService
                 session.Slug = request.Slug;
             }
             if (request.StartTime.HasValue)
+            {
                 session.StartTime = request.StartTime.Value;
+            }
+
             if (request.EndTime.HasValue)
+            {
                 session.EndTime = request.EndTime.Value;
+            }
+
             if (request.Type.HasValue)
+            {
                 session.Type = request.Type.Value;
+            }
+
             if (request.DifficultyLevel.HasValue)
+            {
                 session.DifficultyLevel = request.DifficultyLevel.Value;
+            }
+
             if (request.MaxAttendees.HasValue)
+            {
                 session.MaxAttendees = request.MaxAttendees.Value;
+            }
+
             if (request.RequiresSubscription.HasValue)
+            {
                 session.RequiresSubscription = request.RequiresSubscription.Value;
+            }
+
             if (request.Room != null)
+            {
                 session.Room = request.Room;
+            }
+
             if (request.Building != null)
+            {
                 session.Building = request.Building;
+            }
+
             if (request.IsVirtual.HasValue)
+            {
                 session.IsVirtual = request.IsVirtual.Value;
+            }
+
             if (request.VirtualUrl != null)
+            {
                 session.VirtualUrl = request.VirtualUrl;
+            }
+
             if (request.RecordingUrl != null)
+            {
                 session.RecordingUrl = request.RecordingUrl;
+            }
+
             if (request.MaterialsUrl != null)
+            {
                 session.MaterialsUrl = request.MaterialsUrl;
+            }
+
             if (request.AllowQuestions.HasValue)
+            {
                 session.AllowQuestions = request.AllowQuestions.Value;
+            }
+
             if (request.IsRecorded.HasValue)
+            {
                 session.IsRecorded = request.IsRecorded.Value;
+            }
+
             if (!string.IsNullOrEmpty(request.Language))
+            {
                 session.Language = request.Language;
+            }
+
             if (request.Prerequisites != null)
+            {
                 session.Prerequisites = request.Prerequisites;
+            }
+
             if (request.LearningOutcomes != null)
+            {
                 session.LearningOutcomes = request.LearningOutcomes;
+            }
+
             if (request.TargetAudience != null)
+            {
                 session.TargetAudience = request.TargetAudience;
+            }
+
             if (request.Tags != null)
-                session.Tags = request.Tags.Any() ? JsonSerializer.Serialize(request.Tags) : null;
+            {
+                session.Tags = request.Tags.Count != 0 ? JsonSerializer.Serialize(request.Tags) : null;
+            }
+
             if (request.CustomFields != null)
-                session.CustomFields = request.CustomFields.Any() ? JsonSerializer.Serialize(request.CustomFields) : null;
+            {
+                session.CustomFields = request.CustomFields.Count != 0 ? JsonSerializer.Serialize(request.CustomFields) : null;
+            }
 
             // Check for conflicts if time or room changed
             if (request.StartTime.HasValue || request.EndTime.HasValue || request.Room != null)
             {
-                var conflicts = await DetectSessionConflictsAsync(sessionId, session.StartTime, session.EndTime, session.Room);
+                IEnumerable<SessionConflict> conflicts = await DetectSessionConflictsAsync(sessionId, session.StartTime, session.EndTime, session.Room);
                 if (conflicts.Any())
                 {
-                    var conflictMessages = conflicts.Select(c => $"{c.ConflictType}: {c.ConflictingSessionTitle}");
+                    IEnumerable<string> conflictMessages = conflicts.Select(c => $"{c.ConflictType}: {c.ConflictingSessionTitle}");
                     return Result<SessionResponse>.Failure($"Schedule conflicts detected: {string.Join(", ", conflictMessages)}");
                 }
             }
@@ -227,7 +295,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var session = await _context.Sessions
+            Session? session = await _context.Sessions
                 .Include(s => s.Subscriptions)
                 .FirstOrDefaultAsync(s => s.Id == sessionId);
 
@@ -260,7 +328,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var session = await _context.Sessions.FindAsync(sessionId);
+            Session? session = await _context.Sessions.FindAsync(sessionId);
             if (session == null)
             {
                 return Result.Failure("Session not found");
@@ -287,7 +355,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var session = await _context.Sessions.FindAsync(sessionId);
+            Session? session = await _context.Sessions.FindAsync(sessionId);
             if (session == null)
             {
                 return Result.Failure("Session not found");
@@ -314,17 +382,21 @@ public class SessionService : ISessionService
 
     public async Task<PagedResult<SessionResponse>> SearchSessionsAsync(SessionSearchRequest request)
     {
-        var query = _context.Sessions
+        IQueryable<Session> query = _context.Sessions
             .Include(s => s.Track)
             .Include(s => s.SessionSpeakers)
             .AsQueryable();
 
         // Apply filters
         if (request.EventId.HasValue)
+        {
             query = query.Where(s => s.EventId == request.EventId.Value);
+        }
 
         if (request.TrackId.HasValue)
+        {
             query = query.Where(s => s.TrackId == request.TrackId.Value);
+        }
 
         if (!string.IsNullOrEmpty(request.SearchText))
         {
@@ -336,28 +408,44 @@ public class SessionService : ISessionService
         }
 
         if (request.Types?.Any() == true)
+        {
             query = query.Where(s => request.Types.Contains(s.Type));
+        }
 
         if (request.DifficultyLevels?.Any() == true)
+        {
             query = query.Where(s => request.DifficultyLevels.Contains(s.DifficultyLevel));
+        }
 
         if (request.StartDate.HasValue)
+        {
             query = query.Where(s => s.StartTime >= request.StartDate.Value);
+        }
 
         if (request.EndDate.HasValue)
+        {
             query = query.Where(s => s.EndTime <= request.EndDate.Value);
+        }
 
         if (!string.IsNullOrEmpty(request.Room))
+        {
             query = query.Where(s => s.Room == request.Room);
+        }
 
         if (request.IsVirtual.HasValue)
+        {
             query = query.Where(s => s.IsVirtual == request.IsVirtual.Value);
+        }
 
         if (request.HasCapacity.HasValue && request.HasCapacity.Value)
+        {
             query = query.Where(s => s.MaxAttendees == null || s.CurrentAttendees < s.MaxAttendees);
+        }
 
         if (!request.IncludeUnpublished)
+        {
             query = query.Where(s => s.IsPublished);
+        }
 
         // Get total count
         var totalCount = await query.CountAsync();
@@ -367,10 +455,10 @@ public class SessionService : ISessionService
                      .Skip(request.Skip)
                      .Take(request.PageSize);
 
-        var sessions = await query.ToListAsync();
+        List<Session> sessions = await query.ToListAsync();
         var sessionResponses = new List<SessionResponse>();
 
-        foreach (var session in sessions)
+        foreach (Session? session in sessions)
         {
             sessionResponses.Add(await MapToSessionResponseAsync(session));
         }
@@ -380,23 +468,27 @@ public class SessionService : ISessionService
 
     public async Task<IEnumerable<SessionResponse>> GetEventSessionsAsync(Guid eventId, Guid? trackId = null, bool includeUnpublished = false)
     {
-        var query = _context.Sessions
+        IQueryable<Session> query = _context.Sessions
             .Include(s => s.Track)
             .Include(s => s.SessionSpeakers)
             .Where(s => s.EventId == eventId);
 
         if (trackId.HasValue)
+        {
             query = query.Where(s => s.TrackId == trackId.Value);
+        }
 
         if (!includeUnpublished)
+        {
             query = query.Where(s => s.IsPublished);
+        }
 
         query = query.OrderBy(s => s.StartTime);
 
-        var sessions = await query.ToListAsync();
+        List<Session> sessions = await query.ToListAsync();
         var responses = new List<SessionResponse>();
 
-        foreach (var session in sessions)
+        foreach (Session? session in sessions)
         {
             responses.Add(await MapToSessionResponseAsync(session));
         }
@@ -406,20 +498,22 @@ public class SessionService : ISessionService
 
     public async Task<IEnumerable<SessionResponse>> GetTrackSessionsAsync(Guid trackId, bool includeUnpublished = false)
     {
-        var query = _context.Sessions
+        IQueryable<Session> query = _context.Sessions
             .Include(s => s.Track)
             .Include(s => s.SessionSpeakers)
             .Where(s => s.TrackId == trackId);
 
         if (!includeUnpublished)
+        {
             query = query.Where(s => s.IsPublished);
+        }
 
         query = query.OrderBy(s => s.StartTime);
 
-        var sessions = await query.ToListAsync();
+        List<Session> sessions = await query.ToListAsync();
         var responses = new List<SessionResponse>();
 
-        foreach (var session in sessions)
+        foreach (Session? session in sessions)
         {
             responses.Add(await MapToSessionResponseAsync(session));
         }
@@ -431,7 +525,7 @@ public class SessionService : ISessionService
 
     public async Task<SessionAvailabilityResponse> CheckSessionAvailabilityAsync(Guid sessionId)
     {
-        var session = await _context.Sessions
+        Session? session = await _context.Sessions
             .Include(s => s.Subscriptions)
             .FirstOrDefaultAsync(s => s.Id == sessionId);
 
@@ -464,14 +558,14 @@ public class SessionService : ISessionService
         var conflicts = new List<SessionConflict>();
 
         // Time-based conflicts (overlapping sessions in same room or virtual)
-        var timeConflictQuery = _context.Sessions
+        IQueryable<Session> timeConflictQuery = _context.Sessions
             .Where(s => s.Id != sessionId && s.IsPublished)
             .Where(s => s.StartTime < endTime && s.EndTime > startTime);
 
         // Room conflicts
         if (!string.IsNullOrEmpty(room))
         {
-            var roomConflicts = await timeConflictQuery
+            List<Session> roomConflicts = await timeConflictQuery
                 .Where(s => s.Room == room && !s.IsVirtual)
                 .ToListAsync();
 
@@ -495,7 +589,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var session = await _context.Sessions
+            Session? session = await _context.Sessions
                 .Include(s => s.Subscriptions)
                 .FirstOrDefaultAsync(s => s.Id == sessionId);
 
@@ -505,7 +599,7 @@ public class SessionService : ISessionService
             }
 
             // Check if user is already subscribed
-            var existingSubscription = session.Subscriptions
+            Subscription? existingSubscription = session.Subscriptions
                 .FirstOrDefault(s => s.UserId == userId && s.Status != SubscriptionStatus.Cancelled);
 
             if (existingSubscription != null)
@@ -514,7 +608,7 @@ public class SessionService : ISessionService
             }
 
             // Check availability
-            var availability = await CheckSessionAvailabilityAsync(sessionId);
+            SessionAvailabilityResponse availability = await CheckSessionAvailabilityAsync(sessionId);
 
             var subscription = new Subscription
             {
@@ -558,7 +652,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var subscription = await _context.Subscriptions
+            Subscription? subscription = await _context.Subscriptions
                 .Include(s => s.Session)
                 .FirstOrDefaultAsync(s => s.SessionId == sessionId && s.UserId == userId && s.Status != SubscriptionStatus.Cancelled);
 
@@ -596,17 +690,19 @@ public class SessionService : ISessionService
 
     public async Task<IEnumerable<SubscriptionResponse>> GetUserSubscriptionsAsync(Guid userId, Guid? eventId = null)
     {
-        var query = _context.Subscriptions
+        IQueryable<Subscription> query = _context.Subscriptions
             .Include(s => s.Session)
             .Where(s => s.UserId == userId && s.Status != SubscriptionStatus.Cancelled);
 
         if (eventId.HasValue)
+        {
             query = query.Where(s => s.Session!.EventId == eventId.Value);
+        }
 
-        var subscriptions = await query.ToListAsync();
+        List<Subscription> subscriptions = await query.ToListAsync();
         var responses = new List<SubscriptionResponse>();
 
-        foreach (var subscription in subscriptions)
+        foreach (Subscription? subscription in subscriptions)
         {
             responses.Add(await MapToSubscriptionResponseAsync(subscription));
         }
@@ -616,17 +712,19 @@ public class SessionService : ISessionService
 
     public async Task<IEnumerable<SubscriptionResponse>> GetSessionSubscriptionsAsync(Guid sessionId, bool includeWaitlisted = false)
     {
-        var query = _context.Subscriptions
+        IQueryable<Subscription> query = _context.Subscriptions
             .Include(s => s.Session)
             .Where(s => s.SessionId == sessionId);
 
         if (!includeWaitlisted)
+        {
             query = query.Where(s => s.Status == SubscriptionStatus.Confirmed);
+        }
 
-        var subscriptions = await query.OrderBy(s => s.CreatedAt).ToListAsync();
+        List<Subscription> subscriptions = await query.OrderBy(s => s.CreatedAt).ToListAsync();
         var responses = new List<SubscriptionResponse>();
 
-        foreach (var subscription in subscriptions)
+        foreach (Subscription? subscription in subscriptions)
         {
             responses.Add(await MapToSubscriptionResponseAsync(subscription));
         }
@@ -640,18 +738,22 @@ public class SessionService : ISessionService
     {
         try
         {
-            var session = await _context.Sessions
+            Session? session = await _context.Sessions
                 .Include(s => s.Subscriptions)
                 .FirstOrDefaultAsync(s => s.Id == sessionId);
 
             if (session == null || session.MaxAttendees == null)
+            {
                 return 0;
+            }
 
             var confirmedCount = session.Subscriptions.Count(s => s.Status == SubscriptionStatus.Confirmed);
             var availableSpots = session.MaxAttendees.Value - confirmedCount;
 
             if (availableSpots <= 0)
+            {
                 return 0;
+            }
 
             var spotsToFill = count.HasValue ? Math.Min(count.Value, availableSpots) : availableSpots;
 
@@ -662,7 +764,7 @@ public class SessionService : ISessionService
                 .ToList();
 
             var promotedCount = 0;
-            foreach (var subscription in waitlistedSubscriptions)
+            foreach (Subscription? subscription in waitlistedSubscriptions)
             {
                 subscription.Status = SubscriptionStatus.Confirmed;
                 subscription.IsWaitlisted = false;
@@ -688,7 +790,7 @@ public class SessionService : ISessionService
 
     public async Task<IEnumerable<SubscriptionResponse>> GetSessionWaitlistAsync(Guid sessionId)
     {
-        var subscriptions = await _context.Subscriptions
+        List<Subscription> subscriptions = await _context.Subscriptions
             .Include(s => s.Session)
             .Where(s => s.SessionId == sessionId && s.Status == SubscriptionStatus.Waitlisted)
             .OrderBy(s => s.WaitlistPosition)
@@ -696,7 +798,7 @@ public class SessionService : ISessionService
 
         var responses = new List<SubscriptionResponse>();
 
-        foreach (var subscription in subscriptions)
+        foreach (Subscription? subscription in subscriptions)
         {
             responses.Add(await MapToSubscriptionResponseAsync(subscription));
         }
@@ -710,7 +812,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var subscription = await _context.Subscriptions
+            Subscription? subscription = await _context.Subscriptions
                 .FirstOrDefaultAsync(s => s.SessionId == sessionId && s.UserId == userId && s.Status == SubscriptionStatus.Confirmed);
 
             if (subscription == null)
@@ -741,13 +843,13 @@ public class SessionService : ISessionService
             var attendanceList = attendances.ToList();
             var userIds = attendanceList.Select(a => a.UserId).ToList();
 
-            var subscriptions = await _context.Subscriptions
+            List<Subscription> subscriptions = await _context.Subscriptions
                 .Where(s => s.SessionId == sessionId && userIds.Contains(s.UserId))
                 .ToListAsync();
 
-            foreach (var attendance in attendanceList)
+            foreach (SessionAttendance? attendance in attendanceList)
             {
-                var subscription = subscriptions.FirstOrDefault(s => s.UserId == attendance.UserId);
+                Subscription? subscription = subscriptions.FirstOrDefault(s => s.UserId == attendance.UserId);
                 if (subscription != null)
                 {
                     subscription.Attended = attendance.Attended;
@@ -777,7 +879,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var session = await _context.Sessions.FindAsync(sessionId);
+            Session? session = await _context.Sessions.FindAsync(sessionId);
             if (session == null)
             {
                 return Result.Failure("Session not found");
@@ -803,7 +905,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var session = await _context.Sessions.FindAsync(sessionId);
+            Session? session = await _context.Sessions.FindAsync(sessionId);
             if (session == null)
             {
                 return Result.Failure("Session not found");
@@ -829,7 +931,7 @@ public class SessionService : ISessionService
     {
         try
         {
-            var session = await _context.Sessions
+            Session? session = await _context.Sessions
                 .Include(s => s.Subscriptions)
                 .FirstOrDefaultAsync(s => s.Id == sessionId);
 
@@ -842,7 +944,7 @@ public class SessionService : ISessionService
             session.UpdatedAt = DateTime.UtcNow;
 
             // Cancel all subscriptions
-            foreach (var subscription in session.Subscriptions.Where(s => s.Status != SubscriptionStatus.Cancelled))
+            foreach (Subscription? subscription in session.Subscriptions.Where(s => s.Status != SubscriptionStatus.Cancelled))
             {
                 subscription.Status = SubscriptionStatus.Cancelled;
                 subscription.CancelledAt = DateTime.UtcNow;
@@ -869,8 +971,8 @@ public class SessionService : ISessionService
     private async Task<SessionResponse> MapToSessionResponseAsync(Session session)
     {
         // Deserialize JSON strings for response
-        var tags = !string.IsNullOrEmpty(session.Tags) ? JsonSerializer.Deserialize<List<string>>(session.Tags) : null;
-        var customFields = !string.IsNullOrEmpty(session.CustomFields) ? JsonSerializer.Deserialize<Dictionary<string, object>>(session.CustomFields) : null;
+        List<string>? tags = !string.IsNullOrEmpty(session.Tags) ? JsonSerializer.Deserialize<List<string>>(session.Tags) : null;
+        Dictionary<string, object>? customFields = !string.IsNullOrEmpty(session.CustomFields) ? JsonSerializer.Deserialize<Dictionary<string, object>>(session.CustomFields) : null;
 
         return new SessionResponse
         {

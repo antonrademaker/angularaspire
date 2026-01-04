@@ -69,7 +69,7 @@ builder.Services.AddAuthorization(options =>
     // Optional auth policy (allows anonymous or authenticated)
     options.AddPolicy("OptionalAuth", policy =>
         policy.RequireAssertion(context =>
-            !context.User.Identity?.IsAuthenticated == true ||
+            context.User.Identity?.IsAuthenticated != true ||
             context.User.Identity.IsAuthenticated));
 });
 

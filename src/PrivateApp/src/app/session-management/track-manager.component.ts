@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, computed, inject, NgZone, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -106,7 +106,6 @@ export interface TrackStatistics {
   selector: 'app-track-manager',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     DragDropModule,
     MatTableModule,
@@ -124,8 +123,9 @@ export interface TrackStatistics {
     MatProgressSpinnerModule,
     MatExpansionModule,
     MatToolbarModule,
-    MatTooltipModule
-  ],
+    MatTooltipModule,
+    DatePipe
+],
   templateUrl: './track-manager.component.html',
   styleUrls: ['./track-manager.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -434,7 +434,6 @@ export class TrackManagerComponent implements OnInit {
   selector: 'app-track-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatButtonModule,
@@ -444,7 +443,7 @@ export class TrackManagerComponent implements OnInit {
     MatCheckboxModule,
     MatChipsModule,
     MatIconModule
-  ],
+],
   template: `
     <h2 mat-dialog-title>
       {{ data.mode === 'create' ? 'Create New Track' : 'Edit Track' }}
@@ -456,81 +455,89 @@ export class TrackManagerComponent implements OnInit {
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Track Name</mat-label>
             <input matInput formControlName="name" placeholder="Enter track name" required>
-            <mat-error *ngIf="trackForm.get('name')?.hasError('required')">
-              Track name is required
-            </mat-error>
-            <mat-error *ngIf="trackForm.get('name')?.hasError('maxlength')">
-              Track name must be less than 200 characters
-            </mat-error>
+            @if (trackForm.get('name')?.hasError('required')) {
+              <mat-error>
+                Track name is required
+              </mat-error>
+            }
+            @if (trackForm.get('name')?.hasError('maxlength')) {
+              <mat-error>
+                Track name must be less than 200 characters
+              </mat-error>
+            }
           </mat-form-field>
         </div>
-
+    
         <div class="row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" 
-                      placeholder="Enter track description" 
-                      rows="3"></textarea>
+            <textarea matInput formControlName="description"
+              placeholder="Enter track description"
+            rows="3"></textarea>
           </mat-form-field>
         </div>
-
+    
         <div class="row">
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Slug</mat-label>
             <input matInput formControlName="slug" placeholder="track-slug" required>
             <mat-hint>URL-friendly identifier</mat-hint>
-            <mat-error *ngIf="trackForm.get('slug')?.hasError('required')">
-              Slug is required
-            </mat-error>
-            <mat-error *ngIf="trackForm.get('slug')?.hasError('pattern')">
-              Slug must contain only letters, numbers, and hyphens
-            </mat-error>
+            @if (trackForm.get('slug')?.hasError('required')) {
+              <mat-error>
+                Slug is required
+              </mat-error>
+            }
+            @if (trackForm.get('slug')?.hasError('pattern')) {
+              <mat-error>
+                Slug must contain only letters, numbers, and hyphens
+              </mat-error>
+            }
           </mat-form-field>
-
+    
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Color</mat-label>
             <input matInput type="color" formControlName="color" required>
           </mat-form-field>
         </div>
-
+    
         <div class="row">
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Display Order</mat-label>
             <input matInput type="number" formControlName="displayOrder" min="1">
           </mat-form-field>
-
+    
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Max Sessions</mat-label>
             <input matInput type="number" formControlName="maxSessions" min="1">
             <mat-hint>Leave empty for unlimited</mat-hint>
           </mat-form-field>
         </div>
-
+    
         <div class="row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Tags</mat-label>
-            <input matInput 
-                   placeholder="Add tags..." 
-                   (keydown.enter)="addTagFromInput($event.target)">
-          </mat-form-field>
-        </div>
-
-        <div class="row">
-          <mat-checkbox formControlName="isActive">Active</mat-checkbox>
-        </div>
-      </form>
-    </mat-dialog-content>
-
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="cancel()">Cancel</button>
-      <button mat-raised-button 
-              color="primary" 
-              [disabled]="trackForm.invalid || isSubmitting()"
-              (click)="save()">
-        {{ data.mode === 'create' ? 'Create' : 'Update' }}
-      </button>
-    </mat-dialog-actions>
-  `,
+            <input matInput
+              placeholder="Add tags..."
+              (keydown.enter)="addTagFromInput($event.target)">
+            </mat-form-field>
+          </div>
+    
+          <div class="row">
+            <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+          </div>
+        </form>
+      </mat-dialog-content>
+    
+      <mat-dialog-actions align="end">
+        <button mat-button (click)="cancel()">Cancel</button>
+        <button mat-raised-button
+          color="primary"
+          [disabled]="trackForm.invalid || isSubmitting()"
+          (click)="save()">
+          {{ data.mode === 'create' ? 'Create' : 'Update' }}
+        </button>
+      </mat-dialog-actions>
+    `,
   styles: [`
     .track-form {
       min-width: 500px;

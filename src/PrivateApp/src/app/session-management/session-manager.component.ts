@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -204,7 +204,6 @@ export interface SessionConflict {
   selector: 'app-session-manager',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatTableModule,
     MatPaginatorModule,
@@ -227,7 +226,7 @@ export interface SessionConflict {
     MatMenuModule,
     MatBadgeModule,
     MatDividerModule
-  ],
+],
   templateUrl: './session-manager.component.html',
   styleUrls: ['./session-manager.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -685,7 +684,6 @@ export class SessionManagerComponent implements OnInit {
   selector: 'app-session-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatButtonModule,
@@ -699,7 +697,7 @@ export class SessionManagerComponent implements OnInit {
     MatNativeDateModule,
     MatTabsModule,
     MatTimepickerModule
-  ],
+],
   template: `
     <h2 mat-dialog-title>
       {{ data.mode === 'create' ? 'Create New Session' : 'Edit Session' }}
@@ -714,66 +712,74 @@ export class SessionManagerComponent implements OnInit {
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Session Title</mat-label>
                   <input matInput formControlName="title" placeholder="Enter session title" required>
-                  <mat-error *ngIf="sessionForm.get('title')?.hasError('required')">
-                    Title is required
-                  </mat-error>
+                  @if (sessionForm.get('title')?.hasError('required')) {
+                    <mat-error>
+                      Title is required
+                    </mat-error>
+                  }
                 </mat-form-field>
               </div>
-
+    
               <div class="row">
                 <mat-form-field appearance="outline" class="half-width">
                   <mat-label>Track</mat-label>
                   <mat-select formControlName="trackId">
                     <mat-option [value]="null">No Track</mat-option>
-                    <mat-option *ngFor="let track of data.tracks" [value]="track.id">
-                      {{ track.name }}
-                    </mat-option>
+                    @for (track of data.tracks; track track) {
+                      <mat-option [value]="track.id">
+                        {{ track.name }}
+                      </mat-option>
+                    }
                   </mat-select>
                 </mat-form-field>
-
+    
                 <mat-form-field appearance="outline" class="half-width">
                   <mat-label>Slug</mat-label>
                   <input matInput formControlName="slug" placeholder="session-slug" required>
                 </mat-form-field>
               </div>
-
+    
               <div class="row">
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Description</mat-label>
-                  <textarea matInput formControlName="description" 
-                            placeholder="Enter session description" 
-                            rows="3" required></textarea>
+                  <textarea matInput formControlName="description"
+                    placeholder="Enter session description"
+                  rows="3" required></textarea>
                 </mat-form-field>
               </div>
-
+    
               <div class="row">
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Abstract</mat-label>
-                  <textarea matInput formControlName="abstract" 
-                            placeholder="Enter detailed abstract" 
-                            rows="4"></textarea>
+                  <textarea matInput formControlName="abstract"
+                    placeholder="Enter detailed abstract"
+                  rows="4"></textarea>
                 </mat-form-field>
               </div>
-
+    
               <div class="row">
                 <mat-form-field appearance="outline" class="third-width">
                   <mat-label>Session Type</mat-label>
                   <mat-select formControlName="type" required>
-                    <mat-option *ngFor="let type of sessionTypes" [value]="type">
-                      {{ type }}
-                    </mat-option>
+                    @for (type of sessionTypes; track type) {
+                      <mat-option [value]="type">
+                        {{ type }}
+                      </mat-option>
+                    }
                   </mat-select>
                 </mat-form-field>
-
+    
                 <mat-form-field appearance="outline" class="third-width">
                   <mat-label>Difficulty Level</mat-label>
                   <mat-select formControlName="difficultyLevel" required>
-                    <mat-option *ngFor="let level of difficultyLevels" [value]="level">
-                      {{ level }}
-                    </mat-option>
+                    @for (level of difficultyLevels; track level) {
+                      <mat-option [value]="level">
+                        {{ level }}
+                      </mat-option>
+                    }
                   </mat-select>
                 </mat-form-field>
-
+    
                 <mat-form-field appearance="outline" class="third-width">
                   <mat-label>Language</mat-label>
                   <input matInput formControlName="language" placeholder="en">
@@ -782,7 +788,7 @@ export class SessionManagerComponent implements OnInit {
             </form>
           </div>
         </mat-tab>
-
+    
         <mat-tab label="Schedule">
           <div class="tab-content">
             <form [formGroup]="sessionForm" class="session-form">
@@ -793,21 +799,21 @@ export class SessionManagerComponent implements OnInit {
                   <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
                   <mat-datepicker #startDatePicker></mat-datepicker>
                 </mat-form-field>
-
+    
                 <mat-form-field appearance="outline" class="quarter-width">
                   <mat-label>Start Time</mat-label>
                   <input matInput [matTimepicker]="startTimePicker" formControlName="startTimeValue" required>
                   <mat-timepicker-toggle matIconSuffix [for]="startTimePicker"></mat-timepicker-toggle>
                   <mat-timepicker #startTimePicker [interval]="'15m'"></mat-timepicker>
                 </mat-form-field>
-
+    
                 <mat-form-field appearance="outline" class="quarter-width">
                   <mat-label>End Date</mat-label>
                   <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" required>
                   <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
                   <mat-datepicker #endDatePicker></mat-datepicker>
                 </mat-form-field>
-
+    
                 <mat-form-field appearance="outline" class="quarter-width">
                   <mat-label>End Time</mat-label>
                   <input matInput [matTimepicker]="endTimePicker" formControlName="endTimeValue" required>
@@ -815,35 +821,37 @@ export class SessionManagerComponent implements OnInit {
                   <mat-timepicker #endTimePicker [interval]="'15m'"></mat-timepicker>
                 </mat-form-field>
               </div>
-
+    
               <div class="row">
                 <mat-form-field appearance="outline" class="half-width">
                   <mat-label>Room</mat-label>
                   <input matInput formControlName="room" placeholder="Room name or number">
                 </mat-form-field>
-
+    
                 <mat-form-field appearance="outline" class="half-width">
                   <mat-label>Building</mat-label>
                   <input matInput formControlName="building" placeholder="Building name">
                 </mat-form-field>
               </div>
-
+    
               <div class="row checkboxes">
                 <mat-checkbox formControlName="isVirtual">Virtual Session</mat-checkbox>
                 <mat-checkbox formControlName="isRecorded">Will be Recorded</mat-checkbox>
                 <mat-checkbox formControlName="allowQuestions">Allow Q&A</mat-checkbox>
               </div>
-
-              <div class="row" *ngIf="sessionForm.get('isVirtual')?.value">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Virtual Meeting URL</mat-label>
-                  <input matInput formControlName="virtualUrl" placeholder="https://...">
-                </mat-form-field>
-              </div>
+    
+              @if (sessionForm.get('isVirtual')?.value) {
+                <div class="row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Virtual Meeting URL</mat-label>
+                    <input matInput formControlName="virtualUrl" placeholder="https://...">
+                  </mat-form-field>
+                </div>
+              }
             </form>
           </div>
         </mat-tab>
-
+    
         <mat-tab label="Capacity">
           <div class="tab-content">
             <form [formGroup]="sessionForm" class="session-form">
@@ -853,85 +861,87 @@ export class SessionManagerComponent implements OnInit {
                   <input matInput type="number" formControlName="maxAttendees" min="0">
                   <mat-hint>Leave empty for unlimited</mat-hint>
                 </mat-form-field>
-
+    
                 <div class="half-width checkbox-field">
                   <mat-checkbox formControlName="requiresSubscription">
                     Requires Registration/Subscription
                   </mat-checkbox>
                 </div>
               </div>
-
+    
               <div class="row">
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Target Audience</mat-label>
-                  <input matInput formControlName="targetAudience" 
-                         placeholder="e.g., Developers, DevOps Engineers">
-                </mat-form-field>
+                  <input matInput formControlName="targetAudience"
+                    placeholder="e.g., Developers, DevOps Engineers">
+                  </mat-form-field>
+                </div>
+    
+                <div class="row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Prerequisites</mat-label>
+                    <textarea matInput formControlName="prerequisites"
+                      placeholder="List any prerequisites"
+                    rows="2"></textarea>
+                  </mat-form-field>
+                </div>
+    
+                <div class="row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Learning Outcomes</mat-label>
+                    <textarea matInput formControlName="learningOutcomes"
+                      placeholder="What attendees will learn"
+                    rows="2"></textarea>
+                  </mat-form-field>
+                </div>
+              </form>
+            </div>
+          </mat-tab>
+    
+          <mat-tab label="Materials">
+            <div class="tab-content">
+              <form [formGroup]="sessionForm" class="session-form">
+                <div class="row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Materials URL</mat-label>
+                    <input matInput formControlName="materialsUrl" placeholder="https://...">
+                    <mat-hint>Link to slides, code samples, etc.</mat-hint>
+                  </mat-form-field>
+                </div>
+    
+                @if (data.mode === 'edit') {
+                  <div class="row">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Recording URL</mat-label>
+                      <input matInput formControlName="recordingUrl" placeholder="https://...">
+                      <mat-hint>Link to session recording (after event)</mat-hint>
+                    </mat-form-field>
+                  </div>
+                }
+    
+                <div class="row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Tags (comma separated)</mat-label>
+                    <input matInput formControlName="tagsInput"
+                      placeholder="angular, typescript, web">
+                    </mat-form-field>
+                  </div>
+                </form>
               </div>
-
-              <div class="row">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Prerequisites</mat-label>
-                  <textarea matInput formControlName="prerequisites" 
-                            placeholder="List any prerequisites" 
-                            rows="2"></textarea>
-                </mat-form-field>
-              </div>
-
-              <div class="row">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Learning Outcomes</mat-label>
-                  <textarea matInput formControlName="learningOutcomes" 
-                            placeholder="What attendees will learn" 
-                            rows="2"></textarea>
-                </mat-form-field>
-              </div>
-            </form>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Materials">
-          <div class="tab-content">
-            <form [formGroup]="sessionForm" class="session-form">
-              <div class="row">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Materials URL</mat-label>
-                  <input matInput formControlName="materialsUrl" placeholder="https://...">
-                  <mat-hint>Link to slides, code samples, etc.</mat-hint>
-                </mat-form-field>
-              </div>
-
-              <div class="row" *ngIf="data.mode === 'edit'">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Recording URL</mat-label>
-                  <input matInput formControlName="recordingUrl" placeholder="https://...">
-                  <mat-hint>Link to session recording (after event)</mat-hint>
-                </mat-form-field>
-              </div>
-
-              <div class="row">
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Tags (comma separated)</mat-label>
-                  <input matInput formControlName="tagsInput" 
-                         placeholder="angular, typescript, web">
-                </mat-form-field>
-              </div>
-            </form>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
-    </mat-dialog-content>
-
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="cancel()">Cancel</button>
-      <button mat-raised-button 
-              color="primary" 
-              [disabled]="sessionForm.invalid || isSubmitting()"
-              (click)="save()">
-        {{ data.mode === 'create' ? 'Create' : 'Update' }}
-      </button>
-    </mat-dialog-actions>
-  `,
+            </mat-tab>
+          </mat-tab-group>
+        </mat-dialog-content>
+    
+        <mat-dialog-actions align="end">
+          <button mat-button (click)="cancel()">Cancel</button>
+          <button mat-raised-button
+            color="primary"
+            [disabled]="sessionForm.invalid || isSubmitting()"
+            (click)="save()">
+            {{ data.mode === 'create' ? 'Create' : 'Update' }}
+          </button>
+        </mat-dialog-actions>
+    `,
   styles: [`
     mat-dialog-content {
       min-width: 700px;

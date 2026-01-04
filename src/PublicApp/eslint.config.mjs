@@ -50,8 +50,8 @@ export default tseslint.config(
       '@angular-eslint/template/click-events-have-key-events': 'warn',
       '@angular-eslint/template/interactive-supports-focus': 'warn',
       '@angular-eslint/template/label-has-associated-control': 'warn',
-      // Allow legacy *ngIf/*ngFor syntax during migration
-      '@angular-eslint/template/prefer-control-flow': 'off',
+      // Enforce modern @if/@for control flow syntax
+      '@angular-eslint/template/prefer-control-flow': 'error',
     },
   }
 );

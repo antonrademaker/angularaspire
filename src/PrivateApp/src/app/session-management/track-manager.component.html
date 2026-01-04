@@ -4,10 +4,10 @@
     <mat-toolbar-row>
       <span class="title">Track Management</span>
       <span class="spacer"></span>
-      <button mat-raised-button 
-              color="primary" 
-              (click)="createTrack()"
-              [disabled]="!selectedEventId()">
+      <button mat-raised-button
+        color="primary"
+        (click)="createTrack()"
+        [disabled]="!selectedEventId()">
         <mat-icon>add</mat-icon>
         Create Track
       </button>
@@ -15,45 +15,44 @@
   </mat-toolbar>
 
   <!-- Statistics Cards -->
-  <div class="statistics-section" *ngIf="statistics() as stats">
-    <div class="stats-grid">
-      <mat-card class="stat-card">
-        <mat-card-header>
-          <mat-card-title>Total Sessions</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="stat-value">{{ stats.totalSessions }}</div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-header>
-          <mat-card-title>Total Capacity</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="stat-value">{{ stats.totalCapacity }}</div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-header>
-          <mat-card-title>Confirmed Subscriptions</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="stat-value">{{ stats.confirmedSubscriptions }}</div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card">
-        <mat-card-header>
-          <mat-card-title>Waitlist Count</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="stat-value">{{ stats.waitlistCount }}</div>
-        </mat-card-content>
-      </mat-card>
+  @if (statistics(); as stats) {
+    <div class="statistics-section">
+      <div class="stats-grid">
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-card-title>Total Sessions</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-value">{{ stats.totalSessions }}</div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-card-title>Total Capacity</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-value">{{ stats.totalCapacity }}</div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-card-title>Confirmed Subscriptions</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-value">{{ stats.confirmedSubscriptions }}</div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="stat-card">
+          <mat-card-header>
+            <mat-card-title>Waitlist Count</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stat-value">{{ stats.waitlistCount }}</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Search and Filter Controls -->
   <mat-card class="filter-card">
@@ -62,222 +61,232 @@
         <div class="form-row">
           <mat-form-field appearance="outline" class="search-field">
             <mat-label>Search tracks</mat-label>
-            <input matInput formControlName="searchText" 
-                   placeholder="Search by name, description, or tags">
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
+            <input matInput formControlName="searchText"
+              placeholder="Search by name, description, or tags">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="event-field">
-            <mat-label>Event</mat-label>
-            <mat-select formControlName="eventId" required>
-              <!-- TODO: This would be populated with events from a service -->
-            </mat-select>
-          </mat-form-field>
-        </div>
+            <mat-form-field appearance="outline" class="event-field">
+              <mat-label>Event</mat-label>
+              <mat-select formControlName="eventId" required>
+                <!-- TODO: This would be populated with events from a service -->
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-        <div class="form-row">
-          <mat-checkbox formControlName="showInactive">
-            Show inactive tracks
-          </mat-checkbox>
+          <div class="form-row">
+            <mat-checkbox formControlName="showInactive">
+              Show inactive tracks
+            </mat-checkbox>
 
-          <div class="actions">
-            <button mat-button (click)="loadTracks()" [disabled]="isLoading()">
+            <div class="actions">
+              <button mat-button (click)="loadTracks()" [disabled]="isLoading()">
+                <mat-icon>refresh</mat-icon>
+                Refresh
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Loading Spinner -->
+    @if (isLoading()) {
+      <div class="loading-container">
+        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        <p>Loading tracks...</p>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (error()) {
+      <mat-card class="error-card">
+        <mat-card-content>
+          <div class="error-message">
+            <mat-icon>error</mat-icon>
+            <span>{{ error() }}</span>
+            <button mat-button (click)="loadTracks()">
               <mat-icon>refresh</mat-icon>
-              Refresh
+              Retry
             </button>
           </div>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+        </mat-card-content>
+      </mat-card>
+    }
 
-  <!-- Loading Spinner -->
-  <div class="loading-container" *ngIf="isLoading()">
-    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-    <p>Loading tracks...</p>
-  </div>
-
-  <!-- Error Message -->
-  <mat-card class="error-card" *ngIf="error()">
-    <mat-card-content>
-      <div class="error-message">
-        <mat-icon>error</mat-icon>
-        <span>{{ error() }}</span>
-        <button mat-button (click)="loadTracks()">
-          <mat-icon>refresh</mat-icon>
-          Retry
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Tracks Table -->
-  <mat-card class="table-card" *ngIf="!isLoading() && !error()">
-    <mat-card-content>
-      <div class="table-container">
-        <table mat-table 
-               [dataSource]="dataSource" 
-               matSort
-               (matSortChange)="onSort($event)"
-               cdkDropList
-               (cdkDropListDropped)="onDrop($event)"
-               class="tracks-table">
-
-          <!-- Drag Handle Column -->
-          <ng-container matColumnDef="drag">
-            <th mat-header-cell *matHeaderCellDef class="drag-column">
-              <mat-icon>drag_indicator</mat-icon>
-            </th>
-            <td mat-cell *matCellDef="let track" class="drag-column">
-              <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
-            </td>
-          </ng-container>
-
-          <!-- Name Column -->
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header="name">Name</th>
-            <td mat-cell *matCellDef="let track">
-              <div class="track-name">
-                <div class="color-indicator" [style.background-color]="track.color"></div>
-                <div class="name-content">
-                  <div class="name">{{ track.name }}</div>
-                  <div class="slug">{{ track.slug }}</div>
-                </div>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Description Column -->
-          <ng-container matColumnDef="description">
-            <th mat-header-cell *matHeaderCellDef>Description</th>
-            <td mat-cell *matCellDef="let track">
-              <div class="description">
-                {{ track.description || 'No description' }}
-              </div>
-              <div class="tags" *ngIf="track.tags && track.tags.length > 0">
-                <mat-chip-listbox>
-                  <mat-chip-option *ngFor="let tag of track.tags" disabled>
-                    {{ tag }}
-                  </mat-chip-option>
-                </mat-chip-listbox>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Session Count Column -->
-          <ng-container matColumnDef="sessionCount">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header="sessionCount">Sessions</th>
-            <td mat-cell *matCellDef="let track">
-              <div class="session-info">
-                <div class="session-count">{{ track.sessionCount }}</div>
-                <div class="capacity" *ngIf="track.totalCapacity > 0">
-                  {{ track.totalCapacity }} capacity
-                </div>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Status Column -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header="isActive">Status</th>
-            <td mat-cell *matCellDef="let track">
-              <div class="status-info">
-                <div class="status-badge" [class.active]="track.isActive" [class.inactive]="!track.isActive">
-                  {{ track.isActive ? 'Active' : 'Inactive' }}
-                </div>
-                <div class="order">Order: {{ track.displayOrder }}</div>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Created At Column -->
-          <ng-container matColumnDef="createdAt">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header="createdAt">Created</th>
-            <td mat-cell *matCellDef="let track">
-              <div class="date-info">
-                <div class="date">{{ track.createdAt | date:'short' }}</div>
-                <div class="updated" *ngIf="track.updatedAt">
-                  Updated: {{ track.updatedAt | date:'short' }}
-                </div>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Actions Column -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Actions</th>
-            <td mat-cell *matCellDef="let track">
-              <div class="actions-menu">
-                <button mat-icon-button 
-                        [matTooltip]="'View sessions'"
-                        (click)="navigateToSessions(track.id)">
-                  <mat-icon>list</mat-icon>
-                </button>
-                
-                <button mat-icon-button 
-                        [matTooltip]="'Edit track'"
-                        (click)="editTrack(track)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                
-                <button mat-icon-button 
-                        [matTooltip]="'Duplicate track'"
-                        (click)="duplicateTrack(track)">
-                  <mat-icon>content_copy</mat-icon>
-                </button>
-                
-                <button mat-icon-button 
-                        [matTooltip]="track.isActive ? 'Deactivate' : 'Activate'"
-                        (click)="toggleTrackStatus(track)"
-                        [color]="track.isActive ? 'warn' : 'primary'">
-                  <mat-icon>{{ track.isActive ? 'visibility_off' : 'visibility' }}</mat-icon>
-                </button>
-                
-                <button mat-icon-button 
-                        [matTooltip]="'Delete track'"
-                        (click)="deleteTrack(track)"
-                        color="warn">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
-              cdkDrag 
-              [cdkDragData]="row"
+    <!-- Tracks Table -->
+    @if (!isLoading() && !error()) {
+      <mat-card class="table-card">
+        <mat-card-content>
+          <div class="table-container">
+            <table mat-table
+              [dataSource]="dataSource"
+              matSort
+              (matSortChange)="onSort($event)"
+              cdkDropList
+              (cdkDropListDropped)="onDrop($event)"
+              class="tracks-table">
+              <!-- Drag Handle Column -->
+              <ng-container matColumnDef="drag">
+                <th mat-header-cell *matHeaderCellDef class="drag-column">
+                  <mat-icon>drag_indicator</mat-icon>
+                </th>
+                <td mat-cell *matCellDef="let track" class="drag-column">
+                  <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
+                </td>
+              </ng-container>
+              <!-- Name Column -->
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="name">Name</th>
+                <td mat-cell *matCellDef="let track">
+                  <div class="track-name">
+                    <div class="color-indicator" [style.background-color]="track.color"></div>
+                    <div class="name-content">
+                      <div class="name">{{ track.name }}</div>
+                      <div class="slug">{{ track.slug }}</div>
+                    </div>
+                  </div>
+                </td>
+              </ng-container>
+              <!-- Description Column -->
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <td mat-cell *matCellDef="let track">
+                  <div class="description">
+                    {{ track.description || 'No description' }}
+                  </div>
+                  @if (track.tags && track.tags.length > 0) {
+                    <div class="tags">
+                      <mat-chip-listbox>
+                        @for (tag of track.tags; track tag) {
+                          <mat-chip-option disabled>
+                            {{ tag }}
+                          </mat-chip-option>
+                        }
+                      </mat-chip-listbox>
+                    </div>
+                  }
+                </td>
+              </ng-container>
+              <!-- Session Count Column -->
+              <ng-container matColumnDef="sessionCount">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="sessionCount">Sessions</th>
+                <td mat-cell *matCellDef="let track">
+                  <div class="session-info">
+                    <div class="session-count">{{ track.sessionCount }}</div>
+                    @if (track.totalCapacity > 0) {
+                      <div class="capacity">
+                        {{ track.totalCapacity }} capacity
+                      </div>
+                    }
+                  </div>
+                </td>
+              </ng-container>
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="isActive">Status</th>
+                <td mat-cell *matCellDef="let track">
+                  <div class="status-info">
+                    <div class="status-badge" [class.active]="track.isActive" [class.inactive]="!track.isActive">
+                      {{ track.isActive ? 'Active' : 'Inactive' }}
+                    </div>
+                    <div class="order">Order: {{ track.displayOrder }}</div>
+                  </div>
+                </td>
+              </ng-container>
+              <!-- Created At Column -->
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header="createdAt">Created</th>
+                <td mat-cell *matCellDef="let track">
+                  <div class="date-info">
+                    <div class="date">{{ track.createdAt | date:'short' }}</div>
+                    @if (track.updatedAt) {
+                      <div class="updated">
+                        Updated: {{ track.updatedAt | date:'short' }}
+                      </div>
+                    }
+                  </div>
+                </td>
+              </ng-container>
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let track">
+                  <div class="actions-menu">
+                    <button mat-icon-button
+                      [matTooltip]="'View sessions'"
+                      (click)="navigateToSessions(track.id)">
+                      <mat-icon>list</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                      [matTooltip]="'Edit track'"
+                      (click)="editTrack(track)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                      [matTooltip]="'Duplicate track'"
+                      (click)="duplicateTrack(track)">
+                      <mat-icon>content_copy</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                      [matTooltip]="track.isActive ? 'Deactivate' : 'Activate'"
+                      (click)="toggleTrackStatus(track)"
+                      [color]="track.isActive ? 'warn' : 'primary'">
+                      <mat-icon>{{ track.isActive ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                      [matTooltip]="'Delete track'"
+                      (click)="deleteTrack(track)"
+                      color="warn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                cdkDrag
+                [cdkDragData]="row"
               class="track-row"></tr>
-        </table>
-
-        <!-- No Data Message -->
-        <div class="no-data" *ngIf="filteredTracks().length === 0">
-          <mat-icon>track_changes</mat-icon>
-          <h3>No tracks found</h3>
-          <p *ngIf="searchText()">No tracks match your search criteria.</p>
-          <p *ngIf="!searchText() && selectedEventId()">
-            This event doesn't have any tracks yet.
-          </p>
-          <p *ngIf="!selectedEventId()">
-            Please select an event to view its tracks.
-          </p>
-          <button mat-raised-button 
-                  color="primary" 
-                  (click)="createTrack()"
-                  *ngIf="selectedEventId()">
-            Create First Track
-          </button>
-        </div>
-      </div>
-
-      <!-- Pagination -->
-      <mat-paginator [length]="totalCount()"
-                     [pageSize]="pageSize()"
-                     [pageIndex]="pageIndex()"
-                     [pageSizeOptions]="[10, 25, 50, 100]"
-                     (page)="onPageChange($event)"
-                     showFirstLastButtons>
-      </mat-paginator>
-    </mat-card-content>
-  </mat-card>
-</div>
+            </table>
+            <!-- No Data Message -->
+            @if (filteredTracks().length === 0) {
+              <div class="no-data">
+                <mat-icon>track_changes</mat-icon>
+                <h3>No tracks found</h3>
+                @if (searchText()) {
+                  <p>No tracks match your search criteria.</p>
+                }
+                @if (!searchText() && selectedEventId()) {
+                  <p>
+                    This event doesn't have any tracks yet.
+                  </p>
+                }
+                @if (!selectedEventId()) {
+                  <p>
+                    Please select an event to view its tracks.
+                  </p>
+                }
+                @if (selectedEventId()) {
+                  <button mat-raised-button
+                    color="primary"
+                    (click)="createTrack()"
+                    >
+                    Create First Track
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          <!-- Pagination -->
+          <mat-paginator [length]="totalCount()"
+            [pageSize]="pageSize()"
+            [pageIndex]="pageIndex()"
+            [pageSizeOptions]="[10, 25, 50, 100]"
+            (page)="onPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>

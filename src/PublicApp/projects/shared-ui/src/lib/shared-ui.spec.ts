@@ -1,3 +1,4 @@
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SharedUI } from './shared-ui';
@@ -8,7 +9,8 @@ describe('SharedUI', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SharedUI]
+      imports: [SharedUI],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

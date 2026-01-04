@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -143,7 +143,6 @@ export interface AssignSpeakerRequest {
   selector: 'app-speaker-manager',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatTableModule,
     MatPaginatorModule,
@@ -163,7 +162,7 @@ export interface AssignSpeakerRequest {
     MatMenuModule,
     MatSnackBarModule,
     MatDividerModule
-  ],
+],
   templateUrl: './speaker-manager.component.html',
   styleUrls: ['./speaker-manager.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -406,7 +405,6 @@ export class SpeakerManagerComponent implements OnInit {
   selector: 'app-speaker-form-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -417,7 +415,7 @@ export class SpeakerManagerComponent implements OnInit {
     MatIconModule,
     MatChipsModule,
     MatProgressSpinnerModule
-  ],
+],
   template: `
     <h2 mat-dialog-title>{{ data.mode === 'create' ? 'Create Speaker Profile' : 'Edit Speaker Profile' }}</h2>
     <mat-dialog-content>
@@ -750,12 +748,11 @@ export class SpeakerFormDialogComponent {
   selector: 'app-speaker-view-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
     MatChipsModule
-  ],
+],
   template: `
     <h2 mat-dialog-title>{{ data.speaker.displayName }}</h2>
     <mat-dialog-content>
@@ -939,10 +936,9 @@ export class SpeakerViewDialogComponent {
   selector: 'app-confirm-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule
-  ],
+],
   template: `
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>

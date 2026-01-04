@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -41,136 +41,148 @@ export interface EventSearchResponse {
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="event-list-container">
       <header class="search-header">
         <h1>Discover Events</h1>
-        
+    
         <!-- Search Controls -->
         <div class="search-controls">
           <div class="search-bar">
-            <input 
-              type="text" 
-              [(ngModel)]="searchQuery" 
+            <input
+              type="text"
+              [(ngModel)]="searchQuery"
               (input)="searchEvents()"
               placeholder="Search events by name, description, or location..."
               class="search-input">
-            <button (click)="searchEvents()" class="search-button">Search</button>
+              <button (click)="searchEvents()" class="search-button">Search</button>
+            </div>
+    
+            <div class="filters">
+              <select [(ngModel)]="selectedTag" (change)="searchEvents()" class="filter-select">
+                <option value="">All Categories</option>
+                @for (tag of availableTags; track tag) {
+                  <option [value]="tag">{{ tag }}</option>
+                }
+              </select>
+    
+              <select [(ngModel)]="locationFilter" (change)="searchEvents()" class="filter-select">
+                <option value="">All Locations</option>
+                @for (location of availableLocations; track location) {
+                  <option [value]="location">{{ location }}</option>
+                }
+              </select>
+    
+              <select [(ngModel)]="sortBy" (change)="searchEvents()" class="filter-select">
+                <option value="startDateTime">Date (Earliest First)</option>
+                <option value="-startDateTime">Date (Latest First)</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="-name">Name (Z-A)</option>
+                <option value="-createdAt">Newest First</option>
+              </select>
+            </div>
           </div>
-
-          <div class="filters">
-            <select [(ngModel)]="selectedTag" (change)="searchEvents()" class="filter-select">
-              <option value="">All Categories</option>
-              <option *ngFor="let tag of availableTags" [value]="tag">{{ tag }}</option>
-            </select>
-
-            <select [(ngModel)]="locationFilter" (change)="searchEvents()" class="filter-select">
-              <option value="">All Locations</option>
-              <option *ngFor="let location of availableLocations" [value]="location">{{ location }}</option>
-            </select>
-
-            <select [(ngModel)]="sortBy" (change)="searchEvents()" class="filter-select">
-              <option value="startDateTime">Date (Earliest First)</option>
-              <option value="-startDateTime">Date (Latest First)</option>
-              <option value="name">Name (A-Z)</option>
-              <option value="-name">Name (Z-A)</option>
-              <option value="-createdAt">Newest First</option>
-            </select>
+        </header>
+    
+        <!-- Loading State -->
+        @if (loading()) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading events...</p>
           </div>
-        </div>
-      </header>
-
-      <!-- Loading State -->
-      <div *ngIf="loading()" class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading events...</p>
-      </div>
-
-      <!-- Error State -->
-      <div *ngIf="error()" class="error-state">
-        <p>{{ error() }}</p>
-        <button (click)="searchEvents()" class="retry-button">Try Again</button>
-      </div>
-
-      <!-- Events Grid -->
-      <div *ngIf="!loading() && !error()" class="events-container">
-        <div *ngIf="events().length === 0" class="no-events">
-          <h2>No events found</h2>
-          <p>Try adjusting your search criteria or check back later for new events.</p>
-        </div>
-
-        <div class="events-grid">
-          <div *ngFor="let event of events()" class="event-card" (click)="viewEventDetails(event)">
-            <div class="event-card-header">
-              <h3 class="event-title">{{ event.name }}</h3>
-              <div class="event-status" [class]="'status-' + event.status.toLowerCase()">
-                {{ event.status }}
+        }
+    
+        <!-- Error State -->
+        @if (error()) {
+          <div class="error-state">
+            <p>{{ error() }}</p>
+            <button (click)="searchEvents()" class="retry-button">Try Again</button>
+          </div>
+        }
+    
+        <!-- Events Grid -->
+        @if (!loading() && !error()) {
+          <div class="events-container">
+            @if (events().length === 0) {
+              <div class="no-events">
+                <h2>No events found</h2>
+                <p>Try adjusting your search criteria or check back later for new events.</p>
               </div>
-            </div>
-
-            <div class="event-datetime">
-              <i class="icon-calendar"></i>
-              <span>{{ formatDateTime(event.startDateTime) }}</span>
-            </div>
-
-            <div class="event-location">
-              <i class="icon-location"></i>
-              <span>{{ event.location }}{{ event.venue ? ' - ' + event.venue : '' }}</span>
-            </div>
-
-            <div class="event-description">
-              {{ truncateDescription(event.description) }}
-            </div>
-
-            <div class="event-tags" *ngIf="event.tags.length > 0">
-              <span *ngFor="let tag of event.tags" class="tag">{{ tag }}</span>
-            </div>
-
-            <div class="event-footer">
-              <div class="event-capacity" *ngIf="event.maxCapacity">
-                <i class="icon-users"></i>
-                <span>{{ event.currentRegistrations }} / {{ event.maxCapacity }}</span>
-                <div class="capacity-bar">
-                  <div class="capacity-fill" [style.width.%]="getCapacityPercentage(event)"></div>
+            }
+            <div class="events-grid">
+              @for (event of events(); track event) {
+                <div class="event-card" (click)="viewEventDetails(event)">
+                  <div class="event-card-header">
+                    <h3 class="event-title">{{ event.name }}</h3>
+                    <div class="event-status" [class]="'status-' + event.status.toLowerCase()">
+                      {{ event.status }}
+                    </div>
+                  </div>
+                  <div class="event-datetime">
+                    <i class="icon-calendar"></i>
+                    <span>{{ formatDateTime(event.startDateTime) }}</span>
+                  </div>
+                  <div class="event-location">
+                    <i class="icon-location"></i>
+                    <span>{{ event.location }}{{ event.venue ? ' - ' + event.venue : '' }}</span>
+                  </div>
+                  <div class="event-description">
+                    {{ truncateDescription(event.description) }}
+                  </div>
+                  @if (event.tags.length > 0) {
+                    <div class="event-tags">
+                      @for (tag of event.tags; track tag) {
+                        <span class="tag">{{ tag }}</span>
+                      }
+                    </div>
+                  }
+                  <div class="event-footer">
+                    @if (event.maxCapacity) {
+                      <div class="event-capacity">
+                        <i class="icon-users"></i>
+                        <span>{{ event.currentRegistrations }} / {{ event.maxCapacity }}</span>
+                        <div class="capacity-bar">
+                          <div class="capacity-fill" [style.width.%]="getCapacityPercentage(event)"></div>
+                        </div>
+                      </div>
+                    }
+                    <div class="event-actions">
+                      <button
+                        class="register-button"
+                        [disabled]="!canRegister(event)"
+                        (click)="registerForEvent(event, $event)">
+                        {{ getRegistrationButtonText(event) }}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              <div class="event-actions">
-                <button 
-                  class="register-button"
-                  [disabled]="!canRegister(event)"
-                  (click)="registerForEvent(event, $event)">
-                  {{ getRegistrationButtonText(event) }}
+              }
+            </div>
+            <!-- Pagination -->
+            @if (totalPages() > 1) {
+              <div class="pagination">
+                <button
+                  (click)="goToPage(currentPage() - 1)"
+                  [disabled]="currentPage() <= 1"
+                  class="page-button">
+                  Previous
+                </button>
+                <span class="page-info">
+                  Page {{ currentPage() }} of {{ totalPages() }}
+                </span>
+                <button
+                  (click)="goToPage(currentPage() + 1)"
+                  [disabled]="currentPage() >= totalPages()"
+                  class="page-button">
+                  Next
                 </button>
               </div>
-            </div>
+            }
           </div>
-        </div>
-
-        <!-- Pagination -->
-        <div *ngIf="totalPages() > 1" class="pagination">
-          <button 
-            (click)="goToPage(currentPage() - 1)"
-            [disabled]="currentPage() <= 1"
-            class="page-button">
-            Previous
-          </button>
-
-          <span class="page-info">
-            Page {{ currentPage() }} of {{ totalPages() }}
-          </span>
-
-          <button 
-            (click)="goToPage(currentPage() + 1)"
-            [disabled]="currentPage() >= totalPages()"
-            class="page-button">
-            Next
-          </button>
-        </div>
+        }
       </div>
-    </div>
-  `,
+    `,
   styles: [`
     .event-list-container {
       max-width: 1200px;

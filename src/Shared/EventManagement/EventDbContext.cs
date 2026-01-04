@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
+using Shared.EventManagement.Entities;
 
 namespace Shared.EventManagement;
 
@@ -32,6 +33,12 @@ public class EventDbContext : DbContext
     /// Social event RSVPs table
     /// </summary>
     public DbSet<SocialEventRsvp> SocialEventRsvps => Set<SocialEventRsvp>();
+
+    public DbSet<Location> Locations => Set<Location>();
+    public DbSet<Room> Rooms => Set<Room>();
+    public DbSet<RoomConfiguration> RoomConfigurations => Set<RoomConfiguration>();
+    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<Person> People => Set<Person>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -546,6 +553,33 @@ public class EventDbContext : DbContext
 
             entity.HasIndex(r => new { r.SocialEventId, r.Status })
                 .HasDatabaseName("ix_social_event_rsvps_event_status");
+        });
+
+        modelBuilder.Entity<Location>(entity =>
+        {
+            if (!_isInMemory) entity.ToTable("locations", schema: "event_management");
+            entity.HasMany(l => l.Rooms).WithOne(r => r.Location).HasForeignKey(r => r.LocationId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Room>(entity =>
+        {
+            if (!_isInMemory) entity.ToTable("rooms", schema: "event_management");
+            entity.HasMany(r => r.Configurations).WithOne(c => c.Room).HasForeignKey(c => c.RoomId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RoomConfiguration>(entity =>
+        {
+            if (!_isInMemory) entity.ToTable("room_configurations", schema: "event_management");
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            if (!_isInMemory) entity.ToTable("tags", schema: "event_management");
+        });
+
+        modelBuilder.Entity<Person>(entity =>
+        {
+            if (!_isInMemory) entity.ToTable("people", schema: "event_management");
         });
 
         // Configure JSON conversion for custom fields

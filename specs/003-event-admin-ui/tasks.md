@@ -26,7 +26,7 @@
 - [x] T006 Implement Location and Room entities in [src/Shared/EventManagement/Entities/Location.cs](src/Shared/EventManagement/Entities/Location.cs)
 - [x] T007 Implement Tag entity in [src/Shared/EventManagement/Entities/Tag.cs](src/Shared/EventManagement/Entities/Tag.cs)
 - [x] T008 Implement Person entity (Organizer/Speaker base) in [src/Shared/EventManagement/Entities/Person.cs](src/Shared/EventManagement/Entities/Person.cs)
-- [ ] T009 Create EF Core migrations for foundational entities in [src/Shared/EventManagement/Data/Migrations/](src/Shared/EventManagement/Data/Migrations/)
+- [x] T009 Create EF Core migrations for foundational entities in [src/Shared/EventManagement/Data/Migrations/](src/Shared/EventManagement/Data/Migrations/)
 - [ ] T010 Implement BaseEventService with common validation logic in [src/Shared/EventManagement/Services/BaseEventService.cs](src/Shared/EventManagement/Services/BaseEventService.cs)
 
 ## Phase 3: User Story 1 - Create and Configure Event

@@ -5,6 +5,7 @@ using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 using Shared.SessionManagement;
 using Xunit;
+using Track = Shared.SessionManagement.Track;
 
 namespace Shared.Tests.SessionManagement;
 

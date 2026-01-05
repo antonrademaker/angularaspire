@@ -34,7 +34,7 @@
 
 - [x] T011 [US1] Implement Event and EventSeries entities in [src/Shared/EventManagement/Entities/Event.cs](src/Shared/EventManagement/Entities/Event.cs)
 - [x] T012 [US1] Implement CreateEvent and GetEvent endpoints in [src/PrivateApi/EventManagement/EventController.cs](src/PrivateApi/EventManagement/EventController.cs)
-- [ ] T013 [US1] Create Event List component in [src/PrivateApp/src/app/event-management/components/event-list/event-list.component.ts](src/PrivateApp/src/app/event-management/components/event-list/event-list.component.ts)
+- [x] T013 [US1] Create Event List component in [src/PrivateApp/src/app/event-management/components/event-list/event-list.component.ts](src/PrivateApp/src/app/event-management/components/event-list/event-list.component.ts)
 - [ ] T014 [US1] Create Event Create/Edit Form in [src/PrivateApp/src/app/event-management/components/event-form/event-form.component.ts](src/PrivateApp/src/app/event-management/components/event-form/event-form.component.ts)
 - [ ] T015 [US1] Implement multi-day date picker validation in [src/PrivateApp/src/app/shared-ui/validators/date-range.validator.ts](src/PrivateApp/src/app/shared-ui/validators/date-range.validator.ts)
 - [ ] T016 [US1] [P] Write integration tests for Event creation in [tests/PrivateApi.Tests/EventManagement/EventTests.cs](tests/PrivateApi.Tests/EventManagement/EventTests.cs)

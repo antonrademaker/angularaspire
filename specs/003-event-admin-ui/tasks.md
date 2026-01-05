@@ -66,42 +66,42 @@
 ## Phase 7: User Story 5 - Swap Sessions
 **Goal**: Enable optimizing the schedule via swapping (P2).
 
-- [ ] T029 [US5] Implement SwapSessions endpoint logic in [src/Shared/EventManagement/Services/SessionService.cs](src/Shared/EventManagement/Services/SessionService.cs)
-- [ ] T030 [US5] Update Drag-and-Drop service to handle swap operations in [src/PrivateApp/src/app/event-management/services/schedule-drag-drop.service.ts](src/PrivateApp/src/app/event-management/services/schedule-drag-drop.service.ts)
-- [ ] T031 [US5] [P] Write unit tests for swap validation logic in [tests/Shared.Tests/EventManagement/SessionSwapTests.cs](tests/Shared.Tests/EventManagement/SessionSwapTests.cs)
+- [x] T029 [US5] Implement SwapSessions endpoint logic in [src/Shared/EventManagement/Services/SessionService.cs](src/Shared/EventManagement/Services/SessionService.cs)
+- [x] T030 [US5] Update Drag-and-Drop service to handle swap operations in [src/PrivateApp/src/app/event-management/services/schedule-drag-drop.service.ts](src/PrivateApp/src/app/event-management/services/schedule-drag-drop.service.ts)
+- [x] T031 [US5] [P] Write unit tests for swap validation logic in [tests/Shared.Tests/EventManagement/SessionSwapTests.cs](tests/Shared.Tests/EventManagement/SessionSwapTests.cs)
 
 ## Phase 8: User Story 6 - Manage Organizers
 **Goal**: Enable collaborative event management (P2).
 
-- [ ] T032 [US6] Implement EventOrganizer junction entity in [src/Shared/EventManagement/Entities/EventOrganizer.cs](src/Shared/EventManagement/Entities/EventOrganizer.cs)
-- [ ] T033 [US6] Implement Add/Remove Organizer endpoints in [src/PrivateApi/EventManagement/OrganizerController.cs](src/PrivateApi/EventManagement/OrganizerController.cs)
-- [ ] T034 [US6] Create Organizer Management UI in [src/PrivateApp/src/app/event-management/components/organizer-list/organizer-list.component.ts](src/PrivateApp/src/app/event-management/components/organizer-list/organizer-list.component.ts)
+- [x] T032 [US6] Implement EventOrganizer junction entity in [src/Shared/EventManagement/Entities/EventOrganizer.cs](src/Shared/EventManagement/Entities/EventOrganizer.cs)
+- [x] T033 [US6] Implement Add/Remove Organizer endpoints in [src/PrivateApi/EventManagement/OrganizerController.cs](src/PrivateApi/EventManagement/OrganizerController.cs)
+- [x] T034 [US6] Create Organizer Management UI in [src/PrivateApp/src/app/event-management/components/organizer-list/organizer-list.component.ts](src/PrivateApp/src/app/event-management/components/organizer-list/organizer-list.component.ts)
 
 ## Phase 9: User Story 7 - Event Status & Visibility
 **Goal**: Manage event lifecycle (P2).
 
-- [ ] T035 [US7] Implement Status State Machine validation in [src/Shared/EventManagement/Domain/EventStatusMachine.cs](src/Shared/EventManagement/Domain/EventStatusMachine.cs)
-- [ ] T036 [US7] Implement PublishEvent endpoint with validation in [src/PrivateApi/EventManagement/EventController.cs](src/PrivateApi/EventManagement/EventController.cs)
-- [ ] T037 [US7] Update PublicApp to filter events by status in [src/PublicApi/EventManagement/PublicEventController.cs](src/PublicApi/EventManagement/PublicEventController.cs)
+- [x] T035 [US7] Implement Status State Machine validation in [src/Shared/EventManagement/Domain/EventStatusMachine.cs](src/Shared/EventManagement/Domain/EventStatusMachine.cs)
+- [x] T036 [US7] Implement PublishEvent endpoint with validation in [src/PrivateApi/EventManagement/EventController.cs](src/PrivateApi/EventManagement/EventController.cs)
+- [x] T037 [US7] Update PublicApp to filter events by status in [src/PublicApi/EventManagement/PublicEventController.cs](src/PublicApi/EventManagement/PublicEventController.cs)
 
 ## Phase 10: User Story 10 - Mobile Experience
 **Goal**: Enable mobile management (P2).
 
-- [ ] T038 [US10] Implement responsive CSS grid for Schedule View in [src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.scss](src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.scss)
-- [ ] T039 [US10] Create Mobile List View component for schedule in [src/PrivateApp/src/app/event-management/components/mobile-schedule/mobile-schedule.component.ts](src/PrivateApp/src/app/event-management/components/mobile-schedule/mobile-schedule.component.ts)
-- [ ] T040 [US10] Implement touch-friendly drag handles in [src/PrivateApp/src/app/event-management/components/session-card/session-card.component.ts](src/PrivateApp/src/app/event-management/components/session-card/session-card.component.ts)
+- [x] T038 [US10] Implement responsive CSS grid for Schedule View in [src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.scss](src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.scss)
+- [x] T039 [US10] Create Mobile List View component for schedule in [src/PrivateApp/src/app/event-management/components/mobile-schedule/mobile-schedule.component.ts](src/PrivateApp/src/app/event-management/components/mobile-schedule/mobile-schedule.component.ts)
+- [x] T040 [US10] Implement touch-friendly drag handles in [src/PrivateApp/src/app/event-management/components/session-card/session-card.component.ts](src/PrivateApp/src/app/event-management/components/session-card/session-card.component.ts)
 
 ## Phase 11: User Story 11 - Accessibility
 **Goal**: Ensure inclusive access (P2).
 
-- [ ] T041 [US11] Add ARIA labels to Schedule Grid and Session Cards in [src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.html](src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.html)
-- [ ] T042 [US11] Implement keyboard navigation (arrow keys) for grid in [src/PrivateApp/src/app/event-management/directives/keyboard-nav.directive.ts](src/PrivateApp/src/app/event-management/directives/keyboard-nav.directive.ts)
-- [ ] T043 [US11] Implement Live Region service for announcements in [src/PrivateApp/src/app/shared-ui/services/a11y-announcer.service.ts](src/PrivateApp/src/app/shared-ui/services/a11y-announcer.service.ts)
+- [x] T041 [US11] Add ARIA labels to Schedule Grid and Session Cards in [src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.html](src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.html)
+- [x] T042 [US11] Implement keyboard navigation (arrow keys) for grid in [src/PrivateApp/src/app/event-management/directives/keyboard-nav.directive.ts](src/PrivateApp/src/app/event-management/directives/keyboard-nav.directive.ts)
+- [x] T043 [US11] Implement Live Region service for announcements in [src/PrivateApp/src/app/shared-ui/services/a11y-announcer.service.ts](src/PrivateApp/src/app/shared-ui/services/a11y-announcer.service.ts)
 
 ## Phase 12: Polish & Cross-Cutting
 **Goal**: Security, Performance, and Resilience.
 
-- [ ] T044 Implement File Upload Validation (FR-299) in [src/PrivateApi/Middleware/FileUploadValidator.cs](src/PrivateApi/Middleware/FileUploadValidator.cs)
-- [ ] T045 Implement Rate Limiting (FR-305) in [src/PublicApi/Program.cs](src/PublicApi/Program.cs)
-- [ ] T046 Implement Stress Test Script (FR-306) in [tests/k6/stress-test-schedule.js](tests/k6/stress-test-schedule.js)
-- [ ] T047 Implement UI Rollback Logic (FR-307) in [src/PrivateApp/src/app/event-management/store/schedule.effects.ts](src/PrivateApp/src/app/event-management/store/schedule.effects.ts)
+- [x] T044 Implement File Upload Validation (FR-299) in [src/PrivateApi/Middleware/FileUploadValidator.cs](src/PrivateApi/Middleware/FileUploadValidator.cs)
+- [x] T045 Implement Rate Limiting (FR-305) in [src/PublicApi/Program.cs](src/PublicApi/Program.cs)
+- [x] T046 Implement Stress Test Script (FR-306) in [tests/k6/stress-test-schedule.js](tests/k6/stress-test-schedule.js)
+- [x] T047 Implement UI Rollback Logic (FR-307) in [src/PrivateApp/src/app/event-management/store/schedule.effects.ts](src/PrivateApp/src/app/event-management/store/schedule.effects.ts)

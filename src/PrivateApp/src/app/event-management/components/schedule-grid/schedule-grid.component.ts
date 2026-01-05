@@ -13,11 +13,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { forkJoin } from 'rxjs';
+import { SessionCardComponent } from '../session-card/session-card.component';
 
 @Component({
   selector: 'app-schedule-grid',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, DragDropModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, DragDropModule, SessionCardComponent],
   templateUrl: './schedule-grid.component.html',
   styleUrls: ['./schedule-grid.component.scss']
 })

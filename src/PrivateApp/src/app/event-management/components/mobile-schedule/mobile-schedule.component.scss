@@ -1,0 +1,20 @@
+.mobile-schedule-container {
+  padding: 8px;
+
+  .session-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+  }
+
+  .session-card {
+    background-color: #fafafa;
+  }
+
+  .no-sessions {
+    color: #666;
+    font-style: italic;
+    padding: 8px;
+  }
+}

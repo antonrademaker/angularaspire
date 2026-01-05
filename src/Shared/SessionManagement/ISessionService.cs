@@ -1,4 +1,5 @@
 using Shared.Common;
+using System.ServiceModel;
 
 namespace Shared.SessionManagement;
 
@@ -6,6 +7,7 @@ namespace Shared.SessionManagement;
 /// Service interface for session management operations
 /// Provides methods for session CRUD, subscription management, and capacity control
 /// </summary>
+[ServiceContract]
 public interface ISessionService
 {
     // Session CRUD Operations
@@ -15,6 +17,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="request">Session creation request</param>
     /// <returns>Created session details</returns>
+    [OperationContract]
     Task<Result<SessionResponse>> CreateSessionAsync(CreateSessionRequest request);
 
     /// <summary>
@@ -22,6 +25,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="sessionId">Session ID</param>
     /// <returns>Session details or null if not found</returns>
+    [OperationContract]
     Task<SessionResponse?> GetSessionAsync(Guid sessionId);
 
     /// <summary>
@@ -30,6 +34,7 @@ public interface ISessionService
     /// <param name="eventId">Event ID</param>
     /// <param name="slug">Session slug</param>
     /// <returns>Session details or null if not found</returns>
+    [OperationContract]
     Task<SessionResponse?> GetSessionBySlugAsync(Guid eventId, string slug);
 
     /// <summary>
@@ -38,6 +43,7 @@ public interface ISessionService
     /// <param name="sessionId">Session ID</param>
     /// <param name="request">Session update request</param>
     /// <returns>Updated session details</returns>
+    [OperationContract]
     Task<Result<SessionResponse>> UpdateSessionAsync(Guid sessionId, UpdateSessionRequest request);
 
     /// <summary>
@@ -45,6 +51,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="sessionId">Session ID</param>
     /// <returns>Success result</returns>
+    [OperationContract]
     Task<Result> DeleteSessionAsync(Guid sessionId);
 
     /// <summary>
@@ -52,6 +59,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="sessionId">Session ID</param>
     /// <returns>Success result</returns>
+    [OperationContract]
     Task<Result> PublishSessionAsync(Guid sessionId);
 
     /// <summary>
@@ -59,6 +67,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="sessionId">Session ID</param>
     /// <returns>Success result</returns>
+    [OperationContract]
     Task<Result> UnpublishSessionAsync(Guid sessionId);
 
     // Session Search and Filtering
@@ -68,6 +77,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="request">Search request with filters</param>
     /// <returns>Paged list of sessions</returns>
+    [OperationContract]
     Task<PagedResult<SessionResponse>> SearchSessionsAsync(SessionSearchRequest request);
 
     /// <summary>
@@ -77,6 +87,7 @@ public interface ISessionService
     /// <param name="trackId">Optional track ID to filter by</param>
     /// <param name="includeUnpublished">Whether to include unpublished sessions</param>
     /// <returns>List of sessions</returns>
+    [OperationContract]
     Task<IEnumerable<SessionResponse>> GetEventSessionsAsync(Guid eventId, Guid? trackId = null, bool includeUnpublished = false);
 
     /// <summary>
@@ -85,6 +96,7 @@ public interface ISessionService
     /// <param name="trackId">Track ID</param>
     /// <param name="includeUnpublished">Whether to include unpublished sessions</param>
     /// <returns>List of sessions in the track</returns>
+    [OperationContract]
     Task<IEnumerable<SessionResponse>> GetTrackSessionsAsync(Guid trackId, bool includeUnpublished = false);
 
     // Session Capacity and Conflict Management
@@ -94,6 +106,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="sessionId">Session ID</param>
     /// <returns>Availability information</returns>
+    [OperationContract]
     Task<SessionAvailabilityResponse> CheckSessionAvailabilityAsync(Guid sessionId);
 
     /// <summary>
@@ -104,6 +117,7 @@ public interface ISessionService
     /// <param name="endTime">Proposed end time</param>
     /// <param name="room">Optional room to check conflicts</param>
     /// <returns>List of conflicting sessions</returns>
+    [OperationContract]
     Task<IEnumerable<SessionConflict>> DetectSessionConflictsAsync(Guid sessionId, DateTime startTime, DateTime endTime, string? room = null);
 
     // Subscription Management
@@ -116,6 +130,7 @@ public interface ISessionService
     /// <param name="userAgent">User agent for analytics</param>
     /// <param name="ipAddress">IP address for security</param>
     /// <returns>Subscription result</returns>
+    [OperationContract]
     Task<Result<SubscriptionResponse>> SubscribeToSessionAsync(Guid sessionId, Guid userId, string? userAgent = null, string? ipAddress = null);
 
     /// <summary>
@@ -125,6 +140,7 @@ public interface ISessionService
     /// <param name="userId">User ID</param>
     /// <param name="reason">Optional cancellation reason</param>
     /// <returns>Success result</returns>
+    [OperationContract]
     Task<Result> UnsubscribeFromSessionAsync(Guid sessionId, Guid userId, string? reason = null);
 
     /// <summary>
@@ -133,6 +149,7 @@ public interface ISessionService
     /// <param name="userId">User ID</param>
     /// <param name="eventId">Optional event ID to filter</param>
     /// <returns>List of user's subscriptions</returns>
+    [OperationContract]
     Task<IEnumerable<SubscriptionResponse>> GetUserSubscriptionsAsync(Guid userId, Guid? eventId = null);
 
     /// <summary>
@@ -141,6 +158,7 @@ public interface ISessionService
     /// <param name="sessionId">Session ID</param>
     /// <param name="includeWaitlisted">Whether to include waitlisted users</param>
     /// <returns>List of session subscribers</returns>
+    [OperationContract]
     Task<IEnumerable<SubscriptionResponse>> GetSessionSubscriptionsAsync(Guid sessionId, bool includeWaitlisted = false);
 
     // Waitlist Management
@@ -151,6 +169,7 @@ public interface ISessionService
     /// <param name="sessionId">Session ID</param>
     /// <param name="count">Number of users to promote (default: all possible)</param>
     /// <returns>Number of users promoted</returns>
+    [OperationContract]
     Task<int> ProcessWaitlistAsync(Guid sessionId, int? count = null);
 
     /// <summary>
@@ -158,6 +177,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="sessionId">Session ID</param>
     /// <returns>Ordered list of waitlisted users</returns>
+    [OperationContract]
     Task<IEnumerable<SubscriptionResponse>> GetSessionWaitlistAsync(Guid sessionId);
 
     // Attendance Management
@@ -168,6 +188,7 @@ public interface ISessionService
     /// <param name="sessionId">Session ID</param>
     /// <param name="userId">User ID</param>
     /// <returns>Success result</returns>
+    [OperationContract]
     Task<Result> CheckInUserAsync(Guid sessionId, Guid userId);
 
     /// <summary>
@@ -176,6 +197,7 @@ public interface ISessionService
     /// <param name="sessionId">Session ID</param>
     /// <param name="attendances">List of user attendances</param>
     /// <returns>Success result</returns>
+    [OperationContract]
     Task<Result> MarkAttendanceAsync(Guid sessionId, IEnumerable<SessionAttendance> attendances);
 
     // Session Status Management
@@ -185,6 +207,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="sessionId">Session ID</param>
     /// <returns>Success result</returns>
+    [OperationContract]
     Task<Result> StartSessionAsync(Guid sessionId);
 
     /// <summary>
@@ -192,6 +215,7 @@ public interface ISessionService
     /// </summary>
     /// <param name="sessionId">Session ID</param>
     /// <returns>Success result</returns>
+    [OperationContract]
     Task<Result> CompleteSessionAsync(Guid sessionId);
 
     /// <summary>
@@ -200,6 +224,7 @@ public interface ISessionService
     /// <param name="sessionId">Session ID</param>
     /// <param name="reason">Cancellation reason</param>
     /// <returns>Success result</returns>
+    [OperationContract]
     Task<Result> CancelSessionAsync(Guid sessionId, string reason);
 }
 

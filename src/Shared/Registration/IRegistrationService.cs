@@ -1,5 +1,6 @@
 using Shared.EventManagement;
 using Shared.UserManagement;
+using System.ServiceModel;
 
 namespace Shared.Registration;
 
@@ -237,6 +238,7 @@ public class RegistrationSearchResult
 /// Service interface for managing event registrations with queue processing support
 /// Implements business logic for registration lifecycle, capacity management, and queue processing
 /// </summary>
+[ServiceContract]
 public interface IRegistrationService
 {
     /// <summary>
@@ -245,6 +247,7 @@ public interface IRegistrationService
     /// <param name="request">Registration request details</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Registration result with queue information</returns>
+    [OperationContract]
     Task<RegistrationResult> RegisterUserAsync(RegistrationRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -253,6 +256,7 @@ public interface IRegistrationService
     /// <param name="confirmationToken">Confirmation token from email</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Registration result</returns>
+    [OperationContract]
     Task<RegistrationResult> ConfirmRegistrationAsync(string confirmationToken, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -263,6 +267,7 @@ public interface IRegistrationService
     /// <param name="reason">Optional cancellation reason</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if cancelled successfully</returns>
+    [OperationContract]
     Task<bool> CancelRegistrationAsync(Guid registrationId, Guid userId, string? reason = null, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -273,6 +278,7 @@ public interface IRegistrationService
     /// <param name="includeEvent">Include event details</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Registration details or null if not found</returns>
+    [OperationContract]
     Task<Registration?> GetRegistrationAsync(Guid registrationId, bool includeUser = true, bool includeEvent = true, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -282,6 +288,7 @@ public interface IRegistrationService
     /// <param name="eventId">Event ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Registration or null if not found</returns>
+    [OperationContract]
     Task<Registration?> GetUserRegistrationAsync(Guid userId, Guid eventId, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -290,6 +297,7 @@ public interface IRegistrationService
     /// <param name="criteria">Search criteria</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Paginated search results</returns>
+    [OperationContract]
     Task<RegistrationSearchResult> SearchRegistrationsAsync(RegistrationSearchCriteria criteria, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -300,6 +308,7 @@ public interface IRegistrationService
     /// <param name="includeEvents">Include event details</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User's registrations</returns>
+    [OperationContract]
     Task<List<Registration>> GetUserRegistrationsAsync(Guid userId, RegistrationStatus? status = null, bool includeEvents = true, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -310,6 +319,7 @@ public interface IRegistrationService
     /// <param name="includeUsers">Include user details</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Event registrations</returns>
+    [OperationContract]
     Task<List<Registration>> GetEventRegistrationsAsync(Guid eventId, RegistrationStatus? status = null, bool includeUsers = true, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -318,6 +328,7 @@ public interface IRegistrationService
     /// <param name="eventId">Event ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Queue status information</returns>
+    [OperationContract]
     Task<QueueStatus> GetQueueStatusAsync(Guid eventId, CancellationToken cancellationToken = default);
 
     /// <summary>

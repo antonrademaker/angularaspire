@@ -61,7 +61,7 @@ public class EventsController : ControllerBase
             var searchRequest = new EventSearchRequest
             {
                 SearchText = searchText,
-                Status = EventStatus.Published, // Only show published events in public API
+                Statuses = new List<EventStatus> { EventStatus.Published, EventStatus.Active, EventStatus.Completed },
                 // Visibility = EventVisibility.Public, // Only show public events
                 StartDateFrom = startDateFrom,
                 StartDateTo = startDateTo,

@@ -1,0 +1,68 @@
+<div class="organizer-list-container">
+  <div class="header">
+    <h3>Organizers</h3>
+    <button mat-raised-button color="primary" (click)="toggleAdd()" *ngIf="!isAdding">
+      <mat-icon>add</mat-icon> Add Organizer
+    </button>
+  </div>
+
+  <div class="add-form" *ngIf="isAdding" [formGroup]="addForm">
+    <mat-form-field appearance="outline">
+      <mat-label>First Name</mat-label>
+      <input matInput formControlName="firstName">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Last Name</mat-label>
+      <input matInput formControlName="lastName">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" type="email">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Role</mat-label>
+      <mat-select formControlName="role">
+        <mat-option *ngFor="let role of roles" [value]="role">
+          {{ getRoleName(role) }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="form-actions">
+      <button mat-button (click)="toggleAdd()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="addOrganizer()" [disabled]="addForm.invalid">Save</button>
+    </div>
+  </div>
+
+  <table mat-table [dataSource]="organizers" class="mat-elevation-z1">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef> Name </th>
+      <td mat-cell *matCellDef="let element"> {{element.firstName}} {{element.lastName}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef> Email </th>
+      <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="role">
+      <th mat-header-cell *matHeaderCellDef> Role </th>
+      <td mat-cell *matCellDef="let element"> {{getRoleName(element.role)}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Actions </th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-icon-button color="warn" (click)="removeOrganizer(element.personId)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>

@@ -92,6 +92,20 @@ public class EventController : ControllerBase
         return Ok(evt);
     }
 
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateEventStatusRequest request)
+    {
+        var userId = Guid.NewGuid(); // TODO: Get from claims
+        var result = await _eventService.UpdateEventStatusAsync(id, request.Status, userId);
+        
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result.Error);
+        }
+        
+        return NoContent();
+    }
+
     /// <summary>
     /// Delete an event
     /// </summary>
@@ -111,3 +125,5 @@ public class EventController : ControllerBase
         return NoContent();
     }
 }
+
+public record UpdateEventStatusRequest(EventStatus Status);

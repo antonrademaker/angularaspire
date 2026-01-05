@@ -50,7 +50,11 @@ public class EventService : IEventService
                 e.Description.ToLower().Contains(searchText));
         }
 
-        if (searchRequest.Status.HasValue)
+        if (searchRequest.Statuses != null && searchRequest.Statuses.Any())
+        {
+            query = query.Where(e => searchRequest.Statuses.Contains(e.Status));
+        }
+        else if (searchRequest.Status.HasValue)
         {
             query = query.Where(e => e.Status == searchRequest.Status.Value);
         }
@@ -235,6 +239,25 @@ public class EventService : IEventService
 
         _logger.LogInformation("Updated event: {EventId}", eventId);
         return existingEvent;
+    }
+
+    public async Task<Shared.Common.Result> UpdateEventStatusAsync(Guid eventId, EventStatus newStatus, Guid userId)
+    {
+        var evt = await _eventContext.Events.FindAsync(eventId);
+        if (evt == null) return Shared.Common.Result.Failure("Event not found");
+
+        var transitionResult = Shared.EventManagement.Domain.EventStatusMachine.CanTransition(evt.Status, newStatus);
+        if (!transitionResult.IsSuccess)
+        {
+            return transitionResult;
+        }
+
+        evt.Status = newStatus;
+        evt.UpdatedAt = DateTime.UtcNow;
+        evt.UpdatedBy = userId;
+
+        await _eventContext.SaveChangesAsync();
+        return Shared.Common.Result.Success();
     }
 
     public async Task<bool> DeleteEventAsync(Guid eventId, Guid deletedByUserId)

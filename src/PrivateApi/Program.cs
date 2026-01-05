@@ -5,6 +5,7 @@ using Shared.UserManagement;
 using Shared.EventManagement;
 using Shared.SessionManagement;
 using Shared.ApiManagement;
+using PrivateApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,6 +109,9 @@ app.UseHttpsRedirection();
 app.UseCors("AngularApps");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// File upload validation middleware
+app.UseFileUploadValidation();
 
 // Map default health checks
 app.MapDefaultEndpoints();

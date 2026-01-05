@@ -1,7 +1,7 @@
 <div class="schedule-grid-container">
   <div class="header">
     <h2>Schedule</h2>
-    <button mat-raised-button color="primary" (click)="addTimeSlot()">
+    <button mat-raised-button color="primary" (click)="addTimeSlot()" aria-label="Add new time slot">
       <mat-icon>add</mat-icon> Add Time Slot
     </button>
   </div>
@@ -20,10 +20,10 @@
             <div class="time-range">{{ slot.startTime | date:'shortTime' }} - {{ slot.endTime | date:'shortTime' }}</div>
             <div class="slot-name">{{ slot.name }}</div>
             <div class="slot-actions">
-                <button mat-icon-button (click)="editTimeSlot(slot)">
+                <button mat-icon-button (click)="editTimeSlot(slot)" [attr.aria-label]="'Edit time slot ' + slot.name">
                     <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteTimeSlot(slot)">
+                <button mat-icon-button color="warn" (click)="deleteTimeSlot(slot)" [attr.aria-label]="'Delete time slot ' + slot.name">
                     <mat-icon>delete</mat-icon>
                 </button>
             </div>
@@ -34,10 +34,12 @@
               (cdkDropListDropped)="drop($event, track.id, slot.id)"
               class="session-cell">
             
-            <div *ngFor="let session of gridData[slot.id][track.id]" cdkDrag [cdkDragData]="session" class="session-card">
-              <div class="session-title">{{ session.title }}</div>
-              <div class="session-code">{{ session.shortCode }}</div>
-            </div>
+            <app-session-card 
+              *ngFor="let session of gridData[slot.id][track.id]" 
+              cdkDrag 
+              [cdkDragData]="session" 
+              [session]="session">
+            </app-session-card>
 
           </td>
         </tr>

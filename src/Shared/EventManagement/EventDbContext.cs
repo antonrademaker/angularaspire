@@ -45,6 +45,7 @@ public class EventDbContext : DbContext
     public DbSet<Session> Sessions => Set<Session>();
     public DbSet<SessionAssignment> SessionAssignments => Set<SessionAssignment>();
     public DbSet<Person> People => Set<Person>();
+    public DbSet<EventOrganizer> EventOrganizers => Set<EventOrganizer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,6 +56,14 @@ public class EventDbContext : DbContext
         {
             if (!_isInMemory) entity.ToTable("events", schema: "event_management");
             entity.HasOne(e => e.Series).WithMany().HasForeignKey(e => e.SeriesId).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<EventOrganizer>(entity =>
+        {
+            if (!_isInMemory) entity.ToTable("event_organizers", schema: "event_management");
+            entity.HasKey(eo => new { eo.EventId, eo.PersonId });
+            entity.HasOne(eo => eo.Event).WithMany().HasForeignKey(eo => eo.EventId);
+            entity.HasOne(eo => eo.Person).WithMany().HasForeignKey(eo => eo.PersonId);
         });
 
         modelBuilder.Entity<EventSeries>(entity =>
@@ -474,6 +483,7 @@ public static class EventDbContextExtensions
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<ISocialEventService, SocialEventService>();
         services.AddScoped<IScheduleService, ScheduleService>();
+        services.AddScoped<IEventSessionService, EventSessionService>();
 
         return services;
     }

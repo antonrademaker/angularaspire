@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using System.ServiceModel;
 using Shared.EventManagement.Entities;
 
 namespace Shared.EventManagement;
@@ -8,6 +9,7 @@ namespace Shared.EventManagement;
 /// Business service interface for event management operations
 /// Follows IDesign principles with clear business operations
 /// </summary>
+[ServiceContract]
 public interface IEventService
 {
     // Event Discovery Operations
@@ -17,6 +19,7 @@ public interface IEventService
     /// </summary>
     /// <param name="searchRequest">Search and filter criteria</param>
     /// <returns>Paginated list of events matching criteria</returns>
+    [OperationContract]
     Task<EventSearchResult> SearchEventsAsync(EventSearchRequest searchRequest);
 
     /// <summary>
@@ -25,6 +28,7 @@ public interface IEventService
     /// <param name="eventId">Event unique identifier</param>
     /// <param name="includeDetails">Whether to include detailed information</param>
     /// <returns>Event details or null if not found</returns>
+    [OperationContract]
     Task<Event?> GetEventByIdAsync(Guid eventId, bool includeDetails = true);
 
     /// <summary>
@@ -33,6 +37,7 @@ public interface IEventService
     /// <param name="slug">Event slug</param>
     /// <param name="includeDetails">Whether to include detailed information</param>
     /// <returns>Event details or null if not found</returns>
+    [OperationContract]
     Task<Event?> GetEventBySlugAsync(string slug, bool includeDetails = true);
 
     /// <summary>
@@ -40,7 +45,11 @@ public interface IEventService
     /// </summary>
     /// <param name="limit">Maximum number of events to return</param>
     /// <returns>List of upcoming events</returns>
+    [OperationContract]
     Task<IEnumerable<Event>> GetUpcomingEventsAsync(int limit = 10);
+
+    [OperationContract]
+    Task<Shared.Common.Result> UpdateEventStatusAsync(Guid eventId, EventStatus newStatus, Guid userId);
 
     /*
     /// <summary>
@@ -141,6 +150,11 @@ public class EventSearchRequest
     /// Filter by event status
     /// </summary>
     public EventStatus? Status { get; set; }
+
+    /// <summary>
+    /// Filter by multiple event statuses
+    /// </summary>
+    public List<EventStatus>? Statuses { get; set; }
 
     /*
     /// <summary>

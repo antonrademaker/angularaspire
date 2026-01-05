@@ -1,0 +1,31 @@
+<div class="mobile-schedule-container">
+  <mat-accordion>
+    <mat-expansion-panel *ngFor="let slot of timeSlots" [expanded]="true">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ slot.startTime | date:'shortTime' }} - {{ slot.endTime | date:'shortTime' }}
+        </mat-panel-title>
+        <mat-panel-description>
+          {{ slot.name }}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="session-list">
+        <mat-card *ngFor="let session of sessionsBySlot[slot.id]" class="session-card">
+          <mat-card-header>
+            <mat-card-title>{{ session.title }}</mat-card-title>
+            <mat-card-subtitle>
+              {{ session.shortCode }} | {{ getTrackName(session.assignments[0].trackId) }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p *ngIf="session.abstract">{{ session.abstract | slice:0:100 }}...</p>
+          </mat-card-content>
+        </mat-card>
+        <div *ngIf="sessionsBySlot[slot.id].length === 0" class="no-sessions">
+          No sessions scheduled.
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

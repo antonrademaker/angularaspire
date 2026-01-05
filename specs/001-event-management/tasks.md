@@ -248,6 +248,7 @@ Following the user stories from spec.md organized by priority (P1, P2, P3, P4) w
 
 ### Final E2E Validation
 - [x] T110 [P] Create comprehensive E2E test suite in tests/e2e/full-workflow.spec.ts
+- [x] T112 [P] Implement Swap Sessions feature (User Story 5)
 - [ ] T111 Run quickstart.md validation scenarios
 
 ---

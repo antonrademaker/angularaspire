@@ -164,7 +164,7 @@ public class EventService : IEventService
 
     public async Task<Event> CreateEventAsync(CreateEventRequest eventData, Guid createdByUserId)
     {
-        _logger.LogInformation("Creating new event: {Title}", eventData.Title);
+        _logger.LogInformation("Creating new event: {Title}", eventData.Title.Replace("\r", "").Replace("\n", ""));
 
         // Validate slug uniqueness
         Event? existingEvent = await _eventContext.Events

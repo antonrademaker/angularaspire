@@ -62,7 +62,7 @@ public class EventSessionService : IEventSessionService
             _context.Set<SessionAssignment>().Add(newAssignment);
             _context.Set<SessionAssignment>().Remove(firstAssignment);
         }
-        else if (secondAssignment != null)
+        else
         {
             // Move second assignment to first session
             var newAssignment = new SessionAssignment

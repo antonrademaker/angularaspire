@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { Session, SessionAssignment } from '../models/session.model';
+import { Session } from '../models/session.model';
 import { SessionService } from './session.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -21,7 +21,7 @@ export class ScheduleDragDropService {
     } else {
       // Moving from sidebar to grid or grid to sidebar or grid to grid
       const session = event.item.data as Session;
-      
+
       if (trackId && timeSlotId) {
         // Dropped onto a slot
         if (event.container.data.length > 0) {
@@ -45,25 +45,25 @@ export class ScheduleDragDropService {
         // Manually swap items in the arrays
         const sourceContainer = event.previousContainer;
         const targetContainer = event.container;
-        
+
         // Remove session1 from source
         // Note: transferArrayItem removes from source and adds to target, but we need to swap.
-        
+
         // We can't easily use transferArrayItem for a swap because it's one-way.
         // So we manipulate the data arrays directly.
-        
+
         // 1. Remove session1 from source
         sourceContainer.data.splice(event.previousIndex, 1);
-        
+
         // 2. Remove session2 from target (it should be at index 0 or we find it)
         const session2Index = targetContainer.data.indexOf(session2);
         if (session2Index > -1) {
           targetContainer.data.splice(session2Index, 1);
         }
-        
+
         // 3. Add session1 to target
         targetContainer.data.push(session1);
-        
+
         // 4. Add session2 to source
         sourceContainer.data.push(session2);
 

@@ -1,0 +1,73 @@
+<div class="container mx-auto p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold">Events</h1>
+    <a routerLink="/events/new" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+      Create Event
+    </a>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-4">
+    Loading events...
+  </div>
+
+  <div *ngIf="!loading && events.length === 0" class="text-center py-4 text-gray-500">
+    No events found.
+  </div>
+
+  <div *ngIf="!loading && events.length > 0" class="overflow-x-auto">
+    <table class="min-w-full bg-white border border-gray-200">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="py-2 px-4 border-b text-left">Title</th>
+          <th class="py-2 px-4 border-b text-left">Date</th>
+          <th class="py-2 px-4 border-b text-left">Status</th>
+          <th class="py-2 px-4 border-b text-left">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let event of events" class="hover:bg-gray-50">
+          <td class="py-2 px-4 border-b">
+            <a [routerLink]="['/events', event.id]" class="text-blue-600 hover:underline font-medium">
+              {{ event.title }}
+            </a>
+            <div class="text-sm text-gray-500">{{ event.slug }}</div>
+          </td>
+          <td class="py-2 px-4 border-b">
+            {{ event.startDate | date:'mediumDate' }}
+          </td>
+          <td class="py-2 px-4 border-b">
+            <span class="px-2 py-1 text-xs rounded-full"
+              [ngClass]="{
+                'bg-gray-200 text-gray-800': event.status === EventStatus.Draft,
+                'bg-green-200 text-green-800': event.status === EventStatus.Published,
+                'bg-red-200 text-red-800': event.status === EventStatus.Cancelled,
+                'bg-blue-200 text-blue-800': event.status === EventStatus.Completed,
+                'bg-yellow-200 text-yellow-800': event.status === EventStatus.Postponed
+              }">
+              {{ getStatusLabel(event.status) }}
+            </span>
+          </td>
+          <td class="py-2 px-4 border-b">
+            <a [routerLink]="['/events', event.id, 'edit']" class="text-blue-600 hover:text-blue-800 mr-2">Edit</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-4 flex justify-between items-center" *ngIf="totalCount > pageSize">
+    <button 
+      (click)="onPageChange(currentPage - 1)" 
+      [disabled]="currentPage === 1"
+      class="px-3 py-1 border rounded disabled:opacity-50">
+      Previous
+    </button>
+    <span>Page {{ currentPage }}</span>
+    <button 
+      (click)="onPageChange(currentPage + 1)" 
+      [disabled]="currentPage * pageSize >= totalCount"
+      class="px-3 py-1 border rounded disabled:opacity-50">
+      Next
+    </button>
+  </div>
+</div>

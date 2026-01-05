@@ -25,8 +25,11 @@
     </form>
   </div>
 
-  <div class="track-list" *ngIf="!isFormVisible">
-    <div class="track-item" *ngFor="let track of tracks">
+  <div class="track-list" *ngIf="!isFormVisible" cdkDropList (cdkDropListDropped)="drop($event)">
+    <div class="track-item" *ngFor="let track of tracks" cdkDrag>
+      <div class="track-handle" cdkDragHandle>
+        ☰
+      </div>
       <div class="track-info">
         <span class="color-dot" [style.background-color]="track.color"></span>
         <span class="track-name">{{ track.name }}</span>

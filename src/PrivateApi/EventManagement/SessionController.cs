@@ -127,6 +127,73 @@ public class SessionController : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("swap")]
+    public async Task<IActionResult> SwapSessions(Guid eventId, SwapSessionsRequest request)
+    {
+        var session1 = await _context.Sessions
+            .Include(s => s.Assignments)
+            .FirstOrDefaultAsync(s => s.Id == request.FirstSessionId && s.EventId == eventId);
+
+        var session2 = await _context.Sessions
+            .Include(s => s.Assignments)
+            .FirstOrDefaultAsync(s => s.Id == request.SecondSessionId && s.EventId == eventId);
+
+        if (session1 == null || session2 == null)
+        {
+            return NotFound("One or both sessions not found.");
+        }
+
+        var assignment1 = session1.Assignments.FirstOrDefault();
+        var assignment2 = session2.Assignments.FirstOrDefault();
+
+        if (assignment1 == null && assignment2 == null)
+        {
+            return BadRequest("Both sessions are unassigned.");
+        }
+
+        // If assignment1 is null, create it with assignment2's values, and delete assignment2
+        if (assignment1 == null)
+        {
+            _context.SessionAssignments.Add(new SessionAssignment
+            {
+                SessionId = session1.Id,
+                TrackId = assignment2!.TrackId,
+                TimeSlotId = assignment2.TimeSlotId
+            });
+            _context.SessionAssignments.Remove(assignment2);
+            session1.Status = SessionStatus.Scheduled;
+            session2.Status = SessionStatus.Draft;
+        }
+        // If assignment2 is null, create it with assignment1's values, and delete assignment1
+        else if (assignment2 == null)
+        {
+            _context.SessionAssignments.Add(new SessionAssignment
+            {
+                SessionId = session2.Id,
+                TrackId = assignment1.TrackId,
+                TimeSlotId = assignment1.TimeSlotId
+            });
+            _context.SessionAssignments.Remove(assignment1);
+            session2.Status = SessionStatus.Scheduled;
+            session1.Status = SessionStatus.Draft;
+        }
+        // Both assigned, swap values
+        else
+        {
+            var tempTrackId = assignment1.TrackId;
+            var tempTimeSlotId = assignment1.TimeSlotId;
+
+            assignment1.TrackId = assignment2.TrackId;
+            assignment1.TimeSlotId = assignment2.TimeSlotId;
+
+            assignment2.TrackId = tempTrackId;
+            assignment2.TimeSlotId = tempTimeSlotId;
+        }
+
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
     [HttpDelete("{sessionId}/assign")]
     public async Task<IActionResult> UnassignSession(Guid eventId, Guid sessionId)
     {
@@ -153,3 +220,4 @@ public class SessionController : ControllerBase
 public record CreateSessionRequest(string Title, string ShortCode, string? Abstract, int Duration, SessionLevel Level, string? Language, int? Capacity);
 public record UpdateSessionRequest(string Title, string ShortCode, string? Abstract, int Duration, SessionLevel Level, string? Language, int? Capacity);
 public record AssignSessionRequest(Guid TrackId, Guid TimeSlotId, Guid? RoomConfigurationId);
+public record SwapSessionsRequest(Guid FirstSessionId, Guid SecondSessionId);

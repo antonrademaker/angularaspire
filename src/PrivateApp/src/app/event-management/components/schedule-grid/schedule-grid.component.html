@@ -6,24 +6,43 @@
     </button>
   </div>
 
-  <div class="grid">
-    <div *ngFor="let slot of timeSlots" class="time-slot-row">
-      <div class="time-col">
-        {{ slot.startTime | date:'shortTime' }} - {{ slot.endTime | date:'shortTime' }}
-      </div>
-      <div class="content-col">
-        <div class="slot-name">{{ slot.name }}</div>
-        <div class="slot-type">{{ slot.type }}</div>
-      </div>
-      <div class="actions-col">
-        <button mat-icon-button (click)="editTimeSlot(slot)">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button color="warn" (click)="deleteTimeSlot(slot)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
-    </div>
+  <div class="grid-wrapper">
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th class="time-col">Time</th>
+          <th *ngFor="let track of tracks">{{ track.name }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let slot of timeSlots">
+          <td class="time-col">
+            <div class="time-range">{{ slot.startTime | date:'shortTime' }} - {{ slot.endTime | date:'shortTime' }}</div>
+            <div class="slot-name">{{ slot.name }}</div>
+            <div class="slot-actions">
+                <button mat-icon-button (click)="editTimeSlot(slot)">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteTimeSlot(slot)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+          </td>
+          <td *ngFor="let track of tracks" 
+              cdkDropList 
+              [cdkDropListData]="gridData[slot.id][track.id]"
+              (cdkDropListDropped)="drop($event, track.id, slot.id)"
+              class="session-cell">
+            
+            <div *ngFor="let session of gridData[slot.id][track.id]" cdkDrag [cdkDragData]="session" class="session-card">
+              <div class="session-title">{{ session.title }}</div>
+              <div class="session-code">{{ session.shortCode }}</div>
+            </div>
+
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <div *ngIf="timeSlots.length === 0" class="no-slots">
       No time slots defined.
     </div>

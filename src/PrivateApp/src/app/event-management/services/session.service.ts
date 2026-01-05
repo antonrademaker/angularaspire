@@ -34,4 +34,8 @@ export class SessionService {
   unassignSession(eventId: string, sessionId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${eventId}/sessions/${sessionId}/assign`);
   }
+
+  swapSessions(eventId: string, firstSessionId: string, secondSessionId: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${eventId}/sessions/swap`, { firstSessionId, secondSessionId });
+  }
 }

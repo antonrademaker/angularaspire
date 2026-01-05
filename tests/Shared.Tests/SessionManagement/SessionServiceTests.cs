@@ -1,13 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 using Shared.SessionManagement;
-using Xunit;
-using Track = Shared.SessionManagement.Track;
 using Session = Shared.SessionManagement.Session;
 using SessionStatus = Shared.SessionManagement.SessionStatus;
+using Track = Shared.SessionManagement.Track;
 
 namespace Shared.Tests.SessionManagement;
 

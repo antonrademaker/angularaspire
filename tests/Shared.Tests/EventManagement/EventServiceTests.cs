@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Shared.Common;
 using Shared.EventManagement;
-using Xunit;
 
 namespace Shared.Tests.EventManagement;
 

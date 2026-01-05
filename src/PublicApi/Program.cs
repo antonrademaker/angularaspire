@@ -1,13 +1,13 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Shared.UserManagement;
-using Shared.EventManagement;
-using Shared.Registration;
-using Shared.Notifications;
-using Shared.ApiManagement;
 using PublicApi.Hubs;
 using PublicApi.Middleware;
+using Shared.ApiManagement;
+using Shared.EventManagement;
+using Shared.Notifications;
+using Shared.Registration;
+using Shared.UserManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json;
 using Shared.EventManagement.Entities;
 using Shared.EventManagement.Services;
 
@@ -54,13 +52,15 @@ public class EventDbContext : DbContext
         // Configure Event entity
         modelBuilder.Entity<Event>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("events", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("events", schema: "event_management");
             entity.HasOne(e => e.Series).WithMany().HasForeignKey(e => e.SeriesId).OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<EventOrganizer>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("event_organizers", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("event_organizers", schema: "event_management");
             entity.HasKey(eo => new { eo.EventId, eo.PersonId });
             entity.HasOne(eo => eo.Event).WithMany().HasForeignKey(eo => eo.EventId);
             entity.HasOne(eo => eo.Person).WithMany().HasForeignKey(eo => eo.PersonId);
@@ -68,7 +68,8 @@ public class EventDbContext : DbContext
 
         modelBuilder.Entity<EventSeries>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("event_series", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("event_series", schema: "event_management");
         });
 
         // Configure SocialEvent entity
@@ -390,41 +391,48 @@ public class EventDbContext : DbContext
 
         modelBuilder.Entity<Location>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("locations", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("locations", schema: "event_management");
             entity.HasMany(l => l.Rooms).WithOne(r => r.Location).HasForeignKey(r => r.LocationId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Room>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("rooms", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("rooms", schema: "event_management");
             entity.HasMany(r => r.Configurations).WithOne(c => c.Room).HasForeignKey(c => c.RoomId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<RoomConfiguration>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("room_configurations", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("room_configurations", schema: "event_management");
         });
 
         modelBuilder.Entity<Tag>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("tags", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("tags", schema: "event_management");
         });
 
         modelBuilder.Entity<Person>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("people", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("people", schema: "event_management");
         });
 
         modelBuilder.Entity<TimeSlot>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("time_slots", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("time_slots", schema: "event_management");
             entity.Property(t => t.Type).HasConversion<string>();
             entity.HasOne(t => t.Event).WithMany().HasForeignKey(t => t.EventId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Session>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("sessions", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("sessions", schema: "event_management");
             entity.Property(s => s.Status).HasConversion<string>();
             entity.Property(s => s.Level).HasConversion<string>();
             entity.Property(s => s.SubmissionStatus).HasConversion<string>();
@@ -433,7 +441,8 @@ public class EventDbContext : DbContext
 
         modelBuilder.Entity<SessionAssignment>(entity =>
         {
-            if (!_isInMemory) entity.ToTable("session_assignments", schema: "event_management");
+            if (!_isInMemory)
+                entity.ToTable("session_assignments", schema: "event_management");
             entity.HasOne(sa => sa.Session).WithMany(s => s.Assignments).HasForeignKey(sa => sa.SessionId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(sa => sa.Track).WithMany().HasForeignKey(sa => sa.TrackId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(sa => sa.TimeSlot).WithMany().HasForeignKey(sa => sa.TimeSlotId).OnDelete(DeleteBehavior.Restrict);

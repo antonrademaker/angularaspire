@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 using Shared.EventManagement.Services;
-using Xunit;
 
 namespace Shared.Tests.EventManagement;
 

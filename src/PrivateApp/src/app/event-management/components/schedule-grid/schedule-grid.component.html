@@ -11,42 +11,49 @@
       <thead>
         <tr>
           <th class="time-col">Time</th>
-          <th *ngFor="let track of tracks">{{ track.name }}</th>
+          @for (track of tracks; track track) {
+            <th>{{ track.name }}</th>
+          }
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let slot of timeSlots">
-          <td class="time-col">
-            <div class="time-range">{{ slot.startTime | date:'shortTime' }} - {{ slot.endTime | date:'shortTime' }}</div>
-            <div class="slot-name">{{ slot.name }}</div>
-            <div class="slot-actions">
+        @for (slot of timeSlots; track slot) {
+          <tr>
+            <td class="time-col">
+              <div class="time-range">{{ slot.startTime | date:'shortTime' }} - {{ slot.endTime | date:'shortTime' }}</div>
+              <div class="slot-name">{{ slot.name }}</div>
+              <div class="slot-actions">
                 <button mat-icon-button (click)="editTimeSlot(slot)" [attr.aria-label]="'Edit time slot ' + slot.name">
-                    <mat-icon>edit</mat-icon>
+                  <mat-icon>edit</mat-icon>
                 </button>
                 <button mat-icon-button color="warn" (click)="deleteTimeSlot(slot)" [attr.aria-label]="'Delete time slot ' + slot.name">
-                    <mat-icon>delete</mat-icon>
+                  <mat-icon>delete</mat-icon>
                 </button>
-            </div>
-          </td>
-          <td *ngFor="let track of tracks"
-              cdkDropList
-              [cdkDropListData]="gridData[slot.id][track.id]"
-              (cdkDropListDropped)="drop($event, track.id, slot.id)"
-              class="session-cell">
-
-            <app-session-card
-              *ngFor="let session of gridData[slot.id][track.id]"
-              cdkDrag
-              [cdkDragData]="session"
-              [session]="session">
-            </app-session-card>
-
-          </td>
-        </tr>
+              </div>
+            </td>
+            @for (track of tracks; track track) {
+              <td
+                cdkDropList
+                [cdkDropListData]="gridData[slot.id][track.id]"
+                (cdkDropListDropped)="drop($event, track.id, slot.id)"
+                class="session-cell">
+                @for (session of gridData[slot.id][track.id]; track session) {
+                  <app-session-card
+                    cdkDrag
+                    [cdkDragData]="session"
+                    [session]="session">
+                  </app-session-card>
+                }
+              </td>
+            }
+          </tr>
+        }
       </tbody>
     </table>
-    <div *ngIf="timeSlots.length === 0" class="no-slots">
-      No time slots defined.
-    </div>
+    @if (timeSlots.length === 0) {
+      <div class="no-slots">
+        No time slots defined.
+      </div>
+    }
   </div>
 </div>

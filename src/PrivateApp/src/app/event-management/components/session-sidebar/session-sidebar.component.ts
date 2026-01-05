@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { SessionService } from '../../services/session.service';
 import { Session, SessionStatus } from '../../models/session.model';
 import { ActivatedRoute } from '@angular/router';
@@ -11,7 +11,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 @Component({
   selector: 'app-session-sidebar',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule, DragDropModule],
+  imports: [MatCardModule, MatIconModule, MatButtonModule, DragDropModule],
   templateUrl: './session-sidebar.component.html',
   styleUrls: ['./session-sidebar.component.scss']
 })

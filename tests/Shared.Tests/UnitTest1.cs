@@ -1,4 +1,4 @@
-﻿namespace Shared.Tests;
+namespace Shared.Tests;
 
 public class UnitTest1
 {

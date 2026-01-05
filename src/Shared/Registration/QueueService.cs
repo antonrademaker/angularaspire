@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using StackExchange.Redis;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 namespace Shared.Registration;
 

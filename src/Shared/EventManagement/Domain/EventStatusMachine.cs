@@ -7,7 +7,8 @@ public static class EventStatusMachine
 {
     public static Result CanTransition(EventStatus current, EventStatus next)
     {
-        if (current == next) return Result.Success();
+        if (current == next)
+            return Result.Success();
 
         return current switch
         {

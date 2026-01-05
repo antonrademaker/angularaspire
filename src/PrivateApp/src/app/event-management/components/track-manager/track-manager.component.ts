@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TrackService } from '../../services/track.service';
@@ -8,7 +8,7 @@ import { Track } from '../../models/track.model';
 @Component({
   selector: 'app-track-manager',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DragDropModule],
+  imports: [ReactiveFormsModule, DragDropModule],
   templateUrl: './track-manager.component.html',
   styleUrls: ['./track-manager.component.scss']
 })

@@ -1,41 +1,43 @@
 <div class="organizer-list-container">
   <div class="header">
     <h3>Organizers</h3>
-    <button mat-raised-button color="primary" (click)="toggleAdd()" *ngIf="!isAdding">
-      <mat-icon>add</mat-icon> Add Organizer
-    </button>
+    @if (!isAdding) {
+      <button mat-raised-button color="primary" (click)="toggleAdd()">
+        <mat-icon>add</mat-icon> Add Organizer
+      </button>
+    }
   </div>
 
-  <div class="add-form" *ngIf="isAdding" [formGroup]="addForm">
-    <mat-form-field appearance="outline">
-      <mat-label>First Name</mat-label>
-      <input matInput formControlName="firstName">
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Last Name</mat-label>
-      <input matInput formControlName="lastName">
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email" type="email">
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Role</mat-label>
-      <mat-select formControlName="role">
-        <mat-option *ngFor="let role of roles" [value]="role">
-          {{ getRoleName(role) }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <div class="form-actions">
-      <button mat-button (click)="toggleAdd()">Cancel</button>
-      <button mat-raised-button color="primary" (click)="addOrganizer()" [disabled]="addForm.invalid">Save</button>
+  @if (isAdding) {
+    <div class="add-form" [formGroup]="addForm">
+      <mat-form-field appearance="outline">
+        <mat-label>First Name</mat-label>
+        <input matInput formControlName="firstName">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="lastName">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Role</mat-label>
+        <mat-select formControlName="role">
+          @for (role of roles; track role) {
+            <mat-option [value]="role">
+              {{ getRoleName(role) }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <div class="form-actions">
+        <button mat-button (click)="toggleAdd()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="addOrganizer()" [disabled]="addForm.invalid">Save</button>
+      </div>
     </div>
-  </div>
+  }
 
   <table mat-table [dataSource]="organizers" class="mat-elevation-z1">
     <ng-container matColumnDef="name">

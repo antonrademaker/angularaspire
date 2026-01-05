@@ -39,7 +39,8 @@ public class OrganizerController : ControllerBase
     public async Task<ActionResult> AddOrganizer(Guid eventId, AddOrganizerRequest request)
     {
         var eventExists = await _context.Events.AnyAsync(e => e.Id == eventId);
-        if (!eventExists) return NotFound("Event not found");
+        if (!eventExists)
+            return NotFound("Event not found");
 
         var person = await _context.People.FirstOrDefaultAsync(p => p.Email == request.Email);
         if (person == null)

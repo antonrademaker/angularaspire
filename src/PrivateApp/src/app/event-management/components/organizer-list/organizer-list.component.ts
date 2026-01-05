@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,7 +16,6 @@ import { EventOrganizer, OrganizerRole } from '../../models/organizer.model';
   selector: 'app-organizer-list',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatTableModule,
     MatButtonModule,
@@ -25,7 +24,7 @@ import { EventOrganizer, OrganizerRole } from '../../models/organizer.model';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule
-  ],
+],
   templateUrl: './organizer-list.component.html',
   styleUrls: ['./organizer-list.component.scss']
 })

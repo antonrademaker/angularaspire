@@ -29,7 +29,7 @@ export class ScheduleGridComponent implements OnInit {
   sessions: Session[] = [];
 
   // Grid data structure: timeSlotId -> trackId -> Session[]
-  gridData: { [timeSlotId: string]: { [trackId: string]: Session[] } } = {};
+  gridData: Record<string, Record<string, Session[]>> = {};
 
   constructor(
     private timeSlotService: TimeSlotService,

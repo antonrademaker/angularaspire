@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PrivateApi.SessionManagement;
 using Shared.Common;
 using Shared.EventManagement;
-using PrivateApi.SessionManagement;
 
 namespace PrivateApi.EventManagement;
 

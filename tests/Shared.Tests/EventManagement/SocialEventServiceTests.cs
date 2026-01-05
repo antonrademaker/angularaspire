@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
-using Xunit;
 
 namespace Shared.Tests.EventManagement;
 

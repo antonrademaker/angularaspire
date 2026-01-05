@@ -1,10 +1,6 @@
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Shared.EventManagement;
 using Shared.Registration;
 using Shared.UserManagement;
-using System.Net.Http.Json;
-using Xunit;
 
 namespace PublicApi.Tests.Registration;
 

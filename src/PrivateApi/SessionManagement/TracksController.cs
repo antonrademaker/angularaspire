@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Common;
 using Shared.SessionManagement;
 
 namespace PrivateApi.SessionManagement;

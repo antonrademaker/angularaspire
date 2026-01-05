@@ -627,7 +627,7 @@ export class SpeakerManagerComponent implements OnInit {
     }
   `]
 })
-export class SpeakerFormDialogComponent {
+export class SpeakerFormDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private dialogRef = inject(MatDialogRef<SpeakerFormDialogComponent>);

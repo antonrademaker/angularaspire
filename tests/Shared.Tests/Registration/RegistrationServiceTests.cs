@@ -11,7 +11,6 @@ using Shared.Notifications;
 using Shared.Registration;
 using Shared.UserManagement;
 using StackExchange.Redis;
-using Xunit;
 
 namespace Shared.Tests.Registration;
 

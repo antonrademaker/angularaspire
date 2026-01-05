@@ -1,8 +1,8 @@
+using System.Security.Claims;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Registration;
-using System.Security.Claims;
-using FluentValidation;
 
 namespace PublicApi.Registration;
 

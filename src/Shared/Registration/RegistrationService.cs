@@ -1,14 +1,14 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-using System.Text.Json;
 using Shared.Common;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
-using Shared.UserManagement;
 using Shared.Notifications;
+using Shared.UserManagement;
+using StackExchange.Redis;
 
 namespace Shared.Registration;
 

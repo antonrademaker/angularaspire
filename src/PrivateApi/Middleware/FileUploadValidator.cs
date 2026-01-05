@@ -83,7 +83,8 @@ public class FileUploadValidator
         }
 
         using var reader = new BinaryReader(file.OpenReadStream());
-        if (file.Length == 0) return false;
+        if (file.Length == 0)
+            return false;
 
         var headerBytes = reader.ReadBytes(signatures.Max(m => m.Length));
 

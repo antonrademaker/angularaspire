@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PublicApi.Middleware;
 using Shared.ApiManagement;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
-using PublicApi.Middleware;
 
 namespace PublicApi.ExternalApi;
 

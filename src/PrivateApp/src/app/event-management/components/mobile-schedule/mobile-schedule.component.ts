@@ -20,7 +20,7 @@ export class MobileScheduleComponent implements OnInit, OnChanges {
   @Input() sessions: Session[] = [];
 
   // Data structure: timeSlotId -> Session[]
-  sessionsBySlot: { [timeSlotId: string]: Session[] } = {};
+  sessionsBySlot: Record<string, Session[]> = {};
 
   ngOnInit(): void {
     this.groupSessions();

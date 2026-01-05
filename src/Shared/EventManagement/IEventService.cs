@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
 using System.ServiceModel;
 using Shared.EventManagement.Entities;
 

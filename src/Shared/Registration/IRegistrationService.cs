@@ -1,5 +1,3 @@
-using Shared.EventManagement;
-using Shared.UserManagement;
 using System.ServiceModel;
 
 namespace Shared.Registration;

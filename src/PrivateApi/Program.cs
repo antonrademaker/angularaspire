@@ -1,11 +1,11 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Shared.UserManagement;
+using PrivateApi.Middleware;
+using Shared.ApiManagement;
 using Shared.EventManagement;
 using Shared.SessionManagement;
-using Shared.ApiManagement;
-using PrivateApi.Middleware;
+using Shared.UserManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 

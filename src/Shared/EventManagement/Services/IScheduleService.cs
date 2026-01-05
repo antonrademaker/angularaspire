@@ -1,5 +1,3 @@
-using Shared.EventManagement.Entities;
-
 namespace Shared.EventManagement.Services;
 
 public interface IScheduleService

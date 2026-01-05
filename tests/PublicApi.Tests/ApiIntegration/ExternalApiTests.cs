@@ -1,14 +1,8 @@
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using System.Net;
+using System.Text.Json;
 using Shared.ApiManagement;
 using Shared.EventManagement;
 using Shared.UserManagement;
-using System.Net;
-using System.Net.Http.Json;
-using System.Text.Json;
-using Xunit;
 
 namespace PublicApi.Tests.ApiIntegration;
 

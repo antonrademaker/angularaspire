@@ -1,5 +1,5 @@
-using Shared.Common;
 using System.ServiceModel;
+using Shared.Common;
 
 namespace Shared.SessionManagement;
 

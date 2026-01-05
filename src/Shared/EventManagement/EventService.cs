@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Shared.Common;
-using System.Text.Json;
 using Shared.EventManagement.Entities;
 
 namespace Shared.EventManagement;
@@ -244,7 +243,8 @@ public class EventService : IEventService
     public async Task<Shared.Common.Result> UpdateEventStatusAsync(Guid eventId, EventStatus newStatus, Guid userId)
     {
         var evt = await _eventContext.Events.FindAsync(eventId);
-        if (evt == null) return Shared.Common.Result.Failure("Event not found");
+        if (evt == null)
+            return Shared.Common.Result.Failure("Event not found");
 
         var transitionResult = Shared.EventManagement.Domain.EventStatusMachine.CanTransition(evt.Status, newStatus);
         if (!transitionResult.IsSuccess)

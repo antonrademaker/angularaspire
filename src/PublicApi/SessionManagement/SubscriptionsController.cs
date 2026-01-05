@@ -1,8 +1,8 @@
+using System.Security.Claims;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.SessionManagement;
-using System.Security.Claims;
-using FluentValidation;
 
 namespace PublicApi.SessionManagement;
 

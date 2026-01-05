@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 using Shared.UserManagement;
 

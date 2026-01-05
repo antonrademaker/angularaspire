@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.ApiManagement;
 using Shared.EventManagement;
+using Shared.EventManagement.Entities;
 using PublicApi.Middleware;
 
 namespace PublicApi.ExternalApi;
@@ -159,13 +160,13 @@ public class ExternalApiController : ControllerBase
             Description = request.Description ?? string.Empty,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
-            VenueName = request.Location,
-            VenueAddress = request.VenueAddress,
-            IsVirtual = request.IsVirtual,
-            VirtualMeetingUrl = request.MeetingUrl,
-            MaxAttendees = request.MaxCapacity,
-            RegistrationOpenDate = request.RegistrationOpens,
-            RegistrationCloseDate = request.RegistrationCloses
+            // VenueName = request.Location,
+            // VenueAddress = request.VenueAddress,
+            // IsVirtual = request.IsVirtual,
+            // VirtualMeetingUrl = request.MeetingUrl,
+            // MaxAttendees = request.MaxCapacity,
+            // RegistrationOpenDate = request.RegistrationOpens,
+            // RegistrationCloseDate = request.RegistrationCloses
         };
 
         var createdEvent = await _eventService.CreateEventAsync(createRequest, userId.Value);
@@ -214,11 +215,11 @@ public class ExternalApiController : ControllerBase
             Slug = existingEvent.Slug, // Keep existing slug
             StartDate = request.StartDate ?? existingEvent.StartDate,
             EndDate = request.EndDate ?? existingEvent.EndDate,
-            VenueName = request.Location ?? existingEvent.VenueName,
-            VenueAddress = request.VenueAddress ?? existingEvent.VenueAddress,
-            IsVirtual = request.IsVirtual ?? existingEvent.IsVirtual,
-            VirtualMeetingUrl = request.MeetingUrl ?? existingEvent.VirtualMeetingUrl,
-            MaxAttendees = request.MaxCapacity ?? existingEvent.MaxAttendees
+            // VenueName = request.Location ?? existingEvent.VenueName,
+            // VenueAddress = request.VenueAddress ?? existingEvent.VenueAddress,
+            // IsVirtual = request.IsVirtual ?? existingEvent.IsVirtual,
+            // VirtualMeetingUrl = request.MeetingUrl ?? existingEvent.VirtualMeetingUrl,
+            // MaxAttendees = request.MaxCapacity ?? existingEvent.MaxAttendees
         };
 
         var result = await _eventService.UpdateEventAsync(id, updateRequest, userId.Value);
@@ -396,14 +397,14 @@ public class ExternalApiController : ControllerBase
             Description = @event.Description,
             StartDate = @event.StartDate,
             EndDate = @event.EndDate,
-            Location = @event.VenueName,
-            VenueAddress = @event.VenueAddress,
-            IsVirtual = @event.IsVirtual,
-            MeetingUrl = @event.VirtualMeetingUrl,
-            MaxCapacity = @event.MaxAttendees,
-            CurrentRegistrations = @event.CurrentAttendees,
+            Location = "TBA", // @event.VenueName,
+            VenueAddress = "TBA", // @event.VenueAddress,
+            IsVirtual = false, // @event.IsVirtual,
+            MeetingUrl = null, // @event.VirtualMeetingUrl,
+            MaxCapacity = 0, // @event.MaxAttendees,
+            CurrentRegistrations = 0, // @event.CurrentAttendees,
             Status = @event.Status.ToString(),
-            OrganizerId = @event.CreatedByUserId,
+            OrganizerId = @event.CreatedBy, // @event.CreatedByUserId,
             CreatedAt = @event.CreatedAt,
             UpdatedAt = @event.UpdatedAt
         };

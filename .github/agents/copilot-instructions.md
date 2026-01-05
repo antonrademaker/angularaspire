@@ -10,7 +10,7 @@ Auto-generated from all feature plans. Last updated: 2025-12-30
 - PostgreSQL (primary with JSON columns), Redis (caching), Azure Blob Storage (files) (001-event-management)
 - [e.g., .NET 10, Angular 21, TypeScript 5.9, or NEEDS CLARIFICATION] + [e.g., Aspire 10, gRPC, Entity Framework, OpenTelemetry, or NEEDS CLARIFICATION] (003-event-admin-ui)
 - [if applicable, e.g., SQL Server, PostgreSQL, Redis, or N/A] (003-event-admin-ui)
-- .NET 10, Angular 17+, TypeScript 5.x + Aspire, gRPC, Entity Framework Core, OpenTelemetry (003-event-admin-ui)
+- .NET 10, Angular 21, TypeScript 5.9 + Aspire, gRPC, Entity Framework Core, OpenTelemetry (003-event-admin-ui)
 
 ## Project Structure
 

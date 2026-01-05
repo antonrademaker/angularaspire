@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using Shared.EventManagement;
+using Shared.EventManagement.Entities;
 using Shared.UserManagement;
 
 namespace Shared.Notifications;
@@ -283,8 +284,8 @@ public class EmailService : IEmailService, IDisposable
             EventTitle = eventDetails.Title,
             EventDate = eventDetails.StartDate.ToString("dddd, MMMM dd, yyyy"),
             EventTime = eventDetails.StartDate.ToString("h:mm tt"),
-            EventLocation = eventDetails.VenueName ?? "TBA",
-            EventVenue = eventDetails.VenueAddress,
+            EventLocation = "TBA", // eventDetails.VenueName ?? "TBA",
+            EventVenue = "TBA", // eventDetails.VenueAddress,
             RegistrationId = registration.Id.ToString(),
             Status = registration.Status.ToString(),
             ConfirmationUrl = $"{_settings.BaseUrl}/registrations/{registration.Id}",

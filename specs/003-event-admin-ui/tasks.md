@@ -32,7 +32,7 @@
 ## Phase 3: User Story 1 - Create and Configure Event
 **Goal**: Enable organizers to create new events (P1).
 
-- [ ] T011 [US1] Implement Event and EventSeries entities in [src/Shared/EventManagement/Entities/Event.cs](src/Shared/EventManagement/Entities/Event.cs)
+- [x] T011 [US1] Implement Event and EventSeries entities in [src/Shared/EventManagement/Entities/Event.cs](src/Shared/EventManagement/Entities/Event.cs)
 - [ ] T012 [US1] Implement CreateEvent and GetEvent endpoints in [src/PrivateApi/EventManagement/EventController.cs](src/PrivateApi/EventManagement/EventController.cs)
 - [ ] T013 [US1] Create Event List component in [src/PrivateApp/src/app/event-management/components/event-list/event-list.component.ts](src/PrivateApp/src/app/event-management/components/event-list/event-list.component.ts)
 - [ ] T014 [US1] Create Event Create/Edit Form in [src/PrivateApp/src/app/event-management/components/event-form/event-form.component.ts](src/PrivateApp/src/app/event-management/components/event-form/event-form.component.ts)

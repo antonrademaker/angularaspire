@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.EventManagement;
+using Shared.EventManagement.Entities;
 using System.Security.Claims;
 
 namespace PublicApi.EventManagement;
@@ -61,12 +62,12 @@ public class EventsController : ControllerBase
             {
                 SearchText = searchText,
                 Status = EventStatus.Published, // Only show published events in public API
-                Visibility = EventVisibility.Public, // Only show public events
+                // Visibility = EventVisibility.Public, // Only show public events
                 StartDateFrom = startDateFrom,
                 StartDateTo = startDateTo,
-                Tags = !string.IsNullOrWhiteSpace(tags) ? tags.Split(',', StringSplitOptions.RemoveEmptyEntries) : null,
-                IncludeVirtual = includeVirtual,
-                IncludePhysical = includePhysical,
+                // Tags = !string.IsNullOrWhiteSpace(tags) ? tags.Split(',', StringSplitOptions.RemoveEmptyEntries) : null,
+                // IncludeVirtual = includeVirtual,
+                // IncludePhysical = includePhysical,
                 Page = page,
                 PageSize = pageSize,
                 SortBy = sortBy,
@@ -100,7 +101,7 @@ public class EventsController : ControllerBase
         {
             limit = Math.Min(20, Math.Max(1, limit)); // Limit to 20 events max
 
-            var events = await _eventService.GetUpcomingEventsAsync(limit, EventVisibility.Public);
+            var events = await _eventService.GetUpcomingEventsAsync(limit);
 
             _logger.LogInformation("Retrieved {Count} upcoming events", events.Count());
 
@@ -133,6 +134,7 @@ public class EventsController : ControllerBase
             }
 
             // Only return public events for anonymous users
+            /*
             if (eventItem.Visibility != EventVisibility.Public)
             {
                 // Check if user is authenticated and has access
@@ -144,6 +146,7 @@ public class EventsController : ControllerBase
                 // Additional access checks can be added here
                 // For now, authenticated users can see unlisted events
             }
+            */
 
             // Only show published events in public API
             if (eventItem.Status != EventStatus.Published)
@@ -182,6 +185,7 @@ public class EventsController : ControllerBase
             }
 
             // Apply same visibility and status checks as GetEventById
+            /*
             if (eventItem.Visibility != EventVisibility.Public)
             {
                 if (!User.Identity?.IsAuthenticated == true)
@@ -189,6 +193,7 @@ public class EventsController : ControllerBase
                     return NotFound(new { message = "Event not found" });
                 }
             }
+            */
 
             if (eventItem.Status != EventStatus.Published)
             {
@@ -206,6 +211,7 @@ public class EventsController : ControllerBase
         }
     }
 
+    /*
     /// <summary>
     /// Get events by tags for category browsing
     /// </summary>
@@ -249,7 +255,9 @@ public class EventsController : ControllerBase
             return StatusCode(500, new { message = "An error occurred while retrieving events by tags" });
         }
     }
+    */
 
+    /*
     /// <summary>
     /// Check if registration is available for an event
     /// </summary>
@@ -286,7 +294,9 @@ public class EventsController : ControllerBase
             return StatusCode(500, new { message = "An error occurred while checking registration availability" });
         }
     }
+    */
 
+    /*
     /// <summary>
     /// Get basic event statistics
     /// </summary>
@@ -312,4 +322,5 @@ public class EventsController : ControllerBase
             return StatusCode(500, new { message = "An error occurred while retrieving event statistics" });
         }
     }
+    */
 }

@@ -753,10 +753,10 @@ public class RegistrationController : ControllerBase
                 Title = registration.Event.Title, // Event has Title property
                 StartDateTime = registration.Event.StartDate,
                 EndDateTime = registration.Event.EndDate,
-                Location = registration.Event.VenueName ?? "TBA", // Using VenueName as Location
-                Venue = registration.Event.VenueAddress,
-                MaxCapacity = registration.Event.MaxAttendees,
-                CurrentRegistrations = registration.Event.CurrentAttendees
+                Location = "TBA", // registration.Event.VenueName ?? "TBA", // Using VenueName as Location
+                Venue = "TBA", // registration.Event.VenueAddress,
+                MaxCapacity = 0, // registration.Event.MaxAttendees,
+                CurrentRegistrations = 0 // registration.Event.CurrentAttendees
             },
             User = new UserSummary
             {

@@ -1,12 +1,16 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { SessionService } from '../services/session.service';
+import { UpdateSessionRequest } from '../models/session.model';
 import * as ScheduleActions from './schedule.actions';
 
 @Injectable()
 export class ScheduleEffects {
+  private actions$ = inject(Actions);
+  private sessionService = inject(SessionService);
+
   loadSessions$ = createEffect(() => this.actions$.pipe(
     ofType(ScheduleActions.loadSessions),
     mergeMap(action => this.sessionService.getSessions(action.eventId)
@@ -23,19 +27,24 @@ export class ScheduleEffects {
   // so the reducer can roll back the state.
   updateSession$ = createEffect(() => this.actions$.pipe(
     ofType(ScheduleActions.updateSession),
-    mergeMap(action => this.sessionService.updateSession(action.session)
-      .pipe(
-        map(updatedSession => ScheduleActions.updateSessionSuccess({ session: updatedSession })),
-        catchError(error => of(ScheduleActions.updateSessionFailure({
-          error,
-          originalSession: action.originalSession
-        })))
-      ))
-    )
-  );
-
-  constructor(
-    private actions$: Actions,
-    private sessionService: SessionService
-  ) {}
+    mergeMap(action => {
+      const request: UpdateSessionRequest = {
+        title: action.session.title,
+        shortCode: action.session.shortCode,
+        abstract: action.session.abstract,
+        duration: action.session.duration,
+        level: action.session.level,
+        language: action.session.language,
+        capacity: action.session.capacity
+      };
+      return this.sessionService.updateSession(action.session.eventId, action.session.id, request)
+        .pipe(
+          map(() => ScheduleActions.updateSessionSuccess({ session: action.session })),
+          catchError(error => of(ScheduleActions.updateSessionFailure({
+            error,
+            originalSession: action.originalSession
+          })))
+        );
+    })
+  ));
 }

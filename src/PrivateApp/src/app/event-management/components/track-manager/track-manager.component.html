@@ -1,0 +1,43 @@
+<div class="track-manager">
+  <div class="header">
+    <h3>Tracks</h3>
+    <button class="btn btn-primary" (click)="showAddForm()" *ngIf="!isFormVisible">Add Track</button>
+  </div>
+
+  <div class="track-form" *ngIf="isFormVisible">
+    <form [formGroup]="trackForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" formControlName="name" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" formControlName="description" class="form-control"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="color">Color</label>
+        <input type="color" id="color" formControlName="color" class="form-control">
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn btn-success" [disabled]="!trackForm.valid">Save</button>
+        <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="track-list" *ngIf="!isFormVisible">
+    <div class="track-item" *ngFor="let track of tracks">
+      <div class="track-info">
+        <span class="color-dot" [style.background-color]="track.color"></span>
+        <span class="track-name">{{ track.name }}</span>
+      </div>
+      <div class="track-actions">
+        <button class="btn btn-sm btn-info" (click)="editTrack(track)">Edit</button>
+        <button class="btn btn-sm btn-danger" (click)="deleteTrack(track.id)">Delete</button>
+      </div>
+    </div>
+    <div *ngIf="tracks.length === 0" class="no-tracks">
+      No tracks defined yet.
+    </div>
+  </div>
+</div>

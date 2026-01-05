@@ -48,11 +48,7 @@ public class RegistrationIntegrationTests : IClassFixture<TestWebApplicationFact
             Description = "Event for integration testing",
             Slug = "integration-test-event",
             StartDate = DateTime.UtcNow.AddDays(30),
-            EndDate = DateTime.UtcNow.AddDays(31),
-            MaxAttendees = 100,
-            RegistrationOpenDate = DateTime.UtcNow.AddDays(-1),
-            RegistrationCloseDate = DateTime.UtcNow.AddDays(29),
-            Visibility = EventVisibility.Public
+            EndDate = DateTime.UtcNow.AddDays(31)
         };
 
         var createdEvent = await eventService.CreateEventAsync(createEventRequest, createdUser.Id);
@@ -100,9 +96,7 @@ public class RegistrationIntegrationTests : IClassFixture<TestWebApplicationFact
             Description = "Event for get registration testing",
             Slug = "get-registration-test-event",
             StartDate = DateTime.UtcNow.AddDays(30),
-            EndDate = DateTime.UtcNow.AddDays(31),
-            MaxAttendees = 100,
-            Visibility = EventVisibility.Public
+            EndDate = DateTime.UtcNow.AddDays(31)
         };
 
         var createdEvent = await eventService.CreateEventAsync(createEventRequest, createdUser.Id);
@@ -153,9 +147,7 @@ public class RegistrationIntegrationTests : IClassFixture<TestWebApplicationFact
             Description = "Event for cancellation testing",
             Slug = "cancellation-test-event",
             StartDate = DateTime.UtcNow.AddDays(30),
-            EndDate = DateTime.UtcNow.AddDays(31),
-            MaxAttendees = 100,
-            Visibility = EventVisibility.Public
+            EndDate = DateTime.UtcNow.AddDays(31)
         };
 
         var createdEvent = await eventService.CreateEventAsync(createEventRequest, createdUser.Id);

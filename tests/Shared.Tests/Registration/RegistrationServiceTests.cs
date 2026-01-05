@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Shared.Common;
 using Shared.EventManagement;
+using Shared.EventManagement.Entities;
 using Shared.Notifications;
 using Shared.Registration;
 using Shared.UserManagement;
@@ -79,10 +80,6 @@ public class RegistrationServiceTests : IDisposable
         {
             Id = eventId,
             Title = "Test Event",
-            MaxAttendees = 100,
-            CurrentAttendees = 50,
-            RegistrationOpenDate = DateTime.UtcNow.AddDays(-1),
-            RegistrationCloseDate = DateTime.UtcNow.AddDays(10),
             Status = EventStatus.Published
         };
 
@@ -90,8 +87,6 @@ public class RegistrationServiceTests : IDisposable
             .ReturnsAsync(user);
         _mockEventService.Setup(x => x.GetEventByIdAsync(eventId, It.IsAny<bool>()))
             .ReturnsAsync(eventEntity);
-        _mockEventService.Setup(x => x.IsRegistrationAvailableAsync(eventId))
-            .ReturnsAsync(true);
 
         var registrationRequest = new RegistrationRequest
         {

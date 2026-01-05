@@ -440,9 +440,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
             Description = "Event for external API testing",
             Slug = $"ext-api-test-{Guid.NewGuid():N}",
             StartDate = DateTime.UtcNow.AddDays(30),
-            EndDate = DateTime.UtcNow.AddDays(31),
-            MaxAttendees = 100,
-            Visibility = EventVisibility.Public
+            EndDate = DateTime.UtcNow.AddDays(31)
         };
 
         var createdEvent = await eventService.CreateEventAsync(createEventRequest, createdUser.Id);

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Shared.EventManagement;
+using Shared.EventManagement.Entities;
 using Xunit;
 
 namespace Shared.Tests.EventManagement;
@@ -41,9 +42,7 @@ public class SocialEventServiceTests : IDisposable
             Slug = "test-conference",
             StartDate = DateTime.UtcNow.AddDays(30),
             EndDate = DateTime.UtcNow.AddDays(32),
-            MaxAttendees = 500,
-            Visibility = EventVisibility.Public,
-            CreatedByUserId = _testUserId
+            CreatedBy = _testUserId
         };
 
         _context.Events.Add(testEvent);

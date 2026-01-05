@@ -37,7 +37,7 @@
 - [x] T013 [US1] Create Event List component in [src/PrivateApp/src/app/event-management/components/event-list/event-list.component.ts](src/PrivateApp/src/app/event-management/components/event-list/event-list.component.ts)
 - [x] T014 [US1] Create Event Create/Edit Form in [src/PrivateApp/src/app/event-management/components/event-form/event-form.component.ts](src/PrivateApp/src/app/event-management/components/event-form/event-form.component.ts)
 - [x] T015 [US1] Implement multi-day date picker validation in [src/PrivateApp/src/app/shared-ui/validators/date-range.validator.ts](src/PrivateApp/src/app/shared-ui/validators/date-range.validator.ts)
-- [ ] T016 [US1] [P] Write integration tests for Event creation in [tests/PrivateApi.Tests/EventManagement/EventTests.cs](tests/PrivateApi.Tests/EventManagement/EventTests.cs)
+- [x] T016 [US1] [P] Write integration tests for Event creation in [tests/PrivateApi.Tests/EventManagement/EventTests.cs](tests/PrivateApi.Tests/EventManagement/EventTests.cs)
 
 ## Phase 4: User Story 2 - Manage Event Tracks
 **Goal**: Enable organizers to define tracks for sessions (P1).

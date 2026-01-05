@@ -13,7 +13,7 @@ export class EventService {
 
   getEvents(request: EventSearchRequest): Observable<EventSearchResult> {
     let params = new HttpParams();
-    
+
     if (request.searchTerm) params = params.set('searchTerm', request.searchTerm);
     if (request.startDate) params = params.set('startDate', request.startDate);
     if (request.endDate) params = params.set('endDate', request.endDate);

@@ -6,15 +6,15 @@
   </div>
 
   <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-    
+
     <div class="mb-4">
       <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
         Title
       </label>
-      <input 
-        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-        id="title" 
-        type="text" 
+      <input
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        id="title"
+        type="text"
         formControlName="title"
         [ngClass]="{'border-red-500': submitted && eventForm.get('title')?.errors}">
       <p *ngIf="submitted && eventForm.get('title')?.errors?.['required']" class="text-red-500 text-xs italic">Title is required.</p>
@@ -24,10 +24,10 @@
       <label class="block text-gray-700 text-sm font-bold mb-2" for="slug">
         Slug (URL)
       </label>
-      <input 
-        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-        id="slug" 
-        type="text" 
+      <input
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        id="slug"
+        type="text"
         formControlName="slug"
         [ngClass]="{'border-red-500': submitted && eventForm.get('slug')?.errors}">
       <p *ngIf="submitted && eventForm.get('slug')?.errors?.['required']" class="text-red-500 text-xs italic">Slug is required.</p>
@@ -38,9 +38,9 @@
       <label class="block text-gray-700 text-sm font-bold mb-2" for="description">
         Short Description
       </label>
-      <textarea 
-        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-        id="description" 
+      <textarea
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        id="description"
         formControlName="description"
         rows="3"
         [ngClass]="{'border-red-500': submitted && eventForm.get('description')?.errors}"></textarea>
@@ -51,9 +51,9 @@
       <label class="block text-gray-700 text-sm font-bold mb-2" for="detailedDescription">
         Detailed Description
       </label>
-      <textarea 
-        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-        id="detailedDescription" 
+      <textarea
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        id="detailedDescription"
         formControlName="detailedDescription"
         rows="5"></textarea>
     </div>
@@ -63,10 +63,10 @@
         <label class="block text-gray-700 text-sm font-bold mb-2" for="startDate">
           Start Date
         </label>
-        <input 
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-          id="startDate" 
-          type="date" 
+        <input
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="startDate"
+          type="date"
           formControlName="startDate"
           [ngClass]="{'border-red-500': submitted && eventForm.get('startDate')?.errors}">
         <p *ngIf="submitted && eventForm.get('startDate')?.errors?.['required']" class="text-red-500 text-xs italic">Start date is required.</p>
@@ -75,10 +75,10 @@
         <label class="block text-gray-700 text-sm font-bold mb-2" for="endDate">
           End Date
         </label>
-        <input 
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-          id="endDate" 
-          type="date" 
+        <input
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="endDate"
+          type="date"
           formControlName="endDate"
           [ngClass]="{'border-red-500': submitted && (eventForm.get('endDate')?.errors || eventForm.errors?.['dateRange'])}">
         <p *ngIf="submitted && eventForm.get('endDate')?.errors?.['required']" class="text-red-500 text-xs italic">End date is required.</p>
@@ -90,9 +90,9 @@
       <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
         Status
       </label>
-      <select 
-        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-        id="status" 
+      <select
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        id="status"
         formControlName="status">
         <option [value]="0">Draft</option>
         <option [value]="1">Published</option>
@@ -103,8 +103,8 @@
     </div>
 
     <div class="flex items-center justify-between mt-6">
-      <button 
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" 
+      <button
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         type="submit"
         [disabled]="loading">
         {{ loading ? 'Saving...' : (isEditMode ? 'Update Event' : 'Create Event') }}

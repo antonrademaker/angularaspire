@@ -1,0 +1,31 @@
+<div class="schedule-grid-container">
+  <div class="header">
+    <h2>Schedule</h2>
+    <button mat-raised-button color="primary" (click)="addTimeSlot()">
+      <mat-icon>add</mat-icon> Add Time Slot
+    </button>
+  </div>
+
+  <div class="grid">
+    <div *ngFor="let slot of timeSlots" class="time-slot-row">
+      <div class="time-col">
+        {{ slot.startTime | date:'shortTime' }} - {{ slot.endTime | date:'shortTime' }}
+      </div>
+      <div class="content-col">
+        <div class="slot-name">{{ slot.name }}</div>
+        <div class="slot-type">{{ slot.type }}</div>
+      </div>
+      <div class="actions-col">
+        <button mat-icon-button (click)="editTimeSlot(slot)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteTimeSlot(slot)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+    <div *ngIf="timeSlots.length === 0" class="no-slots">
+      No time slots defined.
+    </div>
+  </div>
+</div>

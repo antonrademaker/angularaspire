@@ -1,0 +1,61 @@
+.schedule-grid-container {
+  padding: 1rem;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .time-slot-row {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      background-color: #fff;
+
+      .time-col {
+        width: 150px;
+        font-weight: bold;
+      }
+
+      .content-col {
+        flex-grow: 1;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+
+        .slot-name {
+          font-weight: 500;
+        }
+
+        .slot-type {
+          font-size: 0.8rem;
+          padding: 0.2rem 0.5rem;
+          background-color: #f0f0f0;
+          border-radius: 12px;
+        }
+      }
+
+      .actions-col {
+        display: flex;
+        gap: 0.5rem;
+      }
+    }
+
+    .no-slots {
+      text-align: center;
+      color: #666;
+      padding: 2rem;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+    }
+  }
+}

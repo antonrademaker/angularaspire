@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using Shared.EventManagement.Entities;
+using Shared.EventManagement.Services;
 
 namespace Shared.EventManagement;
 
@@ -40,6 +41,7 @@ public class EventDbContext : DbContext
     public DbSet<RoomConfiguration> RoomConfigurations => Set<RoomConfiguration>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<Track> Tracks => Set<Track>();
+    public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
     public DbSet<Person> People => Set<Person>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -402,6 +404,13 @@ public class EventDbContext : DbContext
             if (!_isInMemory) entity.ToTable("people", schema: "event_management");
         });
 
+        modelBuilder.Entity<TimeSlot>(entity =>
+        {
+            if (!_isInMemory) entity.ToTable("time_slots", schema: "event_management");
+            entity.Property(t => t.Type).HasConversion<string>();
+            entity.HasOne(t => t.Event).WithMany().HasForeignKey(t => t.EventId).OnDelete(DeleteBehavior.Cascade);
+        });
+
         // Configure JSON conversion for custom fields
         ConfigureJsonSerialization();
     }
@@ -445,6 +454,7 @@ public static class EventDbContextExtensions
         // Register business services
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<ISocialEventService, SocialEventService>();
+        services.AddScoped<IScheduleService, ScheduleService>();
 
         return services;
     }

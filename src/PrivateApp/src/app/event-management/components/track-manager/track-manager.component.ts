@@ -90,7 +90,7 @@ export class TrackManagerComponent implements OnInit {
 
   drop(event: CdkDragDrop<Track[]>): void {
     moveItemInArray(this.tracks, event.previousIndex, event.currentIndex);
-    
+
     const trackIds = this.tracks.map(t => t.id);
     this.trackService.reorderTracks(this.eventId, trackIds).subscribe();
   }

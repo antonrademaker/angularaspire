@@ -44,16 +44,16 @@
 
 - [x] T017 [US2] Implement Track entity in [src/Shared/EventManagement/Entities/Track.cs](src/Shared/EventManagement/Entities/Track.cs)
 - [x] T018 [US2] Implement Track management endpoints (Add, Update, Delete, Reorder) in [src/PrivateApi/EventManagement/TrackController.cs](src/PrivateApi/EventManagement/TrackController.cs)
-- [ ] T019 [US2] Create Track Management UI component in [src/PrivateApp/src/app/event-management/components/track-manager/track-manager.component.ts](src/PrivateApp/src/app/event-management/components/track-manager/track-manager.component.ts)
-- [ ] T020 [US2] Implement drag-and-drop reordering for tracks in [src/PrivateApp/src/app/event-management/components/track-list/track-list.component.ts](src/PrivateApp/src/app/event-management/components/track-list/track-list.component.ts)
+- [x] T019 [US2] Create Track Management UI component in [src/PrivateApp/src/app/event-management/components/track-manager/track-manager.component.ts](src/PrivateApp/src/app/event-management/components/track-manager/track-manager.component.ts)
+- [x] T020 [US2] Implement drag-and-drop reordering for tracks in [src/PrivateApp/src/app/event-management/components/track-list/track-list.component.ts](src/PrivateApp/src/app/event-management/components/track-list/track-list.component.ts)
 
 ## Phase 5: User Story 3 - Manage Time Slots
 **Goal**: Enable organizers to define the schedule grid (P1).
 
-- [ ] T021 [US3] Implement TimeSlot entity in [src/Shared/EventManagement/Entities/TimeSlot.cs](src/Shared/EventManagement/Entities/TimeSlot.cs)
-- [ ] T022 [US3] Implement TimeSlot management endpoints in [src/PrivateApi/EventManagement/TimeSlotController.cs](src/PrivateApi/EventManagement/TimeSlotController.cs)
-- [ ] T023 [US3] Create Schedule Grid visualization component in [src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.ts](src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.ts)
-- [ ] T024 [US3] Implement "Copy Day Schedule" logic in [src/Shared/EventManagement/Services/ScheduleService.cs](src/Shared/EventManagement/Services/ScheduleService.cs)
+- [x] T021 [US3] Implement TimeSlot entity in [src/Shared/EventManagement/Entities/TimeSlot.cs](src/Shared/EventManagement/Entities/TimeSlot.cs)
+- [x] T022 [US3] Implement TimeSlot management endpoints in [src/PrivateApi/EventManagement/TimeSlotController.cs](src/PrivateApi/EventManagement/TimeSlotController.cs)
+- [x] T023 [US3] Create Schedule Grid visualization component in [src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.ts](src/PrivateApp/src/app/event-management/components/schedule-grid/schedule-grid.component.ts)
+- [x] T024 [US3] Implement "Copy Day Schedule" logic in [src/Shared/EventManagement/Services/ScheduleService.cs](src/Shared/EventManagement/Services/ScheduleService.cs)
 
 ## Phase 6: User Story 4 - Assign Sessions
 **Goal**: Enable assigning sessions to time slots (P2).

@@ -80,7 +80,7 @@ public class TrackController : ControllerBase
     public async Task<IActionResult> ReorderTracks(Guid eventId, List<Guid> trackIds)
     {
         var tracks = await _context.Tracks.Where(t => t.EventId == eventId).ToListAsync();
-        
+
         foreach (var track in tracks)
         {
             var index = trackIds.IndexOf(track.Id);

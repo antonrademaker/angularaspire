@@ -59,7 +59,7 @@ public class EventController : ControllerBase
     public async Task<ActionResult<Event>> CreateEvent([FromBody] CreateEventRequest request)
     {
         // TODO: Get actual user ID from claims
-        var userId = Guid.NewGuid(); 
+        var userId = Guid.NewGuid();
 
         try
         {

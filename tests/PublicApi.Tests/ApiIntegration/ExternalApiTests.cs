@@ -192,7 +192,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
         // Arrange - Free tier cannot delete
         var (client, eventId) = await CreateAuthenticatedClientWithTestEvent(ApiKeyTier.Free, skipDelete: true);
 
-        // Act  
+        // Act
         var response = await client.DeleteAsync($"/api/external/events/{eventId}");
 
         // Assert - Should fail due to insufficient scope

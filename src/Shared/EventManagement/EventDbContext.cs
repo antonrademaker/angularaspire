@@ -39,6 +39,7 @@ public class EventDbContext : DbContext
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<RoomConfiguration> RoomConfigurations => Set<RoomConfiguration>();
     public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<Track> Tracks => Set<Track>();
     public DbSet<Person> People => Set<Person>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

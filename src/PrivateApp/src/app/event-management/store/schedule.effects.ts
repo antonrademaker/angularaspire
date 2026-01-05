@@ -26,9 +26,9 @@ export class ScheduleEffects {
     mergeMap(action => this.sessionService.updateSession(action.session)
       .pipe(
         map(updatedSession => ScheduleActions.updateSessionSuccess({ session: updatedSession })),
-        catchError(error => of(ScheduleActions.updateSessionFailure({ 
-          error, 
-          originalSession: action.originalSession 
+        catchError(error => of(ScheduleActions.updateSessionFailure({
+          error,
+          originalSession: action.originalSession
         })))
       ))
     )

@@ -8,7 +8,7 @@ public class FileUploadValidator
     private readonly ILogger<FileUploadValidator> _logger;
     private const long MaxFileSize = 50 * 1024 * 1024; // 50MB
     private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".pdf" };
-    
+
     // Magic numbers for file signature validation
     private static readonly Dictionary<string, List<byte[]>> FileSignatures = new()
     {
@@ -87,7 +87,7 @@ public class FileUploadValidator
 
         var headerBytes = reader.ReadBytes(signatures.Max(m => m.Length));
 
-        return signatures.Any(signature => 
+        return signatures.Any(signature =>
             headerBytes.Take(signature.Length).SequenceEqual(signature));
     }
 }

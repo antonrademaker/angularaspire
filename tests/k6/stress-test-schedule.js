@@ -18,7 +18,7 @@ const BASE_URL = 'http://localhost:5051';
 export default function () {
   // 1. Search for events (Simulating browsing the schedule/events list)
   const res = http.get(`${BASE_URL}/api/events/search?pageSize=20`);
-  
+
   check(res, {
     'status is 200': (r) => r.status === 200,
     'response time < 500ms': (r) => r.timings.duration < 500,
@@ -31,7 +31,7 @@ export default function () {
         // 2. Get details for the first event (Simulating viewing event details)
         const eventId = body.events[0].id;
         const detailRes = http.get(`${BASE_URL}/api/events/${eventId}`);
-        
+
         check(detailRes, {
             'detail status is 200': (r) => r.status === 200,
             'detail response time < 500ms': (r) => r.timings.duration < 500,

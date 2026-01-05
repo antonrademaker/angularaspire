@@ -18,7 +18,7 @@ export class MobileScheduleComponent implements OnInit, OnChanges {
   @Input() timeSlots: TimeSlot[] = [];
   @Input() tracks: Track[] = [];
   @Input() sessions: Session[] = [];
-  
+
   // Data structure: timeSlotId -> Session[]
   sessionsBySlot: { [timeSlotId: string]: Session[] } = {};
 

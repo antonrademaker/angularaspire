@@ -97,12 +97,12 @@ public class EventController : ControllerBase
     {
         var userId = Guid.NewGuid(); // TODO: Get from claims
         var result = await _eventService.UpdateEventStatusAsync(id, request.Status, userId);
-        
+
         if (!result.IsSuccess)
         {
             return BadRequest(result.Error);
         }
-        
+
         return NoContent();
     }
 

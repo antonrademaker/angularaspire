@@ -31,11 +31,11 @@
     .time-col {
       width: 150px;
       background-color: #fafafa;
-      
+
       .time-range {
         font-weight: bold;
       }
-      
+
       .slot-name {
         font-size: 0.9em;
         color: #666;
@@ -116,15 +116,15 @@
   .schedule-grid-container {
     padding: 0.5rem;
   }
-  
+
   .schedule-table {
     min-width: 600px; // Allow smaller width
-    
+
     th, td {
       padding: 4px;
       font-size: 0.9rem;
     }
-    
+
     .time-col {
       width: 100px;
     }

@@ -47,10 +47,10 @@ public class EventSessionService : IEventSessionService
             // Move first assignment to second session (effectively unassigning first and assigning second)
             // But wait, if second is unassigned, we can't "swap" into void unless we create a new assignment for second
             // and delete first assignment.
-            
+
             // If we are swapping a session on the grid with one off the grid:
             // The one on the grid comes off. The one off the grid goes on.
-            
+
             var newAssignment = new SessionAssignment
             {
                 SessionId = secondSessionId,
@@ -58,7 +58,7 @@ public class EventSessionService : IEventSessionService
                 TimeSlotId = firstAssignment.TimeSlotId,
                 RoomConfigurationId = firstAssignment.RoomConfigurationId
             };
-            
+
             _context.Set<SessionAssignment>().Add(newAssignment);
             _context.Set<SessionAssignment>().Remove(firstAssignment);
         }

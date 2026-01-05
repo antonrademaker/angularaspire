@@ -28,16 +28,16 @@
                 </button>
             </div>
           </td>
-          <td *ngFor="let track of tracks" 
-              cdkDropList 
+          <td *ngFor="let track of tracks"
+              cdkDropList
               [cdkDropListData]="gridData[slot.id][track.id]"
               (cdkDropListDropped)="drop($event, track.id, slot.id)"
               class="session-cell">
-            
-            <app-session-card 
-              *ngFor="let session of gridData[slot.id][track.id]" 
-              cdkDrag 
-              [cdkDragData]="session" 
+
+            <app-session-card
+              *ngFor="let session of gridData[slot.id][track.id]"
+              cdkDrag
+              [cdkDragData]="session"
               [session]="session">
             </app-session-card>
 

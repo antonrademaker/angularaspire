@@ -27,7 +27,7 @@ export class KeyboardNavDirective {
         break;
       case 'ArrowDown':
         // Simple linear navigation for now
-        nextIndex = currentIndex + 1; 
+        nextIndex = currentIndex + 1;
         break;
       case 'ArrowUp':
         nextIndex = currentIndex - 1;

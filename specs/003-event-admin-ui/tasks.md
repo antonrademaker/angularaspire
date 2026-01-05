@@ -42,7 +42,7 @@
 ## Phase 4: User Story 2 - Manage Event Tracks
 **Goal**: Enable organizers to define tracks for sessions (P1).
 
-- [ ] T017 [US2] Implement Track entity in [src/Shared/EventManagement/Entities/Track.cs](src/Shared/EventManagement/Entities/Track.cs)
+- [x] T017 [US2] Implement Track entity in [src/Shared/EventManagement/Entities/Track.cs](src/Shared/EventManagement/Entities/Track.cs)
 - [ ] T018 [US2] Implement Track management endpoints (Add, Update, Delete, Reorder) in [src/PrivateApi/EventManagement/TrackController.cs](src/PrivateApi/EventManagement/TrackController.cs)
 - [ ] T019 [US2] Create Track Management UI component in [src/PrivateApp/src/app/event-management/components/track-manager/track-manager.component.ts](src/PrivateApp/src/app/event-management/components/track-manager/track-manager.component.ts)
 - [ ] T020 [US2] Implement drag-and-drop reordering for tracks in [src/PrivateApp/src/app/event-management/components/track-list/track-list.component.ts](src/PrivateApp/src/app/event-management/components/track-list/track-list.component.ts)

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EventService } from '../../services/event.service';
 import { Event, EventStatus } from '../../models/event.model';
+import { dateRangeValidator } from '../../../shared-ui/validators/date-range.validator';
 
 @Component({
   selector: 'app-event-form',
@@ -36,7 +37,7 @@ export class EventFormComponent implements OnInit {
       status: [EventStatus.Draft],
       logoUrl: [''],
       primaryColor: ['']
-    });
+    }, { validators: dateRangeValidator('startDate', 'endDate') });
   }
 
   ngOnInit(): void {

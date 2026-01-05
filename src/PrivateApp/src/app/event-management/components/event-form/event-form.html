@@ -80,8 +80,9 @@
           id="endDate" 
           type="date" 
           formControlName="endDate"
-          [ngClass]="{'border-red-500': submitted && eventForm.get('endDate')?.errors}">
+          [ngClass]="{'border-red-500': submitted && (eventForm.get('endDate')?.errors || eventForm.errors?.['dateRange'])}">
         <p *ngIf="submitted && eventForm.get('endDate')?.errors?.['required']" class="text-red-500 text-xs italic">End date is required.</p>
+        <p *ngIf="submitted && eventForm.get('endDate')?.errors?.['dateRange']" class="text-red-500 text-xs italic">End date must be after start date.</p>
       </div>
     </div>
 

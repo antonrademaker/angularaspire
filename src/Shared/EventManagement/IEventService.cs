@@ -271,7 +271,7 @@ public class CreateEventRequest
 
     public string? LogoUrl { get; set; }
     public string? PrimaryColor { get; set; }
-    
+
     public Guid? SeriesId { get; set; }
 }
 

@@ -37,10 +37,10 @@ public class Person
 
     [MaxLength(500)]
     public string? LinkedInUrl { get; set; }
-    
+
     [MaxLength(500)]
     public string? TwitterUrl { get; set; }
-    
+
     [MaxLength(500)]
     public string? WebsiteUrl { get; set; }
 

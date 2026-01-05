@@ -83,10 +83,10 @@ public class Event
     public Guid UpdatedBy { get; set; }
     public DateTime? DeletedAt { get; set; }
     public Guid? DeletedBy { get; set; }
-    
+
     // Navigation properties
     // Tracks, Sessions, etc. will be added later
-    
+
     // Legacy property support if needed for existing code compatibility
     // public User? CreatedByUser { get; set; } // Was in old Event.cs?
 }

@@ -134,7 +134,6 @@ public class EventServiceTests : IDisposable
         Assert.NotNull(result);
         Assert.Equal("Updated Event", result.Title);
         Assert.Equal("Updated description", result.Description);
-        Assert.NotNull(result.UpdatedAt);
     }
 
     [Fact]

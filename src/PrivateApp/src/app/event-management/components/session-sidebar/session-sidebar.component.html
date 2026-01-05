@@ -1,0 +1,25 @@
+<div class="session-sidebar">
+  <h3>Unassigned Sessions</h3>
+  <div
+    cdkDropList
+    [cdkDropListData]="unassignedSessions"
+    class="session-list"
+    id="unassigned-sessions-list"
+    [cdkDropListConnectedTo]="['schedule-grid']">
+    
+    <div *ngFor="let session of unassignedSessions" class="session-card" cdkDrag [cdkDragData]="session">
+      <div class="session-title">{{ session.title }}</div>
+      <div class="session-meta">
+        <span class="duration">{{ session.duration }} min</span>
+        <span class="level">{{ session.level }}</span>
+      </div>
+      <div *cdkDragPreview class="session-preview">
+        {{ session.title }}
+      </div>
+    </div>
+
+    <div *ngIf="unassignedSessions.length === 0" class="no-sessions">
+      No unassigned sessions.
+    </div>
+  </div>
+</div>

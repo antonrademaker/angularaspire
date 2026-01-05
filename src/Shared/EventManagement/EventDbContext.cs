@@ -42,6 +42,8 @@ public class EventDbContext : DbContext
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<Track> Tracks => Set<Track>();
     public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
+    public DbSet<Session> Sessions => Set<Session>();
+    public DbSet<SessionAssignment> SessionAssignments => Set<SessionAssignment>();
     public DbSet<Person> People => Set<Person>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -409,6 +411,23 @@ public class EventDbContext : DbContext
             if (!_isInMemory) entity.ToTable("time_slots", schema: "event_management");
             entity.Property(t => t.Type).HasConversion<string>();
             entity.HasOne(t => t.Event).WithMany().HasForeignKey(t => t.EventId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Session>(entity =>
+        {
+            if (!_isInMemory) entity.ToTable("sessions", schema: "event_management");
+            entity.Property(s => s.Status).HasConversion<string>();
+            entity.Property(s => s.Level).HasConversion<string>();
+            entity.Property(s => s.SubmissionStatus).HasConversion<string>();
+            entity.HasOne(s => s.Event).WithMany().HasForeignKey(s => s.EventId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SessionAssignment>(entity =>
+        {
+            if (!_isInMemory) entity.ToTable("session_assignments", schema: "event_management");
+            entity.HasOne(sa => sa.Session).WithMany(s => s.Assignments).HasForeignKey(sa => sa.SessionId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(sa => sa.Track).WithMany().HasForeignKey(sa => sa.TrackId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(sa => sa.TimeSlot).WithMany().HasForeignKey(sa => sa.TimeSlotId).OnDelete(DeleteBehavior.Restrict);
         });
 
         // Configure JSON conversion for custom fields

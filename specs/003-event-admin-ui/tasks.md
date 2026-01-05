@@ -58,10 +58,10 @@
 ## Phase 6: User Story 4 - Assign Sessions
 **Goal**: Enable assigning sessions to time slots (P2).
 
-- [ ] T025 [US4] Implement Session and SessionAssignment entities in [src/Shared/EventManagement/Entities/Session.cs](src/Shared/EventManagement/Entities/Session.cs)
-- [ ] T026 [US4] Implement AssignSession endpoint in [src/PrivateApi/EventManagement/SessionController.cs](src/PrivateApi/EventManagement/SessionController.cs)
-- [ ] T027 [US4] Create Unassigned Sessions Sidebar component in [src/PrivateApp/src/app/event-management/components/session-sidebar/session-sidebar.component.ts](src/PrivateApp/src/app/event-management/components/session-sidebar/session-sidebar.component.ts)
-- [ ] T028 [US4] Implement Drag-and-Drop assignment logic in [src/PrivateApp/src/app/event-management/services/schedule-drag-drop.service.ts](src/PrivateApp/src/app/event-management/services/schedule-drag-drop.service.ts)
+- [x] T025 [US4] Implement Session and SessionAssignment entities in [src/Shared/EventManagement/Entities/Session.cs](src/Shared/EventManagement/Entities/Session.cs)
+- [x] T026 [US4] Implement AssignSession endpoint in [src/PrivateApi/EventManagement/SessionController.cs](src/PrivateApi/EventManagement/SessionController.cs)
+- [x] T027 [US4] Create Unassigned Sessions Sidebar component in [src/PrivateApp/src/app/event-management/components/session-sidebar/session-sidebar.component.ts](src/PrivateApp/src/app/event-management/components/session-sidebar/session-sidebar.component.ts)
+- [x] T028 [US4] Implement Drag-and-Drop assignment logic in [src/PrivateApp/src/app/event-management/services/schedule-drag-drop.service.ts](src/PrivateApp/src/app/event-management/services/schedule-drag-drop.service.ts)
 
 ## Phase 7: User Story 5 - Swap Sessions
 **Goal**: Enable optimizing the schedule via swapping (P2).

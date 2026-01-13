@@ -9,7 +9,7 @@ import { Event, EventSearchResult, EventStatus } from '../../models/event.model'
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './event-list.html',
-  styleUrls: ['./event-list.scss']
+  styleUrls: ['./event-list.scss'],
 })
 export class EventListComponent implements OnInit {
   events: Event[] = [];
@@ -19,7 +19,7 @@ export class EventListComponent implements OnInit {
   loading = false;
   EventStatus = EventStatus;
 
-  constructor(private eventService: EventService) { }
+  constructor(private eventService: EventService) {}
 
   ngOnInit(): void {
     this.loadEvents();
@@ -27,20 +27,22 @@ export class EventListComponent implements OnInit {
 
   loadEvents(): void {
     this.loading = true;
-    this.eventService.getEvents({
-      page: this.currentPage,
-      pageSize: this.pageSize
-    }).subscribe({
-      next: (result: EventSearchResult) => {
-        this.events = result.events;
-        this.totalCount = result.totalCount;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading events', error);
-        this.loading = false;
-      }
-    });
+    this.eventService
+      .getEvents({
+        page: this.currentPage,
+        pageSize: this.pageSize,
+      })
+      .subscribe({
+        next: (result: EventSearchResult) => {
+          this.events = result.events;
+          this.totalCount = result.totalCount;
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading events', error);
+          this.loading = false;
+        },
+      });
   }
 
   onPageChange(page: number): void {
@@ -50,11 +52,16 @@ export class EventListComponent implements OnInit {
 
   getStatusLabel(status: EventStatus): string {
     switch (status) {
-      case EventStatus.Draft: return 'Draft';
-      case EventStatus.Published: return 'Published';
-      case EventStatus.Cancelled: return 'Cancelled';
-      case EventStatus.Completed: return 'Completed';
-      default: return 'Unknown';
+      case EventStatus.Draft:
+        return 'Draft';
+      case EventStatus.Published:
+        return 'Published';
+      case EventStatus.Cancelled:
+        return 'Cancelled';
+      case EventStatus.Completed:
+        return 'Completed';
+      default:
+        return 'Unknown';
     }
   }
 }

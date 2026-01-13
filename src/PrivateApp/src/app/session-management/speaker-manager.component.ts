@@ -1,6 +1,5 @@
-import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -12,7 +11,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MatDialogModule,
+  MatDialog,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -56,7 +60,7 @@ export enum SpeakerStatus {
   Pending = 'Pending',
   Inactive = 'Inactive',
   Suspended = 'Suspended',
-  Archived = 'Archived'
+  Archived = 'Archived',
 }
 
 export enum SpeakerRole {
@@ -64,7 +68,7 @@ export enum SpeakerRole {
   CoSpeaker = 'CoSpeaker',
   Moderator = 'Moderator',
   Panelist = 'Panelist',
-  Facilitator = 'Facilitator'
+  Facilitator = 'Facilitator',
 }
 
 export interface CreateSpeakerProfileRequest {
@@ -142,7 +146,7 @@ export enum SessionSpeakerStatus {
   Contacted = 'Contacted',
   Confirmed = 'Confirmed',
   Cancelled = 'Cancelled',
-  Removed = 'Removed'
+  Removed = 'Removed',
 }
 
 export interface AssignSpeakerRequest {
@@ -180,11 +184,11 @@ export interface UpdateSessionSpeakerRequest {
     MatTooltipModule,
     MatMenuModule,
     MatSnackBarModule,
-    MatDividerModule
-],
+    MatDividerModule,
+  ],
   templateUrl: './speaker-manager.component.html',
   styleUrls: ['./speaker-manager.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SpeakerManagerComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -210,7 +214,7 @@ export class SpeakerManagerComponent implements OnInit {
 
   // Computed values
   displayedColumns = ['photo', 'displayName', 'company', 'expertise', 'status', 'actions'];
-  
+
   // Status options
   statusOptions = Object.values(SpeakerStatus);
   roleOptions = Object.values(SpeakerRole);
@@ -220,7 +224,7 @@ export class SpeakerManagerComponent implements OnInit {
     searchText: [''],
     company: [''],
     status: [null as SpeakerStatus | null],
-    showInactive: [false]
+    showInactive: [false],
   });
 
   // Table data source
@@ -231,16 +235,16 @@ export class SpeakerManagerComponent implements OnInit {
 
   constructor() {
     // Subscribe to form changes for reactive filtering
-    this.searchForm.get('searchText')?.valueChanges.subscribe(value => {
+    this.searchForm.get('searchText')?.valueChanges.subscribe((value) => {
       this.searchText.set(value || '');
     });
 
-    this.searchForm.get('status')?.valueChanges.subscribe(value => {
+    this.searchForm.get('status')?.valueChanges.subscribe((value) => {
       this.selectedStatus.set(value);
       this.loadSpeakers();
     });
 
-    this.searchForm.get('showInactive')?.valueChanges.subscribe(value => {
+    this.searchForm.get('showInactive')?.valueChanges.subscribe((value) => {
       this.showInactive.set(!!value);
       this.loadSpeakers();
     });
@@ -268,11 +272,11 @@ export class SpeakerManagerComponent implements OnInit {
         page: this.pageIndex() + 1,
         pageSize: this.pageSize(),
         sortBy: this.sortBy(),
-        sortDescending: this.sortDescending()
+        sortDescending: this.sortDescending(),
       };
 
       const response = await lastValueFrom(
-        this.http.post<PagedResult<SpeakerProfile>>('/api/v1/admin/speakers/search', request)
+        this.http.post<PagedResult<SpeakerProfile>>('/api/v1/admin/speakers/search', request),
       );
 
       this.speakers.set(response.items);
@@ -307,10 +311,10 @@ export class SpeakerManagerComponent implements OnInit {
   openCreateDialog() {
     const dialogRef = this.dialog.open(SpeakerFormDialogComponent, {
       width: '700px',
-      data: { mode: 'create' }
+      data: { mode: 'create' },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadSpeakers();
         this.showSuccessSnackbar('Speaker profile created successfully');
@@ -321,10 +325,10 @@ export class SpeakerManagerComponent implements OnInit {
   openEditDialog(speaker: SpeakerProfile) {
     const dialogRef = this.dialog.open(SpeakerFormDialogComponent, {
       width: '700px',
-      data: { mode: 'edit', speaker }
+      data: { mode: 'edit', speaker },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadSpeakers();
         this.showSuccessSnackbar('Speaker profile updated successfully');
@@ -335,14 +339,14 @@ export class SpeakerManagerComponent implements OnInit {
   openViewDialog(speaker: SpeakerProfile) {
     this.dialog.open(SpeakerViewDialogComponent, {
       width: '600px',
-      data: { speaker }
+      data: { speaker },
     });
   }
 
   async updateStatus(speaker: SpeakerProfile, status: SpeakerStatus) {
     try {
       await lastValueFrom(
-        this.http.patch(`/api/v1/admin/speakers/${speaker.id}/status`, { status })
+        this.http.patch(`/api/v1/admin/speakers/${speaker.id}/status`, { status }),
       );
       await this.loadSpeakers();
       this.showSuccessSnackbar(`Speaker status updated to ${status}`);
@@ -359,16 +363,14 @@ export class SpeakerManagerComponent implements OnInit {
         title: 'Delete Speaker',
         message: `Are you sure you want to delete ${speaker.displayName}'s profile? This action cannot be undone.`,
         confirmText: 'Delete',
-        cancelText: 'Cancel'
-      }
+        cancelText: 'Cancel',
+      },
     });
 
     dialogRef.afterClosed().subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          await lastValueFrom(
-            this.http.delete(`/api/v1/admin/speakers/${speaker.id}`)
-          );
+          await lastValueFrom(this.http.delete(`/api/v1/admin/speakers/${speaker.id}`));
           await this.loadSpeakers();
           this.showSuccessSnackbar('Speaker profile deleted successfully');
         } catch (err) {
@@ -381,12 +383,18 @@ export class SpeakerManagerComponent implements OnInit {
 
   getStatusColor(status: SpeakerStatus): string {
     switch (status) {
-      case SpeakerStatus.Active: return 'primary';
-      case SpeakerStatus.Pending: return 'accent';
-      case SpeakerStatus.Inactive: return 'warn';
-      case SpeakerStatus.Suspended: return 'warn';
-      case SpeakerStatus.Archived: return '';
-      default: return '';
+      case SpeakerStatus.Active:
+        return 'primary';
+      case SpeakerStatus.Pending:
+        return 'accent';
+      case SpeakerStatus.Inactive:
+        return 'warn';
+      case SpeakerStatus.Suspended:
+        return 'warn';
+      case SpeakerStatus.Archived:
+        return '';
+      default:
+        return '';
     }
   }
 
@@ -405,7 +413,7 @@ export class SpeakerManagerComponent implements OnInit {
       duration: 3000,
       horizontalPosition: 'end',
       verticalPosition: 'top',
-      panelClass: ['snackbar-success']
+      panelClass: ['snackbar-success'],
     });
   }
 
@@ -414,7 +422,7 @@ export class SpeakerManagerComponent implements OnInit {
       duration: 5000,
       horizontalPosition: 'end',
       verticalPosition: 'top',
-      panelClass: ['snackbar-error']
+      panelClass: ['snackbar-error'],
     });
   }
 }
@@ -433,16 +441,18 @@ export class SpeakerManagerComponent implements OnInit {
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatProgressSpinnerModule
-],
+    MatProgressSpinnerModule,
+  ],
   template: `
-    <h2 mat-dialog-title>{{ data.mode === 'create' ? 'Create Speaker Profile' : 'Edit Speaker Profile' }}</h2>
+    <h2 mat-dialog-title>
+      {{ data.mode === 'create' ? 'Create Speaker Profile' : 'Edit Speaker Profile' }}
+    </h2>
     <mat-dialog-content>
       <form [formGroup]="speakerForm" class="speaker-form">
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Display Name</mat-label>
-            <input matInput formControlName="displayName" placeholder="Speaker's display name">
+            <input matInput formControlName="displayName" placeholder="Speaker's display name" />
             @if (speakerForm.get('displayName')?.hasError('required')) {
               <mat-error>Display name is required</mat-error>
             }
@@ -452,19 +462,24 @@ export class SpeakerManagerComponent implements OnInit {
         <div class="form-row two-column">
           <mat-form-field appearance="outline">
             <mat-label>Title</mat-label>
-            <input matInput formControlName="title" placeholder="e.g., Senior Developer">
+            <input matInput formControlName="title" placeholder="e.g., Senior Developer" />
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Company</mat-label>
-            <input matInput formControlName="company" placeholder="Company name">
+            <input matInput formControlName="company" placeholder="Company name" />
           </mat-form-field>
         </div>
 
         <div class="form-row two-column">
           <mat-form-field appearance="outline">
             <mat-label>Contact Email</mat-label>
-            <input matInput formControlName="contactEmail" type="email" placeholder="speaker@example.com">
+            <input
+              matInput
+              formControlName="contactEmail"
+              type="email"
+              placeholder="speaker@example.com"
+            />
             @if (speakerForm.get('contactEmail')?.hasError('email')) {
               <mat-error>Please enter a valid email</mat-error>
             }
@@ -472,38 +487,56 @@ export class SpeakerManagerComponent implements OnInit {
 
           <mat-form-field appearance="outline">
             <mat-label>Phone Number</mat-label>
-            <input matInput formControlName="phoneNumber" placeholder="+1 (555) 123-4567">
+            <input matInput formControlName="phoneNumber" placeholder="+1 (555) 123-4567" />
           </mat-form-field>
         </div>
 
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Photo URL</mat-label>
-            <input matInput formControlName="photoUrl" placeholder="https://example.com/photo.jpg">
+            <input
+              matInput
+              formControlName="photoUrl"
+              placeholder="https://example.com/photo.jpg"
+            />
           </mat-form-field>
         </div>
 
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Website URL</mat-label>
-            <input matInput formControlName="websiteUrl" placeholder="https://speaker-website.com">
+            <input
+              matInput
+              formControlName="websiteUrl"
+              placeholder="https://speaker-website.com"
+            />
           </mat-form-field>
         </div>
 
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Short Bio</mat-label>
-            <textarea matInput formControlName="shortBio" rows="2" 
-                      placeholder="Brief introduction (max 500 characters)"></textarea>
-            <mat-hint align="end">{{ speakerForm.get('shortBio')?.value?.length || 0 }}/500</mat-hint>
+            <textarea
+              matInput
+              formControlName="shortBio"
+              rows="2"
+              placeholder="Brief introduction (max 500 characters)"
+            ></textarea>
+            <mat-hint align="end"
+              >{{ speakerForm.get('shortBio')?.value?.length || 0 }}/500</mat-hint
+            >
           </mat-form-field>
         </div>
 
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Full Bio</mat-label>
-            <textarea matInput formControlName="fullBio" rows="4" 
-                      placeholder="Detailed biography (supports markdown)"></textarea>
+            <textarea
+              matInput
+              formControlName="fullBio"
+              rows="4"
+              placeholder="Detailed biography (supports markdown)"
+            ></textarea>
           </mat-form-field>
         </div>
 
@@ -520,26 +553,35 @@ export class SpeakerManagerComponent implements OnInit {
                 </mat-chip-row>
               }
             </mat-chip-grid>
-            <input placeholder="Add expertise area..."
-                   [matChipInputFor]="chipGrid"
-                   [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                   (matChipInputTokenEnd)="addExpertise($event)">
+            <input
+              placeholder="Add expertise area..."
+              [matChipInputFor]="chipGrid"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              (matChipInputTokenEnd)="addExpertise($event)"
+            />
           </mat-form-field>
         </div>
 
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Preferred Session Types</mat-label>
-            <input matInput formControlName="preferredSessionTypes" 
-                   placeholder="e.g., Workshop, Keynote, Panel">
+            <input
+              matInput
+              formControlName="preferredSessionTypes"
+              placeholder="e.g., Workshop, Keynote, Panel"
+            />
           </mat-form-field>
         </div>
 
         <div class="form-row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Availability Notes</mat-label>
-            <textarea matInput formControlName="availabilityNotes" rows="2" 
-                      placeholder="Any scheduling constraints or preferences"></textarea>
+            <textarea
+              matInput
+              formControlName="availabilityNotes"
+              rows="2"
+              placeholder="Any scheduling constraints or preferences"
+            ></textarea>
           </mat-form-field>
         </div>
 
@@ -548,19 +590,19 @@ export class SpeakerManagerComponent implements OnInit {
           <div class="social-links-grid">
             <mat-form-field appearance="outline">
               <mat-label>Twitter</mat-label>
-              <input matInput formControlName="twitter" placeholder="@handle">
+              <input matInput formControlName="twitter" placeholder="@handle" />
               <mat-icon matPrefix>alternate_email</mat-icon>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>LinkedIn</mat-label>
-              <input matInput formControlName="linkedin" placeholder="linkedin.com/in/...">
+              <input matInput formControlName="linkedin" placeholder="linkedin.com/in/..." />
               <mat-icon matPrefix>link</mat-icon>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>GitHub</mat-label>
-              <input matInput formControlName="github" placeholder="github.com/...">
+              <input matInput formControlName="github" placeholder="github.com/..." />
               <mat-icon matPrefix>code</mat-icon>
             </mat-form-field>
           </div>
@@ -573,9 +615,12 @@ export class SpeakerManagerComponent implements OnInit {
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-raised-button color="primary" 
-              (click)="onSave()" 
-              [disabled]="speakerForm.invalid || isSubmitting()">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="onSave()"
+        [disabled]="speakerForm.invalid || isSubmitting()"
+      >
         @if (isSubmitting()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
@@ -584,48 +629,50 @@ export class SpeakerManagerComponent implements OnInit {
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .speaker-form {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-width: 500px;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 16px;
-    }
-
-    .form-row.two-column {
-      > * {
-        flex: 1;
+  styles: [
+    `
+      .speaker-form {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 500px;
       }
-    }
 
-    .full-width {
-      width: 100%;
-    }
-
-    .social-links {
-      flex-direction: column;
-
-      h4 {
-        margin: 8px 0;
-        color: rgba(0, 0, 0, 0.6);
+      .form-row {
+        display: flex;
+        gap: 16px;
       }
-    }
 
-    .social-links-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
+      .form-row.two-column {
+        > * {
+          flex: 1;
+        }
+      }
 
-    mat-dialog-actions {
-      padding: 16px 24px;
-    }
-  `]
+      .full-width {
+        width: 100%;
+      }
+
+      .social-links {
+        flex-direction: column;
+
+        h4 {
+          margin: 8px 0;
+          color: rgba(0, 0, 0, 0.6);
+        }
+      }
+
+      .social-links-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      mat-dialog-actions {
+        padding: 16px 24px;
+      }
+    `,
+  ],
 })
 export class SpeakerFormDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -653,7 +700,7 @@ export class SpeakerFormDialogComponent implements OnInit {
     isPublic: [true],
     twitter: [''],
     linkedin: [''],
-    github: ['']
+    github: [''],
   });
 
   ngOnInit() {
@@ -674,7 +721,7 @@ export class SpeakerFormDialogComponent implements OnInit {
         isPublic: speaker.isPublic,
         twitter: speaker.socialLinks?.['twitter'] || '',
         linkedin: speaker.socialLinks?.['linkedin'] || '',
-        github: speaker.socialLinks?.['github'] || ''
+        github: speaker.socialLinks?.['github'] || '',
       });
       this.expertiseAreas.set(speaker.expertiseAreas || []);
     }
@@ -683,13 +730,13 @@ export class SpeakerFormDialogComponent implements OnInit {
   addExpertise(event: MatChipInputEvent) {
     const value = (event.value || '').trim();
     if (value) {
-      this.expertiseAreas.update(areas => [...areas, value]);
+      this.expertiseAreas.update((areas) => [...areas, value]);
     }
     event.chipInput!.clear();
   }
 
   removeExpertise(area: string) {
-    this.expertiseAreas.update(areas => areas.filter(a => a !== area));
+    this.expertiseAreas.update((areas) => areas.filter((a) => a !== area));
   }
 
   async onSave() {
@@ -720,12 +767,10 @@ export class SpeakerFormDialogComponent implements OnInit {
           expertiseAreas: this.expertiseAreas().length > 0 ? this.expertiseAreas() : undefined,
           preferredSessionTypes: formValue.preferredSessionTypes || undefined,
           availabilityNotes: formValue.availabilityNotes || undefined,
-          isPublic: formValue.isPublic!
+          isPublic: formValue.isPublic!,
         };
 
-        await lastValueFrom(
-          this.http.post('/api/v1/admin/speakers', request)
-        );
+        await lastValueFrom(this.http.post('/api/v1/admin/speakers', request));
       } else {
         const request: UpdateSpeakerProfileRequest = {
           displayName: formValue.displayName || undefined,
@@ -741,11 +786,11 @@ export class SpeakerFormDialogComponent implements OnInit {
           expertiseAreas: this.expertiseAreas().length > 0 ? this.expertiseAreas() : undefined,
           preferredSessionTypes: formValue.preferredSessionTypes || undefined,
           availabilityNotes: formValue.availabilityNotes || undefined,
-          isPublic: formValue.isPublic!
+          isPublic: formValue.isPublic!,
         };
 
         await lastValueFrom(
-          this.http.put(`/api/v1/admin/speakers/${this.data.speaker!.id}`, request)
+          this.http.put(`/api/v1/admin/speakers/${this.data.speaker!.id}`, request),
         );
       }
 
@@ -766,19 +811,18 @@ export class SpeakerFormDialogComponent implements OnInit {
 @Component({
   selector: 'app-speaker-view-dialog',
   standalone: true,
-  imports: [
-    MatDialogModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule
-],
+  imports: [MatDialogModule, MatButtonModule, MatIconModule, MatChipsModule],
   template: `
     <h2 mat-dialog-title>{{ data.speaker.displayName }}</h2>
     <mat-dialog-content>
       <div class="speaker-view">
         <div class="speaker-header">
           @if (data.speaker.photoUrl) {
-            <img [src]="data.speaker.photoUrl" [alt]="data.speaker.displayName" class="speaker-photo">
+            <img
+              [src]="data.speaker.photoUrl"
+              [alt]="data.speaker.displayName"
+              class="speaker-photo"
+            />
           } @else {
             <div class="speaker-photo-placeholder">
               <mat-icon>person</mat-icon>
@@ -789,7 +833,9 @@ export class SpeakerFormDialogComponent implements OnInit {
             @if (data.speaker.title || data.speaker.company) {
               <p class="speaker-title">
                 {{ data.speaker.title }}
-                @if (data.speaker.title && data.speaker.company) { at }
+                @if (data.speaker.title && data.speaker.company) {
+                  at
+                }
                 {{ data.speaker.company }}
               </p>
             }
@@ -821,27 +867,49 @@ export class SpeakerFormDialogComponent implements OnInit {
               <p><mat-icon>email</mat-icon> {{ data.speaker.contactEmail }}</p>
             }
             @if (data.speaker.websiteUrl) {
-              <p><mat-icon>language</mat-icon> <a [href]="data.speaker.websiteUrl" target="_blank">{{ data.speaker.websiteUrl }}</a></p>
+              <p>
+                <mat-icon>language</mat-icon>
+                <a [href]="data.speaker.websiteUrl" target="_blank">{{
+                  data.speaker.websiteUrl
+                }}</a>
+              </p>
             }
           </div>
         }
 
-        @if (data.speaker.socialLinks && (data.speaker.socialLinks['twitter'] || data.speaker.socialLinks['linkedin'] || data.speaker.socialLinks['github'])) {
+        @if (
+          data.speaker.socialLinks &&
+          (data.speaker.socialLinks['twitter'] ||
+            data.speaker.socialLinks['linkedin'] ||
+            data.speaker.socialLinks['github'])
+        ) {
           <div class="speaker-section social-links">
             <h4>Social Links</h4>
             <div class="social-icons">
               @if (data.speaker.socialLinks['twitter']) {
-                <a [href]="'https://twitter.com/' + data.speaker.socialLinks['twitter']" target="_blank" matTooltip="Twitter">
+                <a
+                  [href]="'https://twitter.com/' + data.speaker.socialLinks['twitter']"
+                  target="_blank"
+                  matTooltip="Twitter"
+                >
                   <mat-icon>alternate_email</mat-icon>
                 </a>
               }
               @if (data.speaker.socialLinks['linkedin']) {
-                <a [href]="data.speaker.socialLinks['linkedin']" target="_blank" matTooltip="LinkedIn">
+                <a
+                  [href]="data.speaker.socialLinks['linkedin']"
+                  target="_blank"
+                  matTooltip="LinkedIn"
+                >
                   <mat-icon>link</mat-icon>
                 </a>
               }
               @if (data.speaker.socialLinks['github']) {
-                <a [href]="'https://github.com/' + data.speaker.socialLinks['github']" target="_blank" matTooltip="GitHub">
+                <a
+                  [href]="'https://github.com/' + data.speaker.socialLinks['github']"
+                  target="_blank"
+                  matTooltip="GitHub"
+                >
                   <mat-icon>code</mat-icon>
                 </a>
               }
@@ -860,91 +928,94 @@ export class SpeakerFormDialogComponent implements OnInit {
       <button mat-button [mat-dialog-close]>Close</button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    .speaker-view {
-      min-width: 400px;
-    }
-
-    .speaker-header {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .speaker-photo, .speaker-photo-placeholder {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .speaker-photo-placeholder {
-      background: #e0e0e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      mat-icon {
-        font-size: 48px;
-        width: 48px;
-        height: 48px;
-        color: #9e9e9e;
-      }
-    }
-
-    .speaker-info {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-
-      h3 {
-        margin: 0 0 4px 0;
+  styles: [
+    `
+      .speaker-view {
+        min-width: 400px;
       }
 
-      .speaker-title {
-        margin: 0;
-        color: rgba(0, 0, 0, 0.6);
-      }
-    }
-
-    .speaker-section {
-      margin-bottom: 16px;
-
-      h4 {
-        margin: 0 0 8px 0;
-        color: rgba(0, 0, 0, 0.6);
-        font-size: 14px;
-        text-transform: uppercase;
+      .speaker-header {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
       }
 
-      p {
+      .speaker-photo,
+      .speaker-photo-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .speaker-photo-placeholder {
+        background: #e0e0e0;
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin: 4px 0;
+        justify-content: center;
+
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          color: #9e9e9e;
+        }
       }
-    }
 
-    .social-links .social-icons {
-      display: flex;
-      gap: 16px;
+      .speaker-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
 
-      a {
-        color: inherit;
-        text-decoration: none;
+        h3 {
+          margin: 0 0 4px 0;
+        }
+
+        .speaker-title {
+          margin: 0;
+          color: rgba(0, 0, 0, 0.6);
+        }
       }
-    }
 
-    .metadata {
-      background: #f5f5f5;
-      padding: 12px;
-      border-radius: 4px;
+      .speaker-section {
+        margin-bottom: 16px;
 
-      p {
-        margin: 4px 0;
+        h4 {
+          margin: 0 0 8px 0;
+          color: rgba(0, 0, 0, 0.6);
+          font-size: 14px;
+          text-transform: uppercase;
+        }
+
+        p {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin: 4px 0;
+        }
       }
-    }
-  `]
+
+      .social-links .social-icons {
+        display: flex;
+        gap: 16px;
+
+        a {
+          color: inherit;
+          text-decoration: none;
+        }
+      }
+
+      .metadata {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+
+        p {
+          margin: 4px 0;
+        }
+      }
+    `,
+  ],
 })
 export class SpeakerViewDialogComponent {
   data = inject(MAT_DIALOG_DATA) as { speaker: SpeakerProfile };
@@ -954,10 +1025,7 @@ export class SpeakerViewDialogComponent {
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [
-    MatDialogModule,
-    MatButtonModule
-],
+  imports: [MatDialogModule, MatButtonModule],
   template: `
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>
@@ -965,9 +1033,11 @@ export class SpeakerViewDialogComponent {
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button [mat-dialog-close]="false">{{ data.cancelText }}</button>
-      <button mat-raised-button color="warn" [mat-dialog-close]="true">{{ data.confirmText }}</button>
+      <button mat-raised-button color="warn" [mat-dialog-close]="true">
+        {{ data.confirmText }}
+      </button>
     </mat-dialog-actions>
-  `
+  `,
 })
 export class ConfirmDialogComponent {
   data = inject(MAT_DIALOG_DATA) as {

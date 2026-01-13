@@ -1,9 +1,9 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrivateApi.SessionManagement;
 using Shared.ApiManagement;
 using Shared.Common;
-using System.Security.Claims;
 
 namespace PrivateApi.ApiManagement;
 

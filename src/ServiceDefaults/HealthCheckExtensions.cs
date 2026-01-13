@@ -1,8 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
-using Npgsql;
 
 namespace EventManagement.ServiceDefaults;
 

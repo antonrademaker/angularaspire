@@ -19,7 +19,8 @@ import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 export function initBrowserTelemetry(): void {
   // For browser, we use HTTP endpoint (typically on port 4318)
   // Aspire dashboard exposes OTLP HTTP on a different port than gRPC
-  const otlpEndpoint = (window as any).__OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces';
+  const otlpEndpoint =
+    (window as any).__OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces';
 
   const resource = new Resource({
     [ATTR_SERVICE_NAME]: 'privateapp-browser',
@@ -31,7 +32,7 @@ export function initBrowserTelemetry(): void {
       new BatchSpanProcessor(
         new OTLPTraceExporter({
           url: otlpEndpoint,
-        })
+        }),
       ),
     ],
   });
@@ -44,11 +45,7 @@ export function initBrowserTelemetry(): void {
     instrumentations: [
       new FetchInstrumentation({
         // Propagate trace context to backend APIs
-        propagateTraceHeaderCorsUrls: [
-          /localhost/i,
-          /127\.0\.0\.1/i,
-          /api\//i,
-        ],
+        propagateTraceHeaderCorsUrls: [/localhost/i, /127\.0\.0\.1/i, /api\//i],
         clearTimingResources: true,
       }),
       new DocumentLoadInstrumentation(),

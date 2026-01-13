@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Shared.Common;
-using System.Text.Json;
+using Shared.EventManagement.Entities;
 
 namespace Shared.EventManagement;
 
@@ -30,14 +30,15 @@ public class EventService : IEventService
 
     public async Task<EventSearchResult> SearchEventsAsync(EventSearchRequest searchRequest)
     {
-        _logger.LogInformation("Searching events with criteria: {SearchText}", searchRequest.SearchText);
+        var searchTextSafe = (searchRequest.SearchText ?? string.Empty).Replace("\r", "").Replace("\n", "");
+        _logger.LogInformation("Searching events with criteria: {SearchText}", searchTextSafe);
 
         IQueryable<Event> query = _eventContext.Events.AsQueryable();
 
         // Only include user navigation when not using InMemory (avoids cross-context issues in tests)
         if (!_isInMemory)
         {
-            query = query.Include(e => e.CreatedByUser);
+            // query = query.Include(e => e.CreatedByUser);
         }
 
         // Apply filters
@@ -49,19 +50,13 @@ public class EventService : IEventService
                 e.Description.ToLower().Contains(searchText));
         }
 
-        if (searchRequest.Status.HasValue)
+        if (searchRequest.Statuses != null && searchRequest.Statuses.Any())
+        {
+            query = query.Where(e => searchRequest.Statuses.Contains(e.Status));
+        }
+        else if (searchRequest.Status.HasValue)
         {
             query = query.Where(e => e.Status == searchRequest.Status.Value);
-        }
-
-        if (searchRequest.Visibility.HasValue)
-        {
-            query = query.Where(e => e.Visibility == searchRequest.Visibility.Value);
-        }
-        else
-        {
-            // Default to public events only
-            query = query.Where(e => e.Visibility == EventVisibility.Public);
         }
 
         if (searchRequest.StartDateFrom.HasValue)
@@ -76,20 +71,7 @@ public class EventService : IEventService
 
         if (searchRequest.OrganizerId.HasValue)
         {
-            query = query.Where(e => e.CreatedByUserId == searchRequest.OrganizerId.Value);
-        }
-
-        if (searchRequest.IncludeVirtual.HasValue || searchRequest.IncludePhysical.HasValue)
-        {
-            if (searchRequest.IncludeVirtual == true && searchRequest.IncludePhysical != true)
-            {
-                query = query.Where(e => e.IsVirtual);
-            }
-            else if (searchRequest.IncludePhysical == true && searchRequest.IncludeVirtual != true)
-            {
-                query = query.Where(e => !e.IsVirtual);
-            }
-            // If both are true or both are null, include all
+            query = query.Where(e => e.CreatedBy == searchRequest.OrganizerId.Value);
         }
 
         // Apply sorting
@@ -122,7 +104,7 @@ public class EventService : IEventService
         // Only include user navigation when not using InMemory and includeDetails is true
         if (includeDetails && !_isInMemory)
         {
-            query = query.Include(e => e.CreatedByUser);
+            // query = query.Include(e => e.CreatedByUser);
         }
 
         return await query.FirstOrDefaultAsync(e => e.Id == eventId);
@@ -130,20 +112,20 @@ public class EventService : IEventService
 
     public async Task<Event?> GetEventBySlugAsync(string slug, bool includeDetails = true)
     {
-        _logger.LogInformation("Getting event by slug: {Slug}", slug);
+        _logger.LogInformation("Getting event by slug: {Slug}", slug.Replace("\r", "").Replace("\n", ""));
 
         IQueryable<Event> query = _eventContext.Events.AsQueryable();
 
         // Only include user navigation when not using InMemory and includeDetails is true
         if (includeDetails && !_isInMemory)
         {
-            query = query.Include(e => e.CreatedByUser);
+            // query = query.Include(e => e.CreatedByUser);
         }
 
         return await query.FirstOrDefaultAsync(e => e.Slug == slug);
     }
 
-    public async Task<IEnumerable<Event>> GetUpcomingEventsAsync(int limit = 10, EventVisibility? visibility = EventVisibility.Public)
+    public async Task<IEnumerable<Event>> GetUpcomingEventsAsync(int limit = 10)
     {
         _logger.LogInformation("Getting upcoming events (limit: {Limit})", limit);
 
@@ -151,18 +133,13 @@ public class EventService : IEventService
             .Where(e => e.StartDate > DateTime.UtcNow)
             .Where(e => e.Status == EventStatus.Published);
 
-        if (visibility.HasValue)
-        {
-            query = query.Where(e => e.Visibility == visibility.Value);
-        }
-
         return await query
             .OrderBy(e => e.StartDate)
             .Take(limit)
-            .Include(e => e.CreatedByUser)
             .ToListAsync();
     }
 
+    /*
     public async Task<IEnumerable<Event>> GetEventsByTagsAsync(string[] tags, int limit = 20)
     {
         _logger.LogInformation("Getting events by tags: {Tags}", string.Join(", ", tags));
@@ -182,12 +159,13 @@ public class EventService : IEventService
 
         return filteredEvents;
     }
+    */
 
     // Event Management Operations
 
     public async Task<Event> CreateEventAsync(CreateEventRequest eventData, Guid createdByUserId)
     {
-        _logger.LogInformation("Creating new event: {Title}", eventData.Title);
+        _logger.LogInformation("Creating new event: {Title}", eventData.Title.Replace("\r", "").Replace("\n", ""));
 
         // Validate slug uniqueness
         Event? existingEvent = await _eventContext.Events
@@ -205,34 +183,15 @@ public class EventService : IEventService
             Slug = eventData.Slug,
             StartDate = eventData.StartDate,
             EndDate = eventData.EndDate,
-            Timezone = eventData.Timezone,
-            MaxAttendees = eventData.MaxAttendees,
-            RegistrationOpenDate = eventData.RegistrationOpenDate,
-            RegistrationCloseDate = eventData.RegistrationCloseDate,
-            Status = EventStatus.Draft, // Always start as draft
-            Visibility = eventData.Visibility,
-            VenueName = eventData.VenueName,
-            VenueAddress = eventData.VenueAddress,
-            IsVirtual = eventData.IsVirtual,
-            VirtualMeetingUrl = eventData.VirtualMeetingUrl,
-            BannerImageUrl = eventData.BannerImageUrl,
-            LogoImageUrl = eventData.LogoImageUrl,
-            WebsiteUrl = eventData.WebsiteUrl,
-            ContactEmail = eventData.ContactEmail,
-            CreatedByUserId = createdByUserId,
-            CreatedAt = DateTime.UtcNow
+            Status = eventData.Status,
+            LogoUrl = eventData.LogoUrl,
+            PrimaryColor = eventData.PrimaryColor,
+            SeriesId = eventData.SeriesId,
+            CreatedBy = createdByUserId,
+            UpdatedBy = createdByUserId,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
-
-        // Handle JSON fields
-        if (eventData.CustomFields != null && eventData.CustomFields.Count > 0)
-        {
-            newEvent.CustomFields = JsonSerializer.Serialize(eventData.CustomFields);
-        }
-
-        if (eventData.Tags != null && eventData.Tags.Length > 0)
-        {
-            newEvent.Tags = JsonSerializer.Serialize(eventData.Tags);
-        }
 
         _eventContext.Events.Add(newEvent);
         await _eventContext.SaveChangesAsync();
@@ -269,44 +228,37 @@ public class EventService : IEventService
         existingEvent.Slug = eventData.Slug;
         existingEvent.StartDate = eventData.StartDate;
         existingEvent.EndDate = eventData.EndDate;
-        existingEvent.Timezone = eventData.Timezone;
-        existingEvent.MaxAttendees = eventData.MaxAttendees;
-        existingEvent.RegistrationOpenDate = eventData.RegistrationOpenDate;
-        existingEvent.RegistrationCloseDate = eventData.RegistrationCloseDate;
-        existingEvent.Visibility = eventData.Visibility;
-        existingEvent.VenueName = eventData.VenueName;
-        existingEvent.VenueAddress = eventData.VenueAddress;
-        existingEvent.IsVirtual = eventData.IsVirtual;
-        existingEvent.VirtualMeetingUrl = eventData.VirtualMeetingUrl;
-        existingEvent.BannerImageUrl = eventData.BannerImageUrl;
-        existingEvent.LogoImageUrl = eventData.LogoImageUrl;
-        existingEvent.WebsiteUrl = eventData.WebsiteUrl;
-        existingEvent.ContactEmail = eventData.ContactEmail;
+        existingEvent.Status = eventData.Status;
+        existingEvent.LogoUrl = eventData.LogoUrl;
+        existingEvent.PrimaryColor = eventData.PrimaryColor;
+        existingEvent.SeriesId = eventData.SeriesId;
+        existingEvent.UpdatedBy = updatedByUserId;
         existingEvent.UpdatedAt = DateTime.UtcNow;
-
-        // Update JSON fields
-        if (eventData.CustomFields != null && eventData.CustomFields.Count > 0)
-        {
-            existingEvent.CustomFields = JsonSerializer.Serialize(eventData.CustomFields);
-        }
-        else
-        {
-            existingEvent.CustomFields = null;
-        }
-
-        if (eventData.Tags != null && eventData.Tags.Length > 0)
-        {
-            existingEvent.Tags = JsonSerializer.Serialize(eventData.Tags);
-        }
-        else
-        {
-            existingEvent.Tags = null;
-        }
 
         await _eventContext.SaveChangesAsync();
 
         _logger.LogInformation("Updated event: {EventId}", eventId);
         return existingEvent;
+    }
+
+    public async Task<Shared.Common.Result> UpdateEventStatusAsync(Guid eventId, EventStatus newStatus, Guid userId)
+    {
+        var evt = await _eventContext.Events.FindAsync(eventId);
+        if (evt == null)
+            return Shared.Common.Result.Failure("Event not found");
+
+        var transitionResult = Shared.EventManagement.Domain.EventStatusMachine.CanTransition(evt.Status, newStatus);
+        if (!transitionResult.IsSuccess)
+        {
+            return transitionResult;
+        }
+
+        evt.Status = newStatus;
+        evt.UpdatedAt = DateTime.UtcNow;
+        evt.UpdatedBy = userId;
+
+        await _eventContext.SaveChangesAsync();
+        return Shared.Common.Result.Success();
     }
 
     public async Task<bool> DeleteEventAsync(Guid eventId, Guid deletedByUserId)
@@ -347,6 +299,7 @@ public class EventService : IEventService
 
     // Registration Management
 
+    /*
     public async Task<bool> IsRegistrationAvailableAsync(Guid eventId)
     {
         Event? eventItem = await _eventContext.Events.FindAsync(eventId);
@@ -392,18 +345,20 @@ public class EventService : IEventService
 
         return eventItem.CurrentAttendees;
     }
+    */
 
     // Reporting and Analytics
 
     public async Task<IEnumerable<Event>> GetEventsByOrganizerAsync(Guid organizerUserId, bool includeStats = false)
     {
         IOrderedQueryable<Event> query = _eventContext.Events
-            .Where(e => e.CreatedByUserId == organizerUserId)
+            .Where(e => e.CreatedBy == organizerUserId)
             .OrderByDescending(e => e.CreatedAt);
 
         return await query.ToListAsync();
     }
 
+    /*
     public async Task<EventRegistrationStats?> GetEventStatsAsync(Guid eventId)
     {
         Event? eventItem = await _eventContext.Events.FindAsync(eventId);
@@ -420,21 +375,28 @@ public class EventService : IEventService
             CurrentAttendees = eventItem.CurrentAttendees
         };
     }
+    */
 
     // Private helper methods
 
-    private IQueryable<Event> ApplySorting(IQueryable<Event> query, string sortBy, bool ascending)
+    private IQueryable<Event> ApplySorting(IQueryable<Event> query, string? sortBy, bool ascending)
     {
+        if (string.IsNullOrEmpty(sortBy))
+        {
+            return query.OrderBy(e => e.StartDate);
+        }
+
         return sortBy.ToLower() switch
         {
             "title" => ascending ? query.OrderBy(e => e.Title) : query.OrderByDescending(e => e.Title),
             "startdate" => ascending ? query.OrderBy(e => e.StartDate) : query.OrderByDescending(e => e.StartDate),
             "createdat" => ascending ? query.OrderBy(e => e.CreatedAt) : query.OrderByDescending(e => e.CreatedAt),
-            "attendees" => ascending ? query.OrderBy(e => e.CurrentAttendees) : query.OrderByDescending(e => e.CurrentAttendees),
+            // "attendees" => ascending ? query.OrderBy(e => e.CurrentAttendees) : query.OrderByDescending(e => e.CurrentAttendees),
             _ => query.OrderBy(e => e.StartDate) // Default sort by start date
         };
     }
 
+    /*
     private bool ContainsAnyTag(string? tagsJson, string[] searchTags)
     {
         if (string.IsNullOrEmpty(tagsJson))
@@ -451,4 +413,5 @@ public class EventService : IEventService
         return searchTags.Any(searchTag =>
             eventTags.Any(t => t.Equals(searchTag, StringComparison.OrdinalIgnoreCase)));
     }
+    */
 }

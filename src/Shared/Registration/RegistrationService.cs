@@ -1,13 +1,14 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-using System.Text.Json;
 using Shared.Common;
 using Shared.EventManagement;
-using Shared.UserManagement;
+using Shared.EventManagement.Entities;
 using Shared.Notifications;
+using Shared.UserManagement;
+using StackExchange.Redis;
 
 namespace Shared.Registration;
 
@@ -68,7 +69,7 @@ public class RegistrationService : IRegistrationService
 
             // Get user and event details
             User? user = await _userService.GetUserByIdAsync(request.UserId, cancellationToken);
-            Event? eventDetails = await _eventService.GetEventByIdAsync(request.EventId, true);
+            var eventDetails = await _eventService.GetEventByIdAsync(request.EventId, true);
 
             if (user == null || eventDetails == null)
             {
@@ -94,8 +95,7 @@ public class RegistrationService : IRegistrationService
                     .Where(r => r.EventId == request.EventId && r.Status == RegistrationStatus.Confirmed)
                     .CountAsync(cancellationToken);
 
-                var shouldQueue = eventDetails.MaxCapacity.HasValue &&
-                                currentCount >= eventDetails.MaxCapacity.Value;
+                var shouldQueue = false; // eventDetails.MaxCapacity.HasValue && currentCount >= eventDetails.MaxCapacity.Value;
 
                 // Create the registration
                 var registration = new Registration
@@ -306,11 +306,12 @@ public class RegistrationService : IRegistrationService
         try
         {
             Event? eventDetails = await _eventService.GetEventByIdAsync(eventId, true);
-            if (eventDetails == null || !eventDetails.MaxCapacity.HasValue)
+            if (eventDetails == null) // || !eventDetails.MaxCapacity.HasValue)
             {
                 return 0;
             }
 
+            /*
             var currentConfirmedCount = await _context.Registrations
                 .Where(r => r.EventId == eventId && r.Status == RegistrationStatus.Confirmed)
                 .CountAsync(cancellationToken);
@@ -322,6 +323,8 @@ public class RegistrationService : IRegistrationService
             }
 
             var processCount = Math.Min(availableSpots, maxProcessCount ?? availableSpots);
+            */
+            var processCount = 0; // Disable queue processing for now
             var queueKey = QUEUE_KEY_PREFIX + eventId;
             var promoted = 0;
 
@@ -514,7 +517,7 @@ public class RegistrationService : IRegistrationService
             .CountAsync(cancellationToken);
 
         Event? eventDetails = await _eventService.GetEventByIdAsync(eventId, true);
-        var maxCapacity = eventDetails?.MaxCapacity;
+        var maxCapacity = (int?)null; // eventDetails?.MaxCapacity;
         var availableSpots = maxCapacity.HasValue ? maxCapacity.Value - confirmedCount : (int?)null;
 
         return new QueueStatus

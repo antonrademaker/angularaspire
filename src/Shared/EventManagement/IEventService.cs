@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
+using System.ServiceModel;
+using Shared.EventManagement.Entities;
 
 namespace Shared.EventManagement;
 
@@ -7,6 +8,7 @@ namespace Shared.EventManagement;
 /// Business service interface for event management operations
 /// Follows IDesign principles with clear business operations
 /// </summary>
+[ServiceContract]
 public interface IEventService
 {
     // Event Discovery Operations
@@ -16,6 +18,7 @@ public interface IEventService
     /// </summary>
     /// <param name="searchRequest">Search and filter criteria</param>
     /// <returns>Paginated list of events matching criteria</returns>
+    [OperationContract]
     Task<EventSearchResult> SearchEventsAsync(EventSearchRequest searchRequest);
 
     /// <summary>
@@ -24,6 +27,7 @@ public interface IEventService
     /// <param name="eventId">Event unique identifier</param>
     /// <param name="includeDetails">Whether to include detailed information</param>
     /// <returns>Event details or null if not found</returns>
+    [OperationContract]
     Task<Event?> GetEventByIdAsync(Guid eventId, bool includeDetails = true);
 
     /// <summary>
@@ -32,16 +36,21 @@ public interface IEventService
     /// <param name="slug">Event slug</param>
     /// <param name="includeDetails">Whether to include detailed information</param>
     /// <returns>Event details or null if not found</returns>
+    [OperationContract]
     Task<Event?> GetEventBySlugAsync(string slug, bool includeDetails = true);
 
     /// <summary>
     /// Get upcoming events for homepage/discovery
     /// </summary>
     /// <param name="limit">Maximum number of events to return</param>
-    /// <param name="visibility">Event visibility filter</param>
     /// <returns>List of upcoming events</returns>
-    Task<IEnumerable<Event>> GetUpcomingEventsAsync(int limit = 10, EventVisibility? visibility = EventVisibility.Public);
+    [OperationContract]
+    Task<IEnumerable<Event>> GetUpcomingEventsAsync(int limit = 10);
 
+    [OperationContract]
+    Task<Shared.Common.Result> UpdateEventStatusAsync(Guid eventId, EventStatus newStatus, Guid userId);
+
+    /*
     /// <summary>
     /// Get events by tags for category browsing
     /// </summary>
@@ -49,6 +58,7 @@ public interface IEventService
     /// <param name="limit">Maximum number of events to return</param>
     /// <returns>Events matching any of the provided tags</returns>
     Task<IEnumerable<Event>> GetEventsByTagsAsync(string[] tags, int limit = 20);
+    */
 
     // Event Management Operations (Admin/Organizer)
 
@@ -88,6 +98,7 @@ public interface IEventService
 
     // Registration Management
 
+    /*
     /// <summary>
     /// Check if an event has available registration slots
     /// </summary>
@@ -102,6 +113,7 @@ public interface IEventService
     /// <param name="increment">Number to add (positive) or subtract (negative)</param>
     /// <returns>Updated attendee count</returns>
     Task<int> UpdateAttendeeCountAsync(Guid eventId, int increment);
+    */
 
     // Reporting and Analytics
 
@@ -113,12 +125,14 @@ public interface IEventService
     /// <returns>List of events created by the organizer</returns>
     Task<IEnumerable<Event>> GetEventsByOrganizerAsync(Guid organizerUserId, bool includeStats = false);
 
+    /*
     /// <summary>
     /// Get event registration statistics
     /// </summary>
     /// <param name="eventId">Event ID</param>
     /// <returns>Registration statistics or null if event not found</returns>
     Task<EventRegistrationStats?> GetEventStatsAsync(Guid eventId);
+    */
 }
 
 /// <summary>
@@ -137,9 +151,16 @@ public class EventSearchRequest
     public EventStatus? Status { get; set; }
 
     /// <summary>
+    /// Filter by multiple event statuses
+    /// </summary>
+    public List<EventStatus>? Statuses { get; set; }
+
+    /*
+    /// <summary>
     /// Filter by event visibility
     /// </summary>
     public EventVisibility? Visibility { get; set; } = EventVisibility.Public;
+    */
 
     /// <summary>
     /// Filter events starting after this date
@@ -151,16 +172,19 @@ public class EventSearchRequest
     /// </summary>
     public DateTime? StartDateTo { get; set; }
 
+    /*
     /// <summary>
     /// Filter by tags
     /// </summary>
     public string[]? Tags { get; set; }
+    */
 
     /// <summary>
     /// Filter by organizer user ID
     /// </summary>
     public Guid? OrganizerId { get; set; }
 
+    /*
     /// <summary>
     /// Whether to include virtual events
     /// </summary>
@@ -170,6 +194,7 @@ public class EventSearchRequest
     /// Whether to include physical events
     /// </summary>
     public bool? IncludePhysical { get; set; }
+    */
 
     /// <summary>
     /// Page number for pagination (1-based)
@@ -255,28 +280,12 @@ public class CreateEventRequest
     [Required]
     public DateTime EndDate { get; set; }
 
-    public string Timezone { get; set; } = "UTC";
+    public EventStatus Status { get; set; } = EventStatus.Draft;
 
-    [Required]
-    public int MaxAttendees { get; set; }
+    public string? LogoUrl { get; set; }
+    public string? PrimaryColor { get; set; }
 
-    public DateTime? RegistrationOpenDate { get; set; }
-    public DateTime? RegistrationCloseDate { get; set; }
-
-    public EventVisibility Visibility { get; set; } = EventVisibility.Public;
-
-    public string? VenueName { get; set; }
-    public string? VenueAddress { get; set; }
-    public bool IsVirtual { get; set; } = false;
-    public string? VirtualMeetingUrl { get; set; }
-
-    public string? BannerImageUrl { get; set; }
-    public string? LogoImageUrl { get; set; }
-    public string? WebsiteUrl { get; set; }
-    public string? ContactEmail { get; set; }
-
-    public Dictionary<string, object>? CustomFields { get; set; }
-    public string[]? Tags { get; set; }
+    public Guid? SeriesId { get; set; }
 }
 
 /// <summary>
@@ -288,6 +297,7 @@ public class UpdateEventRequest : CreateEventRequest
     // Additional update-specific logic can be added here
 }
 
+/*
 /// <summary>
 /// Event registration statistics
 /// </summary>
@@ -302,3 +312,4 @@ public class EventRegistrationStats
     public bool IsFullyBooked => CurrentAttendees >= MaxAttendees;
     public DateTime? LastRegistrationDate { get; set; }
 }
+*/

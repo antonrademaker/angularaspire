@@ -1,8 +1,8 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Common;
-using Shared.EventManagement;
-using System.Text.Json;
+using Shared.EventManagement.Entities;
 
 namespace Shared.SessionManagement;
 

@@ -1,0 +1,135 @@
+.schedule-grid-container {
+  padding: 1rem;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .grid-wrapper {
+    overflow-x: auto;
+  }
+
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f5f5f5;
+      font-weight: bold;
+    }
+
+    .time-col {
+      width: 150px;
+      background-color: #fafafa;
+
+      .time-range {
+        font-weight: bold;
+      }
+
+      .slot-name {
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .slot-actions {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 0.2rem;
+      }
+    }
+
+    .session-cell {
+      vertical-align: top;
+      min-height: 100px;
+      height: 100px; /* Fixed height for drop target */
+      background-color: #fff;
+      transition: background-color 0.2s;
+
+      &.cdk-drop-list-dragging {
+        background-color: #e0f7fa;
+      }
+    }
+
+    .session-card {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      cursor: move;
+
+      .session-title {
+        font-weight: 500;
+        margin-bottom: 0.2rem;
+      }
+
+      .session-code {
+        font-size: 0.8rem;
+        color: #666;
+      }
+    }
+  }
+
+  .no-slots {
+    padding: 2rem;
+    text-align: center;
+    color: #666;
+  }
+}
+
+/* CDK Drag Drop Styles */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  background-color: #fff;
+  padding: 0.5rem;
+  width: 200px; /* Approximate width */
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.session-cell.cdk-drop-list-dragging .session-card:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+  .schedule-grid-container {
+    padding: 0.5rem;
+  }
+
+  .schedule-table {
+    min-width: 600px; // Allow smaller width
+
+    th,
+    td {
+      padding: 4px;
+      font-size: 0.9rem;
+    }
+
+    .time-col {
+      width: 100px;
+    }
+  }
+}

@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Shared.EventManagement;
+using Shared.EventManagement.Entities;
 using Shared.SessionManagement;
-using Xunit;
+using Session = Shared.SessionManagement.Session;
+using SessionStatus = Shared.SessionManagement.SessionStatus;
+using Track = Shared.SessionManagement.Track;
 
 namespace Shared.Tests.SessionManagement;
 
@@ -40,9 +42,7 @@ public class SessionServiceTests : IDisposable
             Slug = "test-conference",
             StartDate = DateTime.UtcNow.AddDays(30),
             EndDate = DateTime.UtcNow.AddDays(32),
-            MaxAttendees = 500,
-            Visibility = EventVisibility.Public,
-            CreatedByUserId = Guid.NewGuid()
+            CreatedBy = Guid.NewGuid()
         };
 
         _context.Set<Event>().Add(testEvent);

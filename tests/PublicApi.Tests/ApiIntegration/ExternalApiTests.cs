@@ -1,14 +1,8 @@
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using System.Net;
+using System.Text.Json;
 using Shared.ApiManagement;
 using Shared.EventManagement;
 using Shared.UserManagement;
-using System.Net;
-using System.Net.Http.Json;
-using System.Text.Json;
-using Xunit;
 
 namespace PublicApi.Tests.ApiIntegration;
 
@@ -192,7 +186,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
         // Arrange - Free tier cannot delete
         var (client, eventId) = await CreateAuthenticatedClientWithTestEvent(ApiKeyTier.Free, skipDelete: true);
 
-        // Act  
+        // Act
         var response = await client.DeleteAsync($"/api/external/events/{eventId}");
 
         // Assert - Should fail due to insufficient scope
@@ -440,9 +434,7 @@ public class ExternalApiTests : IClassFixture<TestWebApplicationFactory>
             Description = "Event for external API testing",
             Slug = $"ext-api-test-{Guid.NewGuid():N}",
             StartDate = DateTime.UtcNow.AddDays(30),
-            EndDate = DateTime.UtcNow.AddDays(31),
-            MaxAttendees = 100,
-            Visibility = EventVisibility.Public
+            EndDate = DateTime.UtcNow.AddDays(31)
         };
 
         var createdEvent = await eventService.CreateEventAsync(createEventRequest, createdUser.Id);

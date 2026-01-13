@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Shared.EventManagement.Entities;
 using Shared.UserManagement;
 
 namespace Shared.EventManagement;

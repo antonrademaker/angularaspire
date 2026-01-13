@@ -27,10 +27,10 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    
+
     /* Capture screenshot on failure */
     screenshot: 'only-on-failure',
-    
+
     /* Record video on failure */
     video: 'retain-on-failure',
   },
@@ -74,20 +74,7 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: [
-    {
-      command: 'cd ../../src/PublicApp && npm run start',
-      url: 'http://localhost:4200',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-    {
-      command: 'cd ../.. && dotnet run --project src/AppHost',
-      url: 'http://localhost:5000/health',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    }
-  ],
+  /* webServer block removed to use existing running AppHost */
 
   /* Global setup and teardown */
   globalSetup: require.resolve('./global-setup'),

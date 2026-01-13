@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json;
+using Shared.EventManagement.Entities;
+using Shared.EventManagement.Services;
 
 namespace Shared.EventManagement;
 
@@ -33,6 +33,18 @@ public class EventDbContext : DbContext
     /// </summary>
     public DbSet<SocialEventRsvp> SocialEventRsvps => Set<SocialEventRsvp>();
 
+    public DbSet<EventSeries> EventSeries => Set<EventSeries>();
+    public DbSet<Location> Locations => Set<Location>();
+    public DbSet<Room> Rooms => Set<Room>();
+    public DbSet<RoomConfiguration> RoomConfigurations => Set<RoomConfiguration>();
+    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<Track> Tracks => Set<Track>();
+    public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
+    public DbSet<Session> Sessions => Set<Session>();
+    public DbSet<SessionAssignment> SessionAssignments => Set<SessionAssignment>();
+    public DbSet<Person> People => Set<Person>();
+    public DbSet<EventOrganizer> EventOrganizers => Set<EventOrganizer>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -40,195 +52,24 @@ public class EventDbContext : DbContext
         // Configure Event entity
         modelBuilder.Entity<Event>(entity =>
         {
-            // Table configuration - only for PostgreSQL
             if (!_isInMemory)
-            {
                 entity.ToTable("events", schema: "event_management");
-            }
+            entity.HasOne(e => e.Series).WithMany().HasForeignKey(e => e.SeriesId).OnDelete(DeleteBehavior.SetNull);
+        });
 
-            // Primary key
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id)
-                .HasColumnName("id")
-                .IsRequired();
-
-            // Title and identification
-            entity.Property(e => e.Title)
-                .HasColumnName("title")
-                .HasMaxLength(200)
-                .IsRequired();
-
-            entity.Property(e => e.Slug)
-                .HasColumnName("slug")
-                .HasMaxLength(100)
-                .IsRequired();
-
-            // Create unique index on slug for SEO-friendly URLs
-            entity.HasIndex(e => e.Slug)
-                .IsUnique()
-                .HasDatabaseName("ix_events_slug");
-
-            // Descriptions
-            entity.Property(e => e.Description)
-                .HasColumnName("description")
-                .HasMaxLength(1000)
-                .IsRequired();
-
-            entity.Property(e => e.DetailedDescription)
-                .HasColumnName("detailed_description")
-                .HasColumnType("text");
-
-            // Date and time configuration with timezone support
-            entity.Property(e => e.StartDate)
-                .HasColumnName("start_date")
-                .HasColumnType("timestamp with time zone")
-                .IsRequired();
-
-            entity.Property(e => e.EndDate)
-                .HasColumnName("end_date")
-                .HasColumnType("timestamp with time zone")
-                .IsRequired();
-
-            entity.Property(e => e.Timezone)
-                .HasColumnName("timezone")
-                .HasMaxLength(50)
-                .HasDefaultValue("UTC")
-                .IsRequired();
-
-            // Registration management
-            entity.Property(e => e.MaxAttendees)
-                .HasColumnName("max_attendees")
-                .IsRequired();
-
-            entity.Property(e => e.CurrentAttendees)
-                .HasColumnName("current_attendees")
-                .HasDefaultValue(0)
-                .IsRequired();
-
-            entity.Property(e => e.RegistrationOpenDate)
-                .HasColumnName("registration_open_date")
-                .HasColumnType("timestamp with time zone");
-
-            entity.Property(e => e.RegistrationCloseDate)
-                .HasColumnName("registration_close_date")
-                .HasColumnType("timestamp with time zone");
-
-            // Status and visibility as enums
-            entity.Property(e => e.Status)
-                .HasColumnName("status")
-                .HasConversion<string>() // Store as string in database
-                .IsRequired();
-
-            entity.Property(e => e.Visibility)
-                .HasColumnName("visibility")
-                .HasConversion<string>() // Store as string in database
-                .IsRequired();
-
-            // Venue information
-            entity.Property(e => e.VenueName)
-                .HasColumnName("venue_name")
-                .HasMaxLength(500);
-
-            entity.Property(e => e.VenueAddress)
-                .HasColumnName("venue_address")
-                .HasMaxLength(1000);
-
-            entity.Property(e => e.IsVirtual)
-                .HasColumnName("is_virtual")
-                .HasDefaultValue(false)
-                .IsRequired();
-
-            entity.Property(e => e.VirtualMeetingUrl)
-                .HasColumnName("virtual_meeting_url")
-                .HasMaxLength(500);
-
-            // Media and links
-            entity.Property(e => e.BannerImageUrl)
-                .HasColumnName("banner_image_url")
-                .HasMaxLength(500);
-
-            entity.Property(e => e.LogoImageUrl)
-                .HasColumnName("logo_image_url")
-                .HasMaxLength(500);
-
-            entity.Property(e => e.WebsiteUrl)
-                .HasColumnName("website_url")
-                .HasMaxLength(500);
-
-            entity.Property(e => e.ContactEmail)
-                .HasColumnName("contact_email")
-                .HasMaxLength(320);
-
-            // PostgreSQL JSON support - Dictionary<string, object> works with both InMemory and PostgreSQL
-            entity.Property(e => e.CustomFields)
-                .HasColumnName("custom_fields")
-                .HasColumnType("jsonb"); // Use JSONB for better performance
-
-            entity.Property(e => e.Tags)
-                .HasColumnName("tags")
-                .HasColumnType("jsonb"); // Use JSONB for better performance
-
-            // User relationship and audit fields
-            entity.Property(e => e.CreatedByUserId)
-                .HasColumnName("created_by_user_id")
-                .IsRequired();
-
-            entity.Property(e => e.CreatedAt)
-                .HasColumnName("created_at")
-                .HasColumnType("timestamp with time zone")
-                .IsRequired();
-
-            entity.Property(e => e.UpdatedAt)
-                .HasColumnName("updated_at")
-                .HasColumnType("timestamp with time zone");
-
-            // Foreign key relationship to User
-            entity.HasOne(e => e.CreatedByUser)
-                .WithMany() // Will be configured from User side when implemented
-                .HasForeignKey(e => e.CreatedByUserId)
-                .OnDelete(DeleteBehavior.Restrict) // Prevent deleting users who created events
-                .HasConstraintName("fk_events_created_by_user");
-
-            // Performance indexes
-            entity.HasIndex(e => e.Status)
-                .HasDatabaseName("ix_events_status");
-
-            entity.HasIndex(e => e.Visibility)
-                .HasDatabaseName("ix_events_visibility");
-
-            entity.HasIndex(e => e.StartDate)
-                .HasDatabaseName("ix_events_start_date");
-
-            entity.HasIndex(e => e.EndDate)
-                .HasDatabaseName("ix_events_end_date");
-
-            entity.HasIndex(e => e.CreatedByUserId)
-                .HasDatabaseName("ix_events_created_by_user");
-
-            entity.HasIndex(e => e.CreatedAt)
-                .HasDatabaseName("ix_events_created_at");
-
-            // Multi-column index for event discovery queries
-            entity.HasIndex(e => new { e.Status, e.Visibility, e.StartDate })
-                .HasDatabaseName("ix_events_discovery");
-
-            // GIN index for JSONB fields (PostgreSQL specific) - skip for InMemory
+        modelBuilder.Entity<EventOrganizer>(entity =>
+        {
             if (!_isInMemory)
-            {
-                entity.HasIndex(e => e.Tags)
-                    .HasMethod("gin")
-                    .HasDatabaseName("ix_events_tags_gin");
+                entity.ToTable("event_organizers", schema: "event_management");
+            entity.HasKey(eo => new { eo.EventId, eo.PersonId });
+            entity.HasOne(eo => eo.Event).WithMany().HasForeignKey(eo => eo.EventId);
+            entity.HasOne(eo => eo.Person).WithMany().HasForeignKey(eo => eo.PersonId);
+        });
 
-                entity.HasIndex(e => e.CustomFields)
-                    .HasMethod("gin")
-                    .HasDatabaseName("ix_events_custom_fields_gin");
-
-                // Full-text search support (PostgreSQL specific)
-                entity.HasIndex(e => new { e.Title, e.Description })
-                    .HasMethod("gin")
-                    .HasDatabaseName("ix_events_fulltext_search")
-                    .HasAnnotation("Npgsql:TsVectorConfig", "english");
-            }
+        modelBuilder.Entity<EventSeries>(entity =>
+        {
+            if (!_isInMemory)
+                entity.ToTable("event_series", schema: "event_management");
         });
 
         // Configure SocialEvent entity
@@ -388,7 +229,7 @@ public class EventDbContext : DbContext
 
             // Foreign key to Event
             entity.HasOne(e => e.Event)
-                .WithMany(ev => ev.SocialEvents)
+                .WithMany()
                 .HasForeignKey(e => e.EventId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_social_events_event");
@@ -548,6 +389,65 @@ public class EventDbContext : DbContext
                 .HasDatabaseName("ix_social_event_rsvps_event_status");
         });
 
+        modelBuilder.Entity<Location>(entity =>
+        {
+            if (!_isInMemory)
+                entity.ToTable("locations", schema: "event_management");
+            entity.HasMany(l => l.Rooms).WithOne(r => r.Location).HasForeignKey(r => r.LocationId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Room>(entity =>
+        {
+            if (!_isInMemory)
+                entity.ToTable("rooms", schema: "event_management");
+            entity.HasMany(r => r.Configurations).WithOne(c => c.Room).HasForeignKey(c => c.RoomId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RoomConfiguration>(entity =>
+        {
+            if (!_isInMemory)
+                entity.ToTable("room_configurations", schema: "event_management");
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            if (!_isInMemory)
+                entity.ToTable("tags", schema: "event_management");
+        });
+
+        modelBuilder.Entity<Person>(entity =>
+        {
+            if (!_isInMemory)
+                entity.ToTable("people", schema: "event_management");
+        });
+
+        modelBuilder.Entity<TimeSlot>(entity =>
+        {
+            if (!_isInMemory)
+                entity.ToTable("time_slots", schema: "event_management");
+            entity.Property(t => t.Type).HasConversion<string>();
+            entity.HasOne(t => t.Event).WithMany().HasForeignKey(t => t.EventId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Session>(entity =>
+        {
+            if (!_isInMemory)
+                entity.ToTable("sessions", schema: "event_management");
+            entity.Property(s => s.Status).HasConversion<string>();
+            entity.Property(s => s.Level).HasConversion<string>();
+            entity.Property(s => s.SubmissionStatus).HasConversion<string>();
+            entity.HasOne(s => s.Event).WithMany().HasForeignKey(s => s.EventId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SessionAssignment>(entity =>
+        {
+            if (!_isInMemory)
+                entity.ToTable("session_assignments", schema: "event_management");
+            entity.HasOne(sa => sa.Session).WithMany(s => s.Assignments).HasForeignKey(sa => sa.SessionId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(sa => sa.Track).WithMany().HasForeignKey(sa => sa.TrackId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(sa => sa.TimeSlot).WithMany().HasForeignKey(sa => sa.TimeSlotId).OnDelete(DeleteBehavior.Restrict);
+        });
+
         // Configure JSON conversion for custom fields
         ConfigureJsonSerialization();
     }
@@ -591,6 +491,8 @@ public static class EventDbContextExtensions
         // Register business services
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<ISocialEventService, SocialEventService>();
+        services.AddScoped<IScheduleService, ScheduleService>();
+        services.AddScoped<IEventSessionService, EventSessionService>();
 
         return services;
     }

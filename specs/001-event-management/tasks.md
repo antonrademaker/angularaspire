@@ -233,7 +233,7 @@ Following the user stories from spec.md organized by priority (P1, P2, P3, P4) w
 ### Code Generation & SDK
 - [x] T100 [P] Create NSwag configuration for Angular SDK generation in src/PublicApi/nswag.json
 - [x] T101 [P] Generate TypeScript clients for Angular apps in src/PublicApp/src/app/shared/api/
-- [ ] T102 [P] Configure gRPC proto generation from C# interfaces in src/Shared/ (OPTIONAL - Low priority)
+- [x] T102 [P] Configure gRPC proto generation from C# interfaces in src/Shared/ (OPTIONAL - Low priority)
 
 ### Production Configuration
 - [x] T103 [P] Configure production appsettings for all APIs in src/*/appsettings.Production.json
@@ -248,6 +248,7 @@ Following the user stories from spec.md organized by priority (P1, P2, P3, P4) w
 
 ### Final E2E Validation
 - [x] T110 [P] Create comprehensive E2E test suite in tests/e2e/full-workflow.spec.ts
+- [x] T112 [P] Implement Swap Sessions feature (User Story 5)
 - [ ] T111 Run quickstart.md validation scenarios
 
 ---

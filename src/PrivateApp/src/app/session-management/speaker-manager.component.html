@@ -15,13 +15,17 @@
       <form [formGroup]="searchForm" class="filter-form" (ngSubmit)="onSearch()">
         <mat-form-field appearance="outline" class="search-field">
           <mat-label>Search speakers</mat-label>
-          <input matInput formControlName="searchText" placeholder="Search by name, company, bio...">
+          <input
+            matInput
+            formControlName="searchText"
+            placeholder="Search by name, company, bio..."
+          />
           <mat-icon matPrefix>search</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="company-field">
           <mat-label>Company</mat-label>
-          <input matInput formControlName="company" placeholder="Filter by company">
+          <input matInput formControlName="company" placeholder="Filter by company" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="status-field">
@@ -82,13 +86,23 @@
             </button>
           </div>
         } @else {
-          <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSortChange($event)" class="speakers-table">
+          <table
+            mat-table
+            [dataSource]="dataSource"
+            matSort
+            (matSortChange)="onSortChange($event)"
+            class="speakers-table"
+          >
             <!-- Photo Column -->
             <ng-container matColumnDef="photo">
               <th mat-header-cell *matHeaderCellDef></th>
               <td mat-cell *matCellDef="let speaker">
                 @if (speaker.photoUrl) {
-                  <img [src]="speaker.photoUrl" [alt]="speaker.displayName" class="speaker-avatar">
+                  <img
+                    [src]="speaker.photoUrl"
+                    [alt]="speaker.displayName"
+                    class="speaker-avatar"
+                  />
                 } @else {
                   <div class="speaker-avatar-placeholder">
                     <mat-icon>person</mat-icon>
@@ -158,8 +172,11 @@
                 </button>
                 <mat-menu #statusMenu="matMenu">
                   @for (status of statusOptions; track status) {
-                    <button mat-menu-item (click)="updateStatus(speaker, status)" 
-                            [disabled]="speaker.status === status">
+                    <button
+                      mat-menu-item
+                      (click)="updateStatus(speaker, status)"
+                      [disabled]="speaker.status === status"
+                    >
                       {{ status }}
                     </button>
                   }
@@ -173,17 +190,18 @@
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
           </table>
 
           <!-- Paginator -->
-          <mat-paginator 
+          <mat-paginator
             [length]="totalCount()"
             [pageSize]="pageSize()"
             [pageIndex]="pageIndex()"
             [pageSizeOptions]="[10, 25, 50, 100]"
             (page)="onPageChange($event)"
-            showFirstLastButtons>
+            showFirstLastButtons
+          >
           </mat-paginator>
         }
       </mat-card-content>

@@ -1,10 +1,11 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Shared.UserManagement;
+using PrivateApi.Middleware;
+using Shared.ApiManagement;
 using Shared.EventManagement;
 using Shared.SessionManagement;
-using Shared.ApiManagement;
+using Shared.UserManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,6 +109,9 @@ app.UseHttpsRedirection();
 app.UseCors("AngularApps");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// File upload validation middleware
+app.UseFileUploadValidation();
 
 // Map default health checks
 app.MapDefaultEndpoints();

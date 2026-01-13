@@ -1,11 +1,7 @@
-using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Shared.ApiManagement;
-using System.Net;
-using System.Net.Http.Json;
-using Xunit;
 
 namespace PublicApi.Tests.RateLimiting;
 

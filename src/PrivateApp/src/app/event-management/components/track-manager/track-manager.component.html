@@ -1,0 +1,52 @@
+<div class="track-manager">
+  <div class="header">
+    <h3>Tracks</h3>
+    @if (!isFormVisible) {
+      <button class="btn btn-primary" (click)="showAddForm()">Add Track</button>
+    }
+  </div>
+
+  @if (isFormVisible) {
+    <div class="track-form">
+      <form [formGroup]="trackForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" formControlName="name" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" formControlName="description" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="color">Color</label>
+          <input type="color" id="color" formControlName="color" class="form-control" />
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-success" [disabled]="!trackForm.valid">Save</button>
+          <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (!isFormVisible) {
+    <div class="track-list" cdkDropList (cdkDropListDropped)="drop($event)">
+      @for (track of tracks; track track) {
+        <div class="track-item" cdkDrag>
+          <div class="track-handle" cdkDragHandle>☰</div>
+          <div class="track-info">
+            <span class="color-dot" [style.background-color]="track.color"></span>
+            <span class="track-name">{{ track.name }}</span>
+          </div>
+          <div class="track-actions">
+            <button class="btn btn-sm btn-info" (click)="editTrack(track)">Edit</button>
+            <button class="btn btn-sm btn-danger" (click)="deleteTrack(track.id)">Delete</button>
+          </div>
+        </div>
+      }
+      @if (tracks.length === 0) {
+        <div class="no-tracks">No tracks defined yet.</div>
+      }
+    </div>
+  }
+</div>

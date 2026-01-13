@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Shared.Registration;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 namespace PublicApi.Hubs;
 

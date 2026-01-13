@@ -1,8 +1,7 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.EventManagement;
-using Shared.Common;
-using System.Security.Claims;
 
 namespace PublicApi.EventManagement;
 

@@ -20,7 +20,7 @@ import { SessionCardComponent } from '../session-card/session-card.component';
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, DragDropModule, SessionCardComponent],
   templateUrl: './schedule-grid.component.html',
-  styleUrls: ['./schedule-grid.component.scss']
+  styleUrls: ['./schedule-grid.component.scss'],
 })
 export class ScheduleGridComponent implements OnInit {
   @Input() eventId: string | null = null;
@@ -37,7 +37,7 @@ export class ScheduleGridComponent implements OnInit {
     private sessionService: SessionService,
     private dragDropService: ScheduleDragDropService,
     private route: ActivatedRoute,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -56,9 +56,11 @@ export class ScheduleGridComponent implements OnInit {
     forkJoin({
       slots: this.timeSlotService.getTimeSlots(currentEventId),
       tracks: this.trackService.getTracks(currentEventId),
-      sessions: this.sessionService.getSessions(currentEventId)
+      sessions: this.sessionService.getSessions(currentEventId),
     }).subscribe(({ slots, tracks, sessions }) => {
-      this.timeSlots = slots.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+      this.timeSlots = slots.sort(
+        (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+      );
       this.tracks = tracks;
       this.sessions = sessions;
       this.initGrid();
@@ -67,29 +69,32 @@ export class ScheduleGridComponent implements OnInit {
 
   initGrid(): void {
     this.gridData = {};
-    this.timeSlots.forEach(slot => {
-        this.gridData[slot.id] = {};
-        this.tracks.forEach(track => {
-            this.gridData[slot.id][track.id] = [];
-        });
+    this.timeSlots.forEach((slot) => {
+      this.gridData[slot.id] = {};
+      this.tracks.forEach((track) => {
+        this.gridData[slot.id][track.id] = [];
+      });
     });
     this.populateGrid();
   }
 
   populateGrid(): void {
-    this.sessions.forEach(session => {
-        if (session.assignments && session.assignments.length > 0) {
-            const assignment = session.assignments[0];
-            if (this.gridData[assignment.timeSlotId] && this.gridData[assignment.timeSlotId][assignment.trackId]) {
-                this.gridData[assignment.timeSlotId][assignment.trackId].push(session);
-            }
+    this.sessions.forEach((session) => {
+      if (session.assignments && session.assignments.length > 0) {
+        const assignment = session.assignments[0];
+        if (
+          this.gridData[assignment.timeSlotId] &&
+          this.gridData[assignment.timeSlotId][assignment.trackId]
+        ) {
+          this.gridData[assignment.timeSlotId][assignment.trackId].push(session);
         }
+      }
     });
   }
 
   drop(event: CdkDragDrop<Session[]>, trackId: string, timeSlotId: string): void {
     if (this.eventId) {
-        this.dragDropService.handleDrop(event, this.eventId, trackId, timeSlotId);
+      this.dragDropService.handleDrop(event, this.eventId, trackId, timeSlotId);
     }
   }
 

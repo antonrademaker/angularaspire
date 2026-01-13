@@ -5,16 +5,20 @@ import { SessionService } from './session.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ScheduleDragDropService {
-
   constructor(
     private sessionService: SessionService,
-    private snackBar: MatSnackBar
-  ) { }
+    private snackBar: MatSnackBar,
+  ) {}
 
-  handleDrop(event: CdkDragDrop<Session[]>, eventId: string, trackId?: string, timeSlotId?: string): void {
+  handleDrop(
+    event: CdkDragDrop<Session[]>,
+    eventId: string,
+    trackId?: string,
+    timeSlotId?: string,
+  ): void {
     if (event.previousContainer === event.container) {
       // Reordering within the same list (not applicable for schedule grid usually, but maybe for sidebar)
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
@@ -39,7 +43,12 @@ export class ScheduleDragDropService {
     }
   }
 
-  private swapSessions(eventId: string, session1: Session, session2: Session, event: CdkDragDrop<Session[] | any>): void {
+  private swapSessions(
+    eventId: string,
+    session1: Session,
+    session2: Session,
+    event: CdkDragDrop<Session[]>,
+  ): void {
     this.sessionService.swapSessions(eventId, session1.id, session2.id).subscribe({
       next: () => {
         // Manually swap items in the arrays
@@ -72,46 +81,58 @@ export class ScheduleDragDropService {
       error: (err) => {
         console.error('Failed to swap sessions', err);
         this.snackBar.open('Failed to swap sessions', 'Close', { duration: 3000 });
-      }
-    });
-  }
-
-  private assignSession(eventId: string, session: Session, trackId: string, timeSlotId: string, event: CdkDragDrop<Session[] | any>): void {
-    this.sessionService.assignSession(eventId, session.id, {
-      trackId: trackId,
-      timeSlotId: timeSlotId
-    }).subscribe({
-      next: () => {
-        transferArrayItem(
-          event.previousContainer.data,
-          event.container.data,
-          event.previousIndex,
-          event.currentIndex
-        );
-        this.snackBar.open('Session assigned successfully', 'Close', { duration: 3000 });
       },
-      error: (err) => {
-        console.error('Failed to assign session', err);
-        this.snackBar.open('Failed to assign session', 'Close', { duration: 3000 });
-      }
     });
   }
 
-  private unassignSession(eventId: string, session: Session, event: CdkDragDrop<Session[] | any>): void {
+  private assignSession(
+    eventId: string,
+    session: Session,
+    trackId: string,
+    timeSlotId: string,
+    event: CdkDragDrop<Session[]>,
+  ): void {
+    this.sessionService
+      .assignSession(eventId, session.id, {
+        trackId: trackId,
+        timeSlotId: timeSlotId,
+      })
+      .subscribe({
+        next: () => {
+          transferArrayItem(
+            event.previousContainer.data,
+            event.container.data,
+            event.previousIndex,
+            event.currentIndex,
+          );
+          this.snackBar.open('Session assigned successfully', 'Close', { duration: 3000 });
+        },
+        error: (err) => {
+          console.error('Failed to assign session', err);
+          this.snackBar.open('Failed to assign session', 'Close', { duration: 3000 });
+        },
+      });
+  }
+
+  private unassignSession(
+    eventId: string,
+    session: Session,
+    event: CdkDragDrop<Session[]>,
+  ): void {
     this.sessionService.unassignSession(eventId, session.id).subscribe({
       next: () => {
         transferArrayItem(
           event.previousContainer.data,
           event.container.data,
           event.previousIndex,
-          event.currentIndex
+          event.currentIndex,
         );
         this.snackBar.open('Session unassigned', 'Close', { duration: 3000 });
       },
       error: (err) => {
         console.error('Failed to unassign session', err);
         this.snackBar.open('Failed to unassign session', 'Close', { duration: 3000 });
-      }
+      },
     });
   }
 }

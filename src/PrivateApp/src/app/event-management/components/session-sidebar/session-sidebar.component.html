@@ -5,8 +5,8 @@
     [cdkDropListData]="unassignedSessions"
     class="session-list"
     id="unassigned-sessions-list"
-    [cdkDropListConnectedTo]="['schedule-grid']">
-
+    [cdkDropListConnectedTo]="['schedule-grid']"
+  >
     @for (session of unassignedSessions; track session) {
       <div class="session-card" cdkDrag [cdkDragData]="session">
         <div class="session-title">{{ session.title }}</div>
@@ -23,9 +23,7 @@
     }
 
     @if (unassignedSessions.length === 0) {
-      <div class="no-sessions">
-        No unassigned sessions.
-      </div>
+      <div class="no-sessions">No unassigned sessions.</div>
     }
   </div>
 </div>

@@ -1,0 +1,51 @@
+# Help git determine what is a text file and what is binary
+# http://git-scm.com/docs/gitattributes
+
+# Force all text files to be normalized to LF in the repo, 
+# and use the native EOL on checkout (CRLF on Windows, LF on Linux)
+* text=auto
+
+# Text files that should always strictly use LF (e.g. for shell scripts)
+*.sh text eol=lf
+
+# Explicitly declare code files as text
+*.cs text
+*.cshtml text
+*.fs text
+*.vb text
+*.ts text
+*.js text
+*.json text
+*.html text
+*.css text
+*.scss text
+*.less text
+*.razor text
+*.xml text
+*.xaml text
+*.csproj text
+*.sln text
+*.md text
+*.yaml text
+*.yml text
+*.config text
+*.props text
+*.targets text
+*.editorconfig text
+*.gitignore text
+*.dockerignore text
+*.ps1 text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+# Fonts
+*.ttf binary
+*.eot binary
+*.otf binary
+*.woff binary
+*.woff2 binary

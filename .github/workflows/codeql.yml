@@ -33,7 +33,7 @@ jobs:
     # Java 21 is required for the latest CodeQL Action, but usually available on ubuntu-latest.
     # explicit setup is good if we run into issues, but standard action implies it handles deps.
     # However, we DO need to setup .NET for the C# build.
-    
+
     - name: Setup .NET
       if: matrix.language == 'csharp'
       uses: actions/setup-dotnet@v4

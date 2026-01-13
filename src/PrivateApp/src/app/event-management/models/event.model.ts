@@ -19,9 +19,10 @@ export interface Event {
 export enum EventStatus {
   Draft = 0,
   Published = 1,
-  Cancelled = 2,
+  Active = 2,
   Completed = 3,
-  Postponed = 4
+  Cancelled = 4,
+  Archived = 5
 }
 
 export interface EventSearchResult {

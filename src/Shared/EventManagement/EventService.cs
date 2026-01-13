@@ -112,7 +112,7 @@ public class EventService : IEventService
 
     public async Task<Event?> GetEventBySlugAsync(string slug, bool includeDetails = true)
     {
-        _logger.LogInformation("Getting event by slug: {Slug}", slug);
+        _logger.LogInformation("Getting event by slug: {Slug}", slug.Replace("\r", "").Replace("\n", ""));
 
         IQueryable<Event> query = _eventContext.Events.AsQueryable();
 

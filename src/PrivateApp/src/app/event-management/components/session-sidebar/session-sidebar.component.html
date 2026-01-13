@@ -14,9 +14,11 @@
           <span class="duration">{{ session.duration }} min</span>
           <span class="level">{{ session.level }}</span>
         </div>
-        <div *cdkDragPreview class="session-preview">
-          {{ session.title }}
-        </div>
+        <ng-template cdkDragPreview>
+          <div class="session-preview">
+            {{ session.title }}
+          </div>
+        </ng-template>
       </div>
     }
 

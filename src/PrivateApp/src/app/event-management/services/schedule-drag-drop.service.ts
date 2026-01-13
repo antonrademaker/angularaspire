@@ -14,7 +14,7 @@ export class ScheduleDragDropService {
     private snackBar: MatSnackBar
   ) { }
 
-  handleDrop(event: CdkDragDrop<Session[] | any>, eventId: string, trackId?: string, timeSlotId?: string): void {
+  handleDrop(event: CdkDragDrop<Session[]>, eventId: string, trackId?: string, timeSlotId?: string): void {
     if (event.previousContainer === event.container) {
       // Reordering within the same list (not applicable for schedule grid usually, but maybe for sidebar)
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);

@@ -51,11 +51,12 @@ export class ScheduleGridComponent implements OnInit {
 
   loadData(): void {
     if (!this.eventId) return;
+    const currentEventId = this.eventId;
 
     forkJoin({
-      slots: this.timeSlotService.getTimeSlots(this.eventId),
-      tracks: this.trackService.getTracks(this.eventId),
-      sessions: this.sessionService.getSessions(this.eventId)
+      slots: this.timeSlotService.getTimeSlots(currentEventId),
+      tracks: this.trackService.getTracks(currentEventId),
+      sessions: this.sessionService.getSessions(currentEventId)
     }).subscribe(({ slots, tracks, sessions }) => {
       this.timeSlots = slots.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
       this.tracks = tracks;

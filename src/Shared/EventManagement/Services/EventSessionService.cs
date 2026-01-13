@@ -19,11 +19,13 @@ public class EventSessionService : IEventSessionService
 
     public async Task SwapSessionsAsync(Guid eventId, Guid firstSessionId, Guid secondSessionId, CancellationToken cancellationToken = default)
     {
-        var firstAssignment = await _context.Set<SessionAssignment>()
-            .FirstOrDefaultAsync(a => a.SessionId == firstSessionId && a.Session.EventId == eventId, cancellationToken);
+        var assignments = await _context.Set<SessionAssignment>()
+            .Where(a => a.Session.EventId == eventId &&
+                       (a.SessionId == firstSessionId || a.SessionId == secondSessionId))
+            .ToListAsync(cancellationToken);
 
-        var secondAssignment = await _context.Set<SessionAssignment>()
-            .FirstOrDefaultAsync(a => a.SessionId == secondSessionId && a.Session.EventId == eventId, cancellationToken);
+        var firstAssignment = assignments.FirstOrDefault(a => a.SessionId == firstSessionId);
+        var secondAssignment = assignments.FirstOrDefault(a => a.SessionId == secondSessionId);
 
         if (firstAssignment == null && secondAssignment == null)
         {

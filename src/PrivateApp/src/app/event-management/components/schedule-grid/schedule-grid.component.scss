@@ -17,7 +17,8 @@
     border-collapse: collapse;
     min-width: 800px;
 
-    th, td {
+    th,
+    td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
@@ -66,7 +67,7 @@
       border-radius: 4px;
       padding: 0.5rem;
       margin-bottom: 0.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       cursor: move;
 
       .session-title {
@@ -92,9 +93,10 @@
 .cdk-drag-preview {
   box-sizing: border-box;
   border-radius: 4px;
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-              0 8px 10px 1px rgba(0, 0, 0, 0.14),
-              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
   background-color: #fff;
   padding: 0.5rem;
   width: 200px; /* Approximate width */
@@ -120,7 +122,8 @@
   .schedule-table {
     min-width: 600px; // Allow smaller width
 
-    th, td {
+    th,
+    td {
       padding: 4px;
       font-size: 0.9rem;
     }
@@ -130,4 +133,3 @@
     }
   }
 }
-

@@ -8,9 +8,8 @@ describe('EventForm', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EventForm]
-    })
-    .compileComponents();
+      imports: [EventForm],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EventForm);
     component = fixture.componentInstance;

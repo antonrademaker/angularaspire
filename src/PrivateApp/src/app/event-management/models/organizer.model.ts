@@ -1,7 +1,7 @@
 export enum OrganizerRole {
   Owner = 0,
   Admin = 1,
-  Collaborator = 2
+  Collaborator = 2,
 }
 
 export interface EventOrganizer {

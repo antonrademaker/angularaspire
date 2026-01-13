@@ -4,7 +4,7 @@
       <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            {{ slot.startTime | date:'shortTime' }} - {{ slot.endTime | date:'shortTime' }}
+            {{ slot.startTime | date: 'shortTime' }} - {{ slot.endTime | date: 'shortTime' }}
           </mat-panel-title>
           <mat-panel-description>
             {{ slot.name }}
@@ -21,15 +21,13 @@
               </mat-card-header>
               <mat-card-content>
                 @if (session.abstract) {
-                  <p>{{ session.abstract | slice:0:100 }}...</p>
+                  <p>{{ session.abstract | slice: 0 : 100 }}...</p>
                 }
               </mat-card-content>
             </mat-card>
           }
           @if (sessionsBySlot[slot.id].length === 0) {
-            <div class="no-sessions">
-              No sessions scheduled.
-            </div>
+            <div class="no-sessions">No sessions scheduled.</div>
           }
         </div>
       </mat-expansion-panel>

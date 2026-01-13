@@ -4,26 +4,32 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: '/session-management/sessions',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'health',
-    loadComponent: () => import('./health/health.component').then(c => c.HealthComponent),
-    data: { prerender: false }
+    loadComponent: () => import('./health/health.component').then((c) => c.HealthComponent),
+    data: { prerender: false },
   },
   {
     path: 'session-management',
     children: [
       {
         path: 'tracks',
-        loadComponent: () => import('./session-management/track-manager.component').then(c => c.TrackManagerComponent),
-        data: { prerender: false }
+        loadComponent: () =>
+          import('./session-management/track-manager.component').then(
+            (c) => c.TrackManagerComponent,
+          ),
+        data: { prerender: false },
       },
       {
         path: 'sessions',
-        loadComponent: () => import('./session-management/session-manager.component').then(c => c.SessionManagerComponent),
-        data: { prerender: false }
-      }
-    ]
-  }
+        loadComponent: () =>
+          import('./session-management/session-manager.component').then(
+            (c) => c.SessionManagerComponent,
+          ),
+        data: { prerender: false },
+      },
+    ],
+  },
 ];

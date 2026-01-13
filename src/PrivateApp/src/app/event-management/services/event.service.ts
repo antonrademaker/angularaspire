@@ -4,12 +4,12 @@ import { Observable } from 'rxjs';
 import { Event, EventSearchResult, EventSearchRequest } from '../models/event.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EventService {
   private apiUrl = '/api/events';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getEvents(request: EventSearchRequest): Observable<EventSearchResult> {
     let params = new HttpParams();
@@ -20,7 +20,8 @@ export class EventService {
     if (request.status !== undefined) params = params.set('status', request.status.toString());
     if (request.page) params = params.set('page', request.page.toString());
     if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
-    if (request.sortAscending !== undefined) params = params.set('sortAscending', request.sortAscending.toString());
+    if (request.sortAscending !== undefined)
+      params = params.set('sortAscending', request.sortAscending.toString());
 
     return this.http.get<EventSearchResult>(this.apiUrl, { params });
   }

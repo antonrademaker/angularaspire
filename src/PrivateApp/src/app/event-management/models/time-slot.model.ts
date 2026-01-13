@@ -4,7 +4,7 @@ export enum TimeSlotType {
   Lunch = 'Lunch',
   Keynote = 'Keynote',
   Networking = 'Networking',
-  Workshop = 'Workshop'
+  Workshop = 'Workshop',
 }
 
 export interface TimeSlot {

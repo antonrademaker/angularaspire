@@ -1,4 +1,12 @@
-import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy, Input } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  signal,
+  computed,
+  inject,
+  ChangeDetectionStrategy,
+  Input,
+} from '@angular/core';
 
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -12,7 +20,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MatDialogModule,
+  MatDialog,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -75,14 +88,14 @@ export enum SessionType {
   BoF = 'BoF',
   Networking = 'Networking',
   Break = 'Break',
-  Other = 'Other'
+  Other = 'Other',
 }
 
 export enum SessionDifficulty {
   Beginner = 'Beginner',
   Intermediate = 'Intermediate',
   Advanced = 'Advanced',
-  Expert = 'Expert'
+  Expert = 'Expert',
 }
 
 export enum SessionStatus {
@@ -90,7 +103,7 @@ export enum SessionStatus {
   Scheduled = 'Scheduled',
   InProgress = 'InProgress',
   Completed = 'Completed',
-  Cancelled = 'Cancelled'
+  Cancelled = 'Cancelled',
 }
 
 export enum SessionSpeakerStatus {
@@ -98,7 +111,7 @@ export enum SessionSpeakerStatus {
   Contacted = 'Contacted',
   Confirmed = 'Confirmed',
   Cancelled = 'Cancelled',
-  Removed = 'Removed'
+  Removed = 'Removed',
 }
 
 export interface SessionSpeaker {
@@ -237,16 +250,16 @@ export interface SessionConflict {
     MatTabsModule,
     MatMenuModule,
     MatBadgeModule,
-    MatDividerModule
-],
+    MatDividerModule,
+  ],
   templateUrl: './session-manager.component.html',
   styleUrls: ['./session-manager.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SessionManagerComponent implements OnInit {
   @Input() eventId?: string;
   @Input() trackId?: string;
-  
+
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -280,12 +293,13 @@ export class SessionManagerComponent implements OnInit {
     const text = this.searchText().toLowerCase();
     const trackId = this.selectedTrackId();
     const showUnpublished = this.showUnpublished();
-    
-    return this.sessions().filter(session => {
-      const matchesText = !text || 
-        session.title.toLowerCase().includes(text) || 
+
+    return this.sessions().filter((session) => {
+      const matchesText =
+        !text ||
+        session.title.toLowerCase().includes(text) ||
         session.description.toLowerCase().includes(text) ||
-        session.tags?.some(tag => tag.toLowerCase().includes(text));
+        session.tags?.some((tag) => tag.toLowerCase().includes(text));
       const matchesTrack = !trackId || session.trackId === trackId;
       const matchesPublished = showUnpublished || session.isPublished;
       return matchesText && matchesTrack && matchesPublished;
@@ -299,7 +313,7 @@ export class SessionManagerComponent implements OnInit {
     trackId: [''],
     showUnpublished: [true],
     sessionType: [''],
-    difficulty: ['']
+    difficulty: [''],
   });
 
   // Table data source
@@ -307,19 +321,19 @@ export class SessionManagerComponent implements OnInit {
 
   constructor() {
     // Subscribe to form changes for reactive filtering
-    this.searchForm.get('searchText')?.valueChanges.subscribe(value => {
+    this.searchForm.get('searchText')?.valueChanges.subscribe((value) => {
       this.searchText.set(value || '');
     });
 
-    this.searchForm.get('showUnpublished')?.valueChanges.subscribe(value => {
+    this.searchForm.get('showUnpublished')?.valueChanges.subscribe((value) => {
       this.showUnpublished.set(!!value);
     });
 
-    this.searchForm.get('trackId')?.valueChanges.subscribe(value => {
+    this.searchForm.get('trackId')?.valueChanges.subscribe((value) => {
       this.selectedTrackId.set(value || null);
     });
 
-    this.searchForm.get('eventId')?.valueChanges.subscribe(value => {
+    this.searchForm.get('eventId')?.valueChanges.subscribe((value) => {
       if (value) {
         this.selectedEventId.set(value);
         this.loadTracks();
@@ -330,21 +344,22 @@ export class SessionManagerComponent implements OnInit {
 
   async ngOnInit() {
     // Load event ID from route parameters, query parameters, or input
-    const eventId = this.eventId || 
-      this.route.snapshot.paramMap.get('eventId') || 
+    const eventId =
+      this.eventId ||
+      this.route.snapshot.paramMap.get('eventId') ||
       this.route.snapshot.queryParamMap.get('eventId');
     const trackId = this.trackId || this.route.snapshot.queryParamMap.get('trackId');
-    
+
     if (eventId) {
       this.selectedEventId.set(eventId);
       this.searchForm.patchValue({ eventId });
       await this.loadTracks();
-      
+
       if (trackId) {
         this.selectedTrackId.set(trackId);
         this.searchForm.patchValue({ trackId });
       }
-      
+
       await this.loadSessions();
     }
   }
@@ -354,7 +369,7 @@ export class SessionManagerComponent implements OnInit {
 
     try {
       const tracks = await lastValueFrom(
-        this.http.get<Track[]>(`/api/v1/admin/tracks?eventId=${this.selectedEventId()}`)
+        this.http.get<Track[]>(`/api/v1/admin/tracks?eventId=${this.selectedEventId()}`),
       );
       this.tracks.set(tracks);
     } catch (err) {
@@ -377,11 +392,11 @@ export class SessionManagerComponent implements OnInit {
         page: this.pageIndex() + 1,
         pageSize: this.pageSize(),
         sortBy: this.sortBy(),
-        sortDirection: this.sortDirection()
+        sortDirection: this.sortDirection(),
       };
 
       const response = await lastValueFrom(
-        this.http.post<PagedResult<Session>>('/api/v1/admin/sessions/search', request)
+        this.http.post<PagedResult<Session>>('/api/v1/admin/sessions/search', request),
       );
 
       this.sessions.set(response.items);
@@ -400,11 +415,11 @@ export class SessionManagerComponent implements OnInit {
     const dialogRef = this.dialog.open(SessionDialogComponent, {
       width: '800px',
       maxHeight: '90vh',
-      data: { 
-        eventId: this.selectedEventId(), 
+      data: {
+        eventId: this.selectedEventId(),
         tracks: this.tracks(),
-        mode: 'create' 
-      }
+        mode: 'create',
+      },
     });
 
     const result = await lastValueFrom(dialogRef.afterClosed());
@@ -418,11 +433,11 @@ export class SessionManagerComponent implements OnInit {
     const dialogRef = this.dialog.open(SessionDialogComponent, {
       width: '800px',
       maxHeight: '90vh',
-      data: { 
-        session, 
+      data: {
+        session,
         tracks: this.tracks(),
-        mode: 'edit' 
-      }
+        mode: 'edit',
+      },
     });
 
     const result = await lastValueFrom(dialogRef.afterClosed());
@@ -458,15 +473,13 @@ export class SessionManagerComponent implements OnInit {
       learningOutcomes: session.learningOutcomes,
       targetAudience: session.targetAudience,
       tags: session.tags ? [...session.tags] : undefined,
-      customFields: session.customFields ? { ...session.customFields } : undefined
+      customFields: session.customFields ? { ...session.customFields } : undefined,
     };
 
     this.isLoading.set(true);
 
     try {
-      await lastValueFrom(
-        this.http.post<Session>('/api/v1/admin/sessions', request)
-      );
+      await lastValueFrom(this.http.post<Session>('/api/v1/admin/sessions', request));
 
       await this.loadSessions();
       this.showSuccessMessage('Session duplicated successfully');
@@ -479,15 +492,15 @@ export class SessionManagerComponent implements OnInit {
   }
 
   async deleteSession(session: Session) {
-    const confirmed = confirm(`Are you sure you want to delete "${session.title}"? This action cannot be undone.`);
+    const confirmed = confirm(
+      `Are you sure you want to delete "${session.title}"? This action cannot be undone.`,
+    );
     if (!confirmed) return;
 
     this.isLoading.set(true);
 
     try {
-      await lastValueFrom(
-        this.http.delete(`/api/v1/admin/sessions/${session.id}`)
-      );
+      await lastValueFrom(this.http.delete(`/api/v1/admin/sessions/${session.id}`));
 
       await this.loadSessions();
       this.showSuccessMessage('Session deleted successfully');
@@ -503,9 +516,7 @@ export class SessionManagerComponent implements OnInit {
     this.isLoading.set(true);
 
     try {
-      await lastValueFrom(
-        this.http.post(`/api/v1/admin/sessions/${session.id}/publish`, {})
-      );
+      await lastValueFrom(this.http.post(`/api/v1/admin/sessions/${session.id}/publish`, {}));
 
       await this.loadSessions();
       this.showSuccessMessage('Session published successfully');
@@ -521,9 +532,7 @@ export class SessionManagerComponent implements OnInit {
     this.isLoading.set(true);
 
     try {
-      await lastValueFrom(
-        this.http.post(`/api/v1/admin/sessions/${session.id}/unpublish`, {})
-      );
+      await lastValueFrom(this.http.post(`/api/v1/admin/sessions/${session.id}/unpublish`, {}));
 
       await this.loadSessions();
       this.showSuccessMessage('Session unpublished successfully');
@@ -539,9 +548,7 @@ export class SessionManagerComponent implements OnInit {
     this.isLoading.set(true);
 
     try {
-      await lastValueFrom(
-        this.http.post(`/api/v1/admin/sessions/${session.id}/start`, {})
-      );
+      await lastValueFrom(this.http.post(`/api/v1/admin/sessions/${session.id}/start`, {}));
 
       await this.loadSessions();
       this.showSuccessMessage('Session started');
@@ -557,9 +564,7 @@ export class SessionManagerComponent implements OnInit {
     this.isLoading.set(true);
 
     try {
-      await lastValueFrom(
-        this.http.post(`/api/v1/admin/sessions/${session.id}/complete`, {})
-      );
+      await lastValueFrom(this.http.post(`/api/v1/admin/sessions/${session.id}/complete`, {}));
 
       await this.loadSessions();
       this.showSuccessMessage('Session completed');
@@ -579,7 +584,7 @@ export class SessionManagerComponent implements OnInit {
 
     try {
       await lastValueFrom(
-        this.http.post(`/api/v1/admin/sessions/${session.id}/cancel`, { reason })
+        this.http.post(`/api/v1/admin/sessions/${session.id}/cancel`, { reason }),
       );
 
       await this.loadSessions();
@@ -598,16 +603,16 @@ export class SessionManagerComponent implements OnInit {
         this.http.post<SessionConflict[]>(`/api/v1/admin/sessions/${session.id}/conflicts`, {
           startTime: session.startTime,
           endTime: session.endTime,
-          room: session.room
-        })
+          room: session.room,
+        }),
       );
 
       if (conflicts.length === 0) {
         alert('No scheduling conflicts detected.');
       } else {
-        const conflictList = conflicts.map(c => 
-          `• ${c.conflictingSessionTitle} (${c.conflictType})`
-        ).join('\n');
+        const conflictList = conflicts
+          .map((c) => `• ${c.conflictingSessionTitle} (${c.conflictType})`)
+          .join('\n');
         alert(`Scheduling conflicts detected:\n\n${conflictList}`);
       }
     } catch (err) {
@@ -636,18 +641,24 @@ export class SessionManagerComponent implements OnInit {
   }
 
   getTrackColor(trackId?: string): string {
-    const track = this.tracks().find(t => t.id === trackId);
+    const track = this.tracks().find((t) => t.id === trackId);
     return track?.color || '#cccccc';
   }
 
   getStatusColor(status: SessionStatus): string {
     switch (status) {
-      case SessionStatus.Draft: return '#9e9e9e';
-      case SessionStatus.Scheduled: return '#2196f3';
-      case SessionStatus.InProgress: return '#ff9800';
-      case SessionStatus.Completed: return '#4caf50';
-      case SessionStatus.Cancelled: return '#f44336';
-      default: return '#cccccc';
+      case SessionStatus.Draft:
+        return '#9e9e9e';
+      case SessionStatus.Scheduled:
+        return '#2196f3';
+      case SessionStatus.InProgress:
+        return '#ff9800';
+      case SessionStatus.Completed:
+        return '#4caf50';
+      case SessionStatus.Cancelled:
+        return '#f44336';
+      default:
+        return '#cccccc';
     }
   }
 
@@ -662,7 +673,7 @@ export class SessionManagerComponent implements OnInit {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -671,7 +682,7 @@ export class SessionManagerComponent implements OnInit {
     const end = new Date(session.endTime);
     const diffMs = end.getTime() - start.getTime();
     const diffMins = Math.round(diffMs / 60000);
-    
+
     if (diffMins < 60) {
       return `${diffMins} min`;
     }
@@ -708,13 +719,13 @@ export class SessionManagerComponent implements OnInit {
     MatDatepickerModule,
     MatNativeDateModule,
     MatTabsModule,
-    MatTimepickerModule
-],
+    MatTimepickerModule,
+  ],
   template: `
     <h2 mat-dialog-title>
       {{ data.mode === 'create' ? 'Create New Session' : 'Edit Session' }}
     </h2>
-    
+
     <mat-dialog-content>
       <mat-tab-group>
         <mat-tab label="Basic Info">
@@ -723,15 +734,18 @@ export class SessionManagerComponent implements OnInit {
               <div class="row">
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Session Title</mat-label>
-                  <input matInput formControlName="title" placeholder="Enter session title" required>
+                  <input
+                    matInput
+                    formControlName="title"
+                    placeholder="Enter session title"
+                    required
+                  />
                   @if (sessionForm.get('title')?.hasError('required')) {
-                    <mat-error>
-                      Title is required
-                    </mat-error>
+                    <mat-error> Title is required </mat-error>
                   }
                 </mat-form-field>
               </div>
-    
+
               <div class="row">
                 <mat-form-field appearance="outline" class="half-width">
                   <mat-label>Track</mat-label>
@@ -744,31 +758,38 @@ export class SessionManagerComponent implements OnInit {
                     }
                   </mat-select>
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="half-width">
                   <mat-label>Slug</mat-label>
-                  <input matInput formControlName="slug" placeholder="session-slug" required>
+                  <input matInput formControlName="slug" placeholder="session-slug" required />
                 </mat-form-field>
               </div>
-    
+
               <div class="row">
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Description</mat-label>
-                  <textarea matInput formControlName="description"
+                  <textarea
+                    matInput
+                    formControlName="description"
                     placeholder="Enter session description"
-                  rows="3" required></textarea>
+                    rows="3"
+                    required
+                  ></textarea>
                 </mat-form-field>
               </div>
-    
+
               <div class="row">
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Abstract</mat-label>
-                  <textarea matInput formControlName="abstract"
+                  <textarea
+                    matInput
+                    formControlName="abstract"
                     placeholder="Enter detailed abstract"
-                  rows="4"></textarea>
+                    rows="4"
+                  ></textarea>
                 </mat-form-field>
               </div>
-    
+
               <div class="row">
                 <mat-form-field appearance="outline" class="third-width">
                   <mat-label>Session Type</mat-label>
@@ -780,7 +801,7 @@ export class SessionManagerComponent implements OnInit {
                     }
                   </mat-select>
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="third-width">
                   <mat-label>Difficulty Level</mat-label>
                   <mat-select formControlName="difficultyLevel" required>
@@ -791,208 +812,265 @@ export class SessionManagerComponent implements OnInit {
                     }
                   </mat-select>
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="third-width">
                   <mat-label>Language</mat-label>
-                  <input matInput formControlName="language" placeholder="en">
+                  <input matInput formControlName="language" placeholder="en" />
                 </mat-form-field>
               </div>
             </form>
           </div>
         </mat-tab>
-    
+
         <mat-tab label="Schedule">
           <div class="tab-content">
             <form [formGroup]="sessionForm" class="session-form">
               <div class="row">
                 <mat-form-field appearance="outline" class="quarter-width">
                   <mat-label>Start Date</mat-label>
-                  <input matInput [matDatepicker]="startDatePicker" formControlName="startDate" required>
-                  <mat-datepicker-toggle matIconSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+                  <input
+                    matInput
+                    [matDatepicker]="startDatePicker"
+                    formControlName="startDate"
+                    required
+                  />
+                  <mat-datepicker-toggle
+                    matIconSuffix
+                    [for]="startDatePicker"
+                  ></mat-datepicker-toggle>
                   <mat-datepicker #startDatePicker></mat-datepicker>
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="quarter-width">
                   <mat-label>Start Time</mat-label>
-                  <input matInput [matTimepicker]="startTimePicker" formControlName="startTimeValue" required>
-                  <mat-timepicker-toggle matIconSuffix [for]="startTimePicker"></mat-timepicker-toggle>
+                  <input
+                    matInput
+                    [matTimepicker]="startTimePicker"
+                    formControlName="startTimeValue"
+                    required
+                  />
+                  <mat-timepicker-toggle
+                    matIconSuffix
+                    [for]="startTimePicker"
+                  ></mat-timepicker-toggle>
                   <mat-timepicker #startTimePicker [interval]="'15m'"></mat-timepicker>
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="quarter-width">
                   <mat-label>End Date</mat-label>
-                  <input matInput [matDatepicker]="endDatePicker" formControlName="endDate" required>
-                  <mat-datepicker-toggle matIconSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+                  <input
+                    matInput
+                    [matDatepicker]="endDatePicker"
+                    formControlName="endDate"
+                    required
+                  />
+                  <mat-datepicker-toggle
+                    matIconSuffix
+                    [for]="endDatePicker"
+                  ></mat-datepicker-toggle>
                   <mat-datepicker #endDatePicker></mat-datepicker>
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="quarter-width">
                   <mat-label>End Time</mat-label>
-                  <input matInput [matTimepicker]="endTimePicker" formControlName="endTimeValue" required>
-                  <mat-timepicker-toggle matIconSuffix [for]="endTimePicker"></mat-timepicker-toggle>
+                  <input
+                    matInput
+                    [matTimepicker]="endTimePicker"
+                    formControlName="endTimeValue"
+                    required
+                  />
+                  <mat-timepicker-toggle
+                    matIconSuffix
+                    [for]="endTimePicker"
+                  ></mat-timepicker-toggle>
                   <mat-timepicker #endTimePicker [interval]="'15m'"></mat-timepicker>
                 </mat-form-field>
               </div>
-    
+
               <div class="row">
                 <mat-form-field appearance="outline" class="half-width">
                   <mat-label>Room</mat-label>
-                  <input matInput formControlName="room" placeholder="Room name or number">
+                  <input matInput formControlName="room" placeholder="Room name or number" />
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="half-width">
                   <mat-label>Building</mat-label>
-                  <input matInput formControlName="building" placeholder="Building name">
+                  <input matInput formControlName="building" placeholder="Building name" />
                 </mat-form-field>
               </div>
-    
+
               <div class="row checkboxes">
                 <mat-checkbox formControlName="isVirtual">Virtual Session</mat-checkbox>
                 <mat-checkbox formControlName="isRecorded">Will be Recorded</mat-checkbox>
                 <mat-checkbox formControlName="allowQuestions">Allow Q&A</mat-checkbox>
               </div>
-    
+
               @if (sessionForm.get('isVirtual')?.value) {
                 <div class="row">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Virtual Meeting URL</mat-label>
-                    <input matInput formControlName="virtualUrl" placeholder="https://...">
+                    <input matInput formControlName="virtualUrl" placeholder="https://..." />
                   </mat-form-field>
                 </div>
               }
             </form>
           </div>
         </mat-tab>
-    
+
         <mat-tab label="Capacity">
           <div class="tab-content">
             <form [formGroup]="sessionForm" class="session-form">
               <div class="row">
                 <mat-form-field appearance="outline" class="half-width">
                   <mat-label>Max Attendees</mat-label>
-                  <input matInput type="number" formControlName="maxAttendees" min="0">
+                  <input matInput type="number" formControlName="maxAttendees" min="0" />
                   <mat-hint>Leave empty for unlimited</mat-hint>
                 </mat-form-field>
-    
+
                 <div class="half-width checkbox-field">
                   <mat-checkbox formControlName="requiresSubscription">
                     Requires Registration/Subscription
                   </mat-checkbox>
                 </div>
               </div>
-    
+
               <div class="row">
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Target Audience</mat-label>
-                  <input matInput formControlName="targetAudience"
-                    placeholder="e.g., Developers, DevOps Engineers">
-                  </mat-form-field>
-                </div>
-    
-                <div class="row">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Prerequisites</mat-label>
-                    <textarea matInput formControlName="prerequisites"
-                      placeholder="List any prerequisites"
-                    rows="2"></textarea>
-                  </mat-form-field>
-                </div>
-    
-                <div class="row">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Learning Outcomes</mat-label>
-                    <textarea matInput formControlName="learningOutcomes"
-                      placeholder="What attendees will learn"
-                    rows="2"></textarea>
-                  </mat-form-field>
-                </div>
-              </form>
-            </div>
-          </mat-tab>
-    
-          <mat-tab label="Materials">
-            <div class="tab-content">
-              <form [formGroup]="sessionForm" class="session-form">
-                <div class="row">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Materials URL</mat-label>
-                    <input matInput formControlName="materialsUrl" placeholder="https://...">
-                    <mat-hint>Link to slides, code samples, etc.</mat-hint>
-                  </mat-form-field>
-                </div>
-    
-                @if (data.mode === 'edit') {
-                  <div class="row">
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>Recording URL</mat-label>
-                      <input matInput formControlName="recordingUrl" placeholder="https://...">
-                      <mat-hint>Link to session recording (after event)</mat-hint>
-                    </mat-form-field>
-                  </div>
-                }
-    
-                <div class="row">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Tags (comma separated)</mat-label>
-                    <input matInput formControlName="tagsInput"
-                      placeholder="angular, typescript, web">
-                    </mat-form-field>
-                  </div>
-                </form>
+                  <input
+                    matInput
+                    formControlName="targetAudience"
+                    placeholder="e.g., Developers, DevOps Engineers"
+                  />
+                </mat-form-field>
               </div>
-            </mat-tab>
-          </mat-tab-group>
-        </mat-dialog-content>
-    
-        <mat-dialog-actions align="end">
-          <button mat-button (click)="cancel()">Cancel</button>
-          <button mat-raised-button
-            color="primary"
-            [disabled]="sessionForm.invalid || isSubmitting()"
-            (click)="save()">
-            {{ data.mode === 'create' ? 'Create' : 'Update' }}
-          </button>
-        </mat-dialog-actions>
+
+              <div class="row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Prerequisites</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="prerequisites"
+                    placeholder="List any prerequisites"
+                    rows="2"
+                  ></textarea>
+                </mat-form-field>
+              </div>
+
+              <div class="row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Learning Outcomes</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="learningOutcomes"
+                    placeholder="What attendees will learn"
+                    rows="2"
+                  ></textarea>
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Materials">
+          <div class="tab-content">
+            <form [formGroup]="sessionForm" class="session-form">
+              <div class="row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Materials URL</mat-label>
+                  <input matInput formControlName="materialsUrl" placeholder="https://..." />
+                  <mat-hint>Link to slides, code samples, etc.</mat-hint>
+                </mat-form-field>
+              </div>
+
+              @if (data.mode === 'edit') {
+                <div class="row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Recording URL</mat-label>
+                    <input matInput formControlName="recordingUrl" placeholder="https://..." />
+                    <mat-hint>Link to session recording (after event)</mat-hint>
+                  </mat-form-field>
+                </div>
+              }
+
+              <div class="row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Tags (comma separated)</mat-label>
+                  <input
+                    matInput
+                    formControlName="tagsInput"
+                    placeholder="angular, typescript, web"
+                  />
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="cancel()">Cancel</button>
+      <button
+        mat-raised-button
+        color="primary"
+        [disabled]="sessionForm.invalid || isSubmitting()"
+        (click)="save()"
+      >
+        {{ data.mode === 'create' ? 'Create' : 'Update' }}
+      </button>
+    </mat-dialog-actions>
+  `,
+  styles: [
+    `
+      mat-dialog-content {
+        min-width: 700px;
+        max-height: 70vh;
+      }
+      .tab-content {
+        padding: 16px 0;
+      }
+      .session-form {
+        display: flex;
+        flex-direction: column;
+      }
+      .row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .full-width {
+        flex: 1;
+      }
+      .half-width {
+        flex: 0.5;
+      }
+      .third-width {
+        flex: 0.33;
+      }
+      .quarter-width {
+        flex: 0.25;
+        min-width: 150px;
+      }
+      .checkboxes {
+        gap: 24px;
+      }
+      .checkbox-field {
+        display: flex;
+        align-items: center;
+      }
     `,
-  styles: [`
-    mat-dialog-content {
-      min-width: 700px;
-      max-height: 70vh;
-    }
-    .tab-content {
-      padding: 16px 0;
-    }
-    .session-form {
-      display: flex;
-      flex-direction: column;
-    }
-    .row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .full-width { flex: 1; }
-    .half-width { flex: 0.5; }
-    .third-width { flex: 0.33; }
-    .quarter-width { flex: 0.25; min-width: 150px; }
-    .checkboxes {
-      gap: 24px;
-    }
-    .checkbox-field {
-      display: flex;
-      align-items: center;
-    }
-  `]
+  ],
 })
 export class SessionDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private dialogRef = inject(MatDialogRef<SessionDialogComponent>);
-  data = inject(MAT_DIALOG_DATA) as { 
-    session?: Session; 
+  data = inject(MAT_DIALOG_DATA) as {
+    session?: Session;
     eventId?: string;
     tracks: Track[];
-    mode: 'create' | 'edit' 
+    mode: 'create' | 'edit';
   };
 
   isSubmitting = signal(false);
@@ -1025,7 +1103,7 @@ export class SessionDialogComponent implements OnInit {
     learningOutcomes: [''],
     materialsUrl: [''],
     recordingUrl: [''],
-    tagsInput: ['']
+    tagsInput: [''],
   });
 
   ngOnInit() {
@@ -1033,7 +1111,7 @@ export class SessionDialogComponent implements OnInit {
       const session = this.data.session;
       const startDateTime = new Date(session.startTime);
       const endDateTime = new Date(session.endTime);
-      
+
       // Create time-only Date objects for the timepicker
       // The timepicker uses Date objects but only cares about hours/minutes
       const createTimeDate = (date: Date): Date => {
@@ -1041,7 +1119,7 @@ export class SessionDialogComponent implements OnInit {
         timeDate.setHours(date.getHours(), date.getMinutes(), 0, 0);
         return timeDate;
       };
-      
+
       this.sessionForm.patchValue({
         title: session.title,
         description: session.description,
@@ -1068,33 +1146,34 @@ export class SessionDialogComponent implements OnInit {
         learningOutcomes: session.learningOutcomes || '',
         materialsUrl: session.materialsUrl || '',
         recordingUrl: session.recordingUrl || '',
-        tagsInput: session.tags?.join(', ') || ''
+        tagsInput: session.tags?.join(', ') || '',
       });
     } else {
       // Set default dates for new sessions (tomorrow at 9:00 and 10:00)
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(9, 0, 0, 0);
-      
+
       const defaultStartTime = new Date();
       defaultStartTime.setHours(9, 0, 0, 0);
-      
+
       const defaultEndTime = new Date();
       defaultEndTime.setHours(10, 0, 0, 0);
-      
+
       this.sessionForm.patchValue({
         startDate: tomorrow,
         startTimeValue: defaultStartTime,
         endDate: tomorrow,
-        endTimeValue: defaultEndTime
+        endTimeValue: defaultEndTime,
       });
     }
 
     // Auto-generate slug from title
     if (this.data.mode === 'create') {
-      this.sessionForm.get('title')?.valueChanges.subscribe(title => {
+      this.sessionForm.get('title')?.valueChanges.subscribe((title) => {
         if (title && !this.sessionForm.get('slug')?.dirty) {
-          const slug = title.toLowerCase()
+          const slug = title
+            .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
@@ -1109,7 +1188,7 @@ export class SessionDialogComponent implements OnInit {
   // timeValue can be a Date object (from mat-timepicker) or a string (HH:mm format)
   private combineDateAndTime(date: Date, timeValue: Date | string): Date {
     const result = new Date(date);
-    
+
     if (timeValue instanceof Date) {
       // Mat-timepicker returns a Date object
       result.setHours(timeValue.getHours(), timeValue.getMinutes(), 0, 0);
@@ -1124,7 +1203,7 @@ export class SessionDialogComponent implements OnInit {
         result.setHours(timeDate.getHours(), timeDate.getMinutes(), 0, 0);
       }
     }
-    
+
     return result;
   }
 
@@ -1134,8 +1213,11 @@ export class SessionDialogComponent implements OnInit {
     this.isSubmitting.set(true);
 
     const formValue = this.sessionForm.value;
-    const tags = formValue.tagsInput 
-      ? formValue.tagsInput.split(',').map(t => t.trim().toLowerCase()).filter(t => t)
+    const tags = formValue.tagsInput
+      ? formValue.tagsInput
+          .split(',')
+          .map((t) => t.trim().toLowerCase())
+          .filter((t) => t)
       : undefined;
 
     // Combine date and time values
@@ -1168,12 +1250,10 @@ export class SessionDialogComponent implements OnInit {
           prerequisites: formValue.prerequisites || undefined,
           learningOutcomes: formValue.learningOutcomes || undefined,
           targetAudience: formValue.targetAudience || undefined,
-          tags: tags
+          tags: tags,
         };
 
-        await lastValueFrom(
-          this.http.post<Session>('/api/v1/admin/sessions', request)
-        );
+        await lastValueFrom(this.http.post<Session>('/api/v1/admin/sessions', request));
       } else {
         const request: UpdateSessionRequest = {
           trackId: formValue.trackId || undefined,
@@ -1199,10 +1279,10 @@ export class SessionDialogComponent implements OnInit {
           prerequisites: formValue.prerequisites || undefined,
           learningOutcomes: formValue.learningOutcomes || undefined,
           targetAudience: formValue.targetAudience || undefined,
-          tags: tags
+          tags: tags,
         };
         await lastValueFrom(
-          this.http.put<Session>(`/api/v1/admin/sessions/${this.data.session!.id}`, request)
+          this.http.put<Session>(`/api/v1/admin/sessions/${this.data.session!.id}`, request),
         );
       }
 

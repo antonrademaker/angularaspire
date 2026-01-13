@@ -11,7 +11,7 @@ import { dateRangeValidator } from '../../../shared-ui/validators/date-range.val
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './event-form.html',
-  styleUrls: ['./event-form.scss']
+  styleUrls: ['./event-form.scss'],
 })
 export class EventFormComponent implements OnInit {
   eventForm: FormGroup;
@@ -25,19 +25,22 @@ export class EventFormComponent implements OnInit {
     private fb: FormBuilder,
     private eventService: EventService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
   ) {
-    this.eventForm = this.fb.group({
-      title: ['', Validators.required],
-      slug: ['', [Validators.required, Validators.pattern('^[a-z0-9-]+$')]],
-      description: ['', Validators.required],
-      detailedDescription: [''],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
-      status: [EventStatus.Draft],
-      logoUrl: [''],
-      primaryColor: ['']
-    }, { validators: dateRangeValidator('startDate', 'endDate') });
+    this.eventForm = this.fb.group(
+      {
+        title: ['', Validators.required],
+        slug: ['', [Validators.required, Validators.pattern('^[a-z0-9-]+$')]],
+        description: ['', Validators.required],
+        detailedDescription: [''],
+        startDate: ['', Validators.required],
+        endDate: ['', Validators.required],
+        status: [EventStatus.Draft],
+        logoUrl: [''],
+        primaryColor: [''],
+      },
+      { validators: dateRangeValidator('startDate', 'endDate') },
+    );
   }
 
   ngOnInit(): void {
@@ -61,7 +64,7 @@ export class EventFormComponent implements OnInit {
           endDate: event.endDate.split('T')[0],
           status: event.status,
           logoUrl: event.logoUrl,
-          primaryColor: event.primaryColor
+          primaryColor: event.primaryColor,
         });
         this.loading = false;
       },
@@ -69,7 +72,7 @@ export class EventFormComponent implements OnInit {
         this.error = 'Failed to load event';
         this.loading = false;
         console.error(err);
-      }
+      },
     });
   }
 
@@ -101,8 +104,7 @@ export class EventFormComponent implements OnInit {
         this.error = err.error || 'An error occurred';
         this.loading = false;
         console.error(err);
-      }
+      },
     });
   }
 }
-

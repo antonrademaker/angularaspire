@@ -13,7 +13,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   standalone: true,
   imports: [MatCardModule, MatIconModule, MatButtonModule, DragDropModule],
   templateUrl: './session-sidebar.component.html',
-  styleUrls: ['./session-sidebar.component.scss']
+  styleUrls: ['./session-sidebar.component.scss'],
 })
 export class SessionSidebarComponent implements OnInit {
   @Input() eventId: string | null = null;
@@ -21,7 +21,7 @@ export class SessionSidebarComponent implements OnInit {
 
   constructor(
     private sessionService: SessionService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -35,8 +35,8 @@ export class SessionSidebarComponent implements OnInit {
 
   loadUnassignedSessions(): void {
     if (this.eventId) {
-      this.sessionService.getSessions(this.eventId).subscribe(sessions => {
-        this.unassignedSessions = sessions.filter(s => s.status === SessionStatus.Draft);
+      this.sessionService.getSessions(this.eventId).subscribe((sessions) => {
+        this.unassignedSessions = sessions.filter((s) => s.status === SessionStatus.Draft);
       });
     }
   }

@@ -4,12 +4,12 @@ import { Observable } from 'rxjs';
 import { Track, CreateTrackRequest, UpdateTrackRequest } from '../models/track.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TrackService {
   private apiUrl = '/api/events';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getTracks(eventId: string): Observable<Track[]> {
     return this.http.get<Track[]>(`${this.apiUrl}/${eventId}/tracks`);

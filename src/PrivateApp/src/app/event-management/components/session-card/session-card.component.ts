@@ -9,7 +9,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   standalone: true,
   imports: [MatIconModule, DragDropModule],
   templateUrl: './session-card.component.html',
-  styleUrls: ['./session-card.component.scss']
+  styleUrls: ['./session-card.component.scss'],
 })
 export class SessionCardComponent {
   @Input() session!: Session;

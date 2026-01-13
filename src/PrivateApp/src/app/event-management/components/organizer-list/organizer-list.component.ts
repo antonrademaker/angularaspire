@@ -23,10 +23,10 @@ import { EventOrganizer, OrganizerRole } from '../../models/organizer.model';
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule
-],
+    MatSelectModule,
+  ],
   templateUrl: './organizer-list.component.html',
-  styleUrls: ['./organizer-list.component.scss']
+  styleUrls: ['./organizer-list.component.scss'],
 })
 export class OrganizerListComponent implements OnInit {
   @Input() eventId: string | null = null;
@@ -34,18 +34,18 @@ export class OrganizerListComponent implements OnInit {
   displayedColumns: string[] = ['name', 'email', 'role', 'actions'];
   addForm: FormGroup;
   isAdding = false;
-  roles = Object.values(OrganizerRole).filter(value => typeof value === 'number') as number[];
+  roles = Object.values(OrganizerRole).filter((value) => typeof value === 'number') as number[];
 
   constructor(
     private organizerService: OrganizerService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {
     this.addForm = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      role: [OrganizerRole.Collaborator, Validators.required]
+      role: [OrganizerRole.Collaborator, Validators.required],
     });
   }
 
@@ -58,8 +58,8 @@ export class OrganizerListComponent implements OnInit {
   loadOrganizers(): void {
     if (!this.eventId) return;
     this.organizerService.getOrganizers(this.eventId).subscribe({
-      next: (data) => this.organizers = data,
-      error: (err) => console.error('Failed to load organizers', err)
+      next: (data) => (this.organizers = data),
+      error: (err) => console.error('Failed to load organizers', err),
     });
   }
 
@@ -82,7 +82,7 @@ export class OrganizerListComponent implements OnInit {
       error: (err) => {
         console.error('Failed to add organizer', err);
         this.snackBar.open('Failed to add organizer', 'Close', { duration: 3000 });
-      }
+      },
     });
   }
 
@@ -97,7 +97,7 @@ export class OrganizerListComponent implements OnInit {
       error: (err) => {
         console.error('Failed to remove organizer', err);
         this.snackBar.open('Failed to remove organizer', 'Close', { duration: 3000 });
-      }
+      },
     });
   }
 

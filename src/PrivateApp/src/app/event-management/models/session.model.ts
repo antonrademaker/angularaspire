@@ -1,13 +1,13 @@
 export enum SessionStatus {
   Draft = 'Draft',
   Scheduled = 'Scheduled',
-  Cancelled = 'Cancelled'
+  Cancelled = 'Cancelled',
 }
 
 export enum SessionLevel {
   Beginner = 'Beginner',
   Intermediate = 'Intermediate',
-  Advanced = 'Advanced'
+  Advanced = 'Advanced',
 }
 
 export enum SubmissionStatus {
@@ -15,7 +15,7 @@ export enum SubmissionStatus {
   Submitted = 'Submitted',
   UnderReview = 'UnderReview',
   Accepted = 'Accepted',
-  Rejected = 'Rejected'
+  Rejected = 'Rejected',
 }
 
 export interface SessionAssignment {

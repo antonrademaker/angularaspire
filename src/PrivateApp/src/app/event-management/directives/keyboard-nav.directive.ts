@@ -2,7 +2,7 @@ import { Directive, ElementRef, HostListener, Input } from '@angular/core';
 
 @Directive({
   selector: '[appKeyboardNav]',
-  standalone: true
+  standalone: true,
 })
 export class KeyboardNavDirective {
   @Input() appKeyboardNav: string = ''; // Selector for navigable items
@@ -11,7 +11,9 @@ export class KeyboardNavDirective {
 
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
-    const items = Array.from(this.el.nativeElement.querySelectorAll(this.appKeyboardNav)) as HTMLElement[];
+    const items = Array.from(
+      this.el.nativeElement.querySelectorAll(this.appKeyboardNav),
+    ) as HTMLElement[];
     const currentIndex = items.indexOf(document.activeElement as HTMLElement);
 
     if (currentIndex === -1) return;

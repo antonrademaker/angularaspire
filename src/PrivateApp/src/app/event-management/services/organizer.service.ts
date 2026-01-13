@@ -4,12 +4,12 @@ import { Observable } from 'rxjs';
 import { EventOrganizer, AddOrganizerRequest } from '../models/organizer.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OrganizerService {
   private apiUrl = '/api/events';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getOrganizers(eventId: string): Observable<EventOrganizer[]> {
     return this.http.get<EventOrganizer[]>(`${this.apiUrl}/${eventId}/organizers`);

@@ -22,7 +22,7 @@ export enum EventStatus {
   Active = 2,
   Completed = 3,
   Cancelled = 4,
-  Archived = 5
+  Archived = 5,
 }
 
 export interface EventSearchResult {

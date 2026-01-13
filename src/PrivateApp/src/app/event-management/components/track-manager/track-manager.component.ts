@@ -10,7 +10,7 @@ import { Track } from '../../models/track.model';
   standalone: true,
   imports: [ReactiveFormsModule, DragDropModule],
   templateUrl: './track-manager.component.html',
-  styleUrls: ['./track-manager.component.scss']
+  styleUrls: ['./track-manager.component.scss'],
 })
 export class TrackManagerComponent implements OnInit {
   @Input() eventId!: string;
@@ -21,12 +21,12 @@ export class TrackManagerComponent implements OnInit {
 
   constructor(
     private trackService: TrackService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
   ) {
     this.trackForm = this.fb.group({
       name: ['', Validators.required],
       description: [''],
-      color: ['#000000']
+      color: ['#000000'],
     });
   }
 
@@ -37,7 +37,7 @@ export class TrackManagerComponent implements OnInit {
   }
 
   loadTracks(): void {
-    this.trackService.getTracks(this.eventId).subscribe(tracks => {
+    this.trackService.getTracks(this.eventId).subscribe((tracks) => {
       this.tracks = tracks;
     });
   }
@@ -53,7 +53,7 @@ export class TrackManagerComponent implements OnInit {
     this.trackForm.patchValue({
       name: track.name,
       description: track.description,
-      color: track.color
+      color: track.color,
     });
     this.isFormVisible = true;
   }
@@ -91,7 +91,7 @@ export class TrackManagerComponent implements OnInit {
   drop(event: CdkDragDrop<Track[]>): void {
     moveItemInArray(this.tracks, event.previousIndex, event.currentIndex);
 
-    const trackIds = this.tracks.map(t => t.id);
+    const trackIds = this.tracks.map((t) => t.id);
     this.trackService.reorderTracks(this.eventId, trackIds).subscribe();
   }
 }

@@ -1,4 +1,12 @@
-import { Component, OnInit, signal, computed, inject, NgZone, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  signal,
+  computed,
+  inject,
+  NgZone,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -13,7 +21,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MatDialogModule,
+  MatDialog,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -124,11 +137,11 @@ export interface TrackStatistics {
     MatExpansionModule,
     MatToolbarModule,
     MatTooltipModule,
-    DatePipe
-],
+    DatePipe,
+  ],
   templateUrl: './track-manager.component.html',
   styleUrls: ['./track-manager.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrackManagerComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -153,15 +166,24 @@ export class TrackManagerComponent implements OnInit {
   statistics = signal<TrackStatistics | null>(null);
 
   // Computed values
-  displayedColumns = ['drag', 'name', 'description', 'sessionCount', 'status', 'createdAt', 'actions'];
+  displayedColumns = [
+    'drag',
+    'name',
+    'description',
+    'sessionCount',
+    'status',
+    'createdAt',
+    'actions',
+  ];
   filteredTracks = computed(() => {
     const text = this.searchText().toLowerCase();
     const showInactive = this.showInactive();
-    return this.tracks().filter(track => {
-      const matchesText = !text || 
-        track.name.toLowerCase().includes(text) || 
+    return this.tracks().filter((track) => {
+      const matchesText =
+        !text ||
+        track.name.toLowerCase().includes(text) ||
         track.description.toLowerCase().includes(text) ||
-        track.tags?.some(tag => tag.toLowerCase().includes(text));
+        track.tags?.some((tag) => tag.toLowerCase().includes(text));
       const matchesStatus = showInactive || track.isActive;
       return matchesText && matchesStatus;
     });
@@ -171,7 +193,7 @@ export class TrackManagerComponent implements OnInit {
   searchForm = this.fb.group({
     searchText: [''],
     eventId: [''],
-    showInactive: [false]
+    showInactive: [false],
   });
 
   // Table data source
@@ -179,15 +201,15 @@ export class TrackManagerComponent implements OnInit {
 
   constructor() {
     // Subscribe to form changes for reactive filtering
-    this.searchForm.get('searchText')?.valueChanges.subscribe(value => {
+    this.searchForm.get('searchText')?.valueChanges.subscribe((value) => {
       this.searchText.set(value || '');
     });
 
-    this.searchForm.get('showInactive')?.valueChanges.subscribe(value => {
+    this.searchForm.get('showInactive')?.valueChanges.subscribe((value) => {
       this.showInactive.set(!!value);
     });
 
-    this.searchForm.get('eventId')?.valueChanges.subscribe(value => {
+    this.searchForm.get('eventId')?.valueChanges.subscribe((value) => {
       if (value) {
         this.selectedEventId.set(value);
         this.loadTracks();
@@ -229,11 +251,11 @@ export class TrackManagerComponent implements OnInit {
         page: this.pageIndex() + 1,
         pageSize: this.pageSize(),
         sortBy: this.sortBy(),
-        sortDirection: this.sortDirection()
+        sortDirection: this.sortDirection(),
       };
 
       const response = await lastValueFrom(
-        this.http.post<PagedResult<Track>>('/api/v1/admin/tracks/search', request)
+        this.http.post<PagedResult<Track>>('/api/v1/admin/tracks/search', request),
       );
 
       this.tracks.set(response.items);
@@ -252,7 +274,7 @@ export class TrackManagerComponent implements OnInit {
 
     try {
       const stats = await lastValueFrom(
-        this.http.get<TrackStatistics>(`/api/v1/admin/tracks/${this.selectedEventId()}/statistics`)
+        this.http.get<TrackStatistics>(`/api/v1/admin/tracks/${this.selectedEventId()}/statistics`),
       );
       this.statistics.set(stats);
     } catch (err) {
@@ -263,7 +285,7 @@ export class TrackManagerComponent implements OnInit {
   async createTrack() {
     const dialogRef = this.dialog.open(TrackDialogComponent, {
       width: '600px',
-      data: { eventId: this.selectedEventId(), mode: 'create' }
+      data: { eventId: this.selectedEventId(), mode: 'create' },
     });
 
     const result = await lastValueFrom(dialogRef.afterClosed());
@@ -277,7 +299,7 @@ export class TrackManagerComponent implements OnInit {
   async editTrack(track: Track) {
     const dialogRef = this.dialog.open(TrackDialogComponent, {
       width: '600px',
-      data: { track, mode: 'edit' }
+      data: { track, mode: 'edit' },
     });
 
     const result = await lastValueFrom(dialogRef.afterClosed());
@@ -289,15 +311,15 @@ export class TrackManagerComponent implements OnInit {
   }
 
   async deleteTrack(track: Track) {
-    const confirmed = confirm(`Are you sure you want to delete the track "${track.name}"? This action cannot be undone.`);
+    const confirmed = confirm(
+      `Are you sure you want to delete the track "${track.name}"? This action cannot be undone.`,
+    );
     if (!confirmed) return;
 
     this.isLoading.set(true);
 
     try {
-      await lastValueFrom(
-        this.http.delete(`/api/v1/admin/tracks/${track.id}`)
-      );
+      await lastValueFrom(this.http.delete(`/api/v1/admin/tracks/${track.id}`));
 
       await this.loadTracks();
       await this.loadStatistics();
@@ -315,9 +337,7 @@ export class TrackManagerComponent implements OnInit {
 
     try {
       const endpoint = track.isActive ? 'deactivate' : 'activate';
-      await lastValueFrom(
-        this.http.post(`/api/v1/admin/tracks/${track.id}/${endpoint}`, {})
-      );
+      await lastValueFrom(this.http.post(`/api/v1/admin/tracks/${track.id}/${endpoint}`, {}));
 
       await this.loadTracks();
       await this.loadStatistics();
@@ -342,15 +362,13 @@ export class TrackManagerComponent implements OnInit {
       isActive: false,
       maxSessions: track.maxSessions,
       tags: track.tags ? [...track.tags] : undefined,
-      metadata: track.metadata ? { ...track.metadata } : undefined
+      metadata: track.metadata ? { ...track.metadata } : undefined,
     };
 
     this.isLoading.set(true);
 
     try {
-      await lastValueFrom(
-        this.http.post<Track>('/api/v1/admin/tracks', request)
-      );
+      await lastValueFrom(this.http.post<Track>('/api/v1/admin/tracks', request));
 
       await this.loadTracks();
       await this.loadStatistics();
@@ -372,16 +390,14 @@ export class TrackManagerComponent implements OnInit {
     // Update display orders
     const trackOrders: TrackOrderItem[] = tracks.map((track, index) => ({
       trackId: track.id,
-      displayOrder: index + 1
+      displayOrder: index + 1,
     }));
 
     this.isLoading.set(true);
 
     try {
       const request: TrackReorderRequest = { trackOrders };
-      await lastValueFrom(
-        this.http.post('/api/v1/admin/tracks/reorder', request)
-      );
+      await lastValueFrom(this.http.post('/api/v1/admin/tracks/reorder', request));
 
       // Update local state
       tracks.forEach((track, index) => {
@@ -413,8 +429,8 @@ export class TrackManagerComponent implements OnInit {
   }
 
   navigateToSessions(trackId: string) {
-    this.router.navigate(['/session-management', 'sessions'], { 
-      queryParams: { trackId } 
+    this.router.navigate(['/session-management', 'sessions'], {
+      queryParams: { trackId },
     });
   }
 
@@ -442,118 +458,119 @@ export class TrackManagerComponent implements OnInit {
     MatSelectModule,
     MatCheckboxModule,
     MatChipsModule,
-    MatIconModule
-],
+    MatIconModule,
+  ],
   template: `
     <h2 mat-dialog-title>
       {{ data.mode === 'create' ? 'Create New Track' : 'Edit Track' }}
     </h2>
-    
+
     <mat-dialog-content>
       <form [formGroup]="trackForm" class="track-form">
         <div class="row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Track Name</mat-label>
-            <input matInput formControlName="name" placeholder="Enter track name" required>
+            <input matInput formControlName="name" placeholder="Enter track name" required />
             @if (trackForm.get('name')?.hasError('required')) {
-              <mat-error>
-                Track name is required
-              </mat-error>
+              <mat-error> Track name is required </mat-error>
             }
             @if (trackForm.get('name')?.hasError('maxlength')) {
-              <mat-error>
-                Track name must be less than 200 characters
-              </mat-error>
+              <mat-error> Track name must be less than 200 characters </mat-error>
             }
           </mat-form-field>
         </div>
-    
+
         <div class="row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description"
+            <textarea
+              matInput
+              formControlName="description"
               placeholder="Enter track description"
-            rows="3"></textarea>
+              rows="3"
+            ></textarea>
           </mat-form-field>
         </div>
-    
+
         <div class="row">
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Slug</mat-label>
-            <input matInput formControlName="slug" placeholder="track-slug" required>
+            <input matInput formControlName="slug" placeholder="track-slug" required />
             <mat-hint>URL-friendly identifier</mat-hint>
             @if (trackForm.get('slug')?.hasError('required')) {
-              <mat-error>
-                Slug is required
-              </mat-error>
+              <mat-error> Slug is required </mat-error>
             }
             @if (trackForm.get('slug')?.hasError('pattern')) {
-              <mat-error>
-                Slug must contain only letters, numbers, and hyphens
-              </mat-error>
+              <mat-error> Slug must contain only letters, numbers, and hyphens </mat-error>
             }
           </mat-form-field>
-    
+
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Color</mat-label>
-            <input matInput type="color" formControlName="color" required>
+            <input matInput type="color" formControlName="color" required />
           </mat-form-field>
         </div>
-    
+
         <div class="row">
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Display Order</mat-label>
-            <input matInput type="number" formControlName="displayOrder" min="1">
+            <input matInput type="number" formControlName="displayOrder" min="1" />
           </mat-form-field>
-    
+
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Max Sessions</mat-label>
-            <input matInput type="number" formControlName="maxSessions" min="1">
+            <input matInput type="number" formControlName="maxSessions" min="1" />
             <mat-hint>Leave empty for unlimited</mat-hint>
           </mat-form-field>
         </div>
-    
+
         <div class="row">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Tags</mat-label>
-            <input matInput
+            <input
+              matInput
               placeholder="Add tags..."
-              (keydown.enter)="addTagFromInput($event.target)">
-            </mat-form-field>
-          </div>
-    
-          <div class="row">
-            <mat-checkbox formControlName="isActive">Active</mat-checkbox>
-          </div>
-        </form>
-      </mat-dialog-content>
-    
-      <mat-dialog-actions align="end">
-        <button mat-button (click)="cancel()">Cancel</button>
-        <button mat-raised-button
-          color="primary"
-          [disabled]="trackForm.invalid || isSubmitting()"
-          (click)="save()">
-          {{ data.mode === 'create' ? 'Create' : 'Update' }}
-        </button>
-      </mat-dialog-actions>
+              (keydown.enter)="addTagFromInput($event.target)"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="row">
+          <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+        </div>
+      </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="cancel()">Cancel</button>
+      <button
+        mat-raised-button
+        color="primary"
+        [disabled]="trackForm.invalid || isSubmitting()"
+        (click)="save()"
+      >
+        {{ data.mode === 'create' ? 'Create' : 'Update' }}
+      </button>
+    </mat-dialog-actions>
+  `,
+  styles: [
+    `
+      .track-form {
+        min-width: 500px;
+      }
+      .row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .full-width {
+        flex: 1;
+      }
+      .half-width {
+        flex: 0.5;
+      }
     `,
-  styles: [`
-    .track-form {
-      min-width: 500px;
-    }
-    .row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .full-width {
-      flex: 1;
-    }
-    .half-width {
-      flex: 0.5;
-    }
-  `]
+  ],
 })
 export class TrackDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -572,7 +589,7 @@ export class TrackDialogComponent implements OnInit {
     displayOrder: [1, [Validators.required, Validators.min(1)]],
     maxSessions: [null as number | null],
     tags: [[] as string[]],
-    isActive: [true]
+    isActive: [true],
   });
 
   ngOnInit() {
@@ -586,16 +603,17 @@ export class TrackDialogComponent implements OnInit {
         displayOrder: track.displayOrder,
         maxSessions: track.maxSessions,
         tags: track.tags || [],
-        isActive: track.isActive
+        isActive: track.isActive,
       });
       this.currentTags = track.tags || [];
     }
 
     // Auto-generate slug from name
     if (this.data.mode === 'create') {
-      this.trackForm.get('name')?.valueChanges.subscribe(name => {
+      this.trackForm.get('name')?.valueChanges.subscribe((name) => {
         if (name && !this.trackForm.get('slug')?.dirty) {
-          const slug = name.toLowerCase()
+          const slug = name
+            .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
@@ -646,16 +664,14 @@ export class TrackDialogComponent implements OnInit {
       if (this.data.mode === 'create') {
         const request: CreateTrackRequest = {
           eventId: this.data.eventId!,
-          ...this.trackForm.value as any
+          ...(this.trackForm.value as any),
         };
 
-        await lastValueFrom(
-          this.http.post<Track>('/api/v1/admin/tracks', request)
-        );
+        await lastValueFrom(this.http.post<Track>('/api/v1/admin/tracks', request));
       } else {
         const request: UpdateTrackRequest = this.trackForm.value as any;
         await lastValueFrom(
-          this.http.put<Track>(`/api/v1/admin/tracks/${this.data.track!.id}`, request)
+          this.http.put<Track>(`/api/v1/admin/tracks/${this.data.track!.id}`, request),
         );
       }
 

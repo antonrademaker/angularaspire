@@ -1,7 +1,12 @@
 <div class="schedule-grid-container">
   <div class="header">
     <h2>Schedule</h2>
-    <button mat-raised-button color="primary" (click)="addTimeSlot()" aria-label="Add new time slot">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="addTimeSlot()"
+      aria-label="Add new time slot"
+    >
       <mat-icon>add</mat-icon> Add Time Slot
     </button>
   </div>
@@ -20,13 +25,24 @@
         @for (slot of timeSlots; track slot) {
           <tr>
             <td class="time-col">
-              <div class="time-range">{{ slot.startTime | date:'shortTime' }} - {{ slot.endTime | date:'shortTime' }}</div>
+              <div class="time-range">
+                {{ slot.startTime | date: 'shortTime' }} - {{ slot.endTime | date: 'shortTime' }}
+              </div>
               <div class="slot-name">{{ slot.name }}</div>
               <div class="slot-actions">
-                <button mat-icon-button (click)="editTimeSlot(slot)" [attr.aria-label]="'Edit time slot ' + slot.name">
+                <button
+                  mat-icon-button
+                  (click)="editTimeSlot(slot)"
+                  [attr.aria-label]="'Edit time slot ' + slot.name"
+                >
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteTimeSlot(slot)" [attr.aria-label]="'Delete time slot ' + slot.name">
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="deleteTimeSlot(slot)"
+                  [attr.aria-label]="'Delete time slot ' + slot.name"
+                >
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -36,12 +52,10 @@
                 cdkDropList
                 [cdkDropListData]="gridData[slot.id][track.id]"
                 (cdkDropListDropped)="drop($event, track.id, slot.id)"
-                class="session-cell">
+                class="session-cell"
+              >
                 @for (session of gridData[slot.id][track.id]; track session) {
-                  <app-session-card
-                    cdkDrag
-                    [cdkDragData]="session"
-                    [session]="session">
+                  <app-session-card cdkDrag [cdkDragData]="session" [session]="session">
                   </app-session-card>
                 }
               </td>
@@ -51,9 +65,7 @@
       </tbody>
     </table>
     @if (timeSlots.length === 0) {
-      <div class="no-slots">
-        No time slots defined.
-      </div>
+      <div class="no-slots">No time slots defined.</div>
     }
   </div>
 </div>

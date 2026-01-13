@@ -114,11 +114,7 @@ export class ScheduleDragDropService {
       });
   }
 
-  private unassignSession(
-    eventId: string,
-    session: Session,
-    event: CdkDragDrop<Session[]>,
-  ): void {
+  private unassignSession(eventId: string, session: Session, event: CdkDragDrop<Session[]>): void {
     this.sessionService.unassignSession(eventId, session.id).subscribe({
       next: () => {
         transferArrayItem(

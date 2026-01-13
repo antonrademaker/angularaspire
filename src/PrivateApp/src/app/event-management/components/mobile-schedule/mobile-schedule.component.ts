@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [CommonModule, MatCardModule, MatExpansionModule, MatIconModule],
   templateUrl: './mobile-schedule.component.html',
-  styleUrls: ['./mobile-schedule.component.scss']
+  styleUrls: ['./mobile-schedule.component.scss'],
 })
 export class MobileScheduleComponent implements OnInit, OnChanges {
   @Input() timeSlots: TimeSlot[] = [];
@@ -32,11 +32,11 @@ export class MobileScheduleComponent implements OnInit, OnChanges {
 
   groupSessions(): void {
     this.sessionsBySlot = {};
-    this.timeSlots.forEach(slot => {
+    this.timeSlots.forEach((slot) => {
       this.sessionsBySlot[slot.id] = [];
     });
 
-    this.sessions.forEach(session => {
+    this.sessions.forEach((session) => {
       if (session.assignments && session.assignments.length > 0) {
         const assignment = session.assignments[0];
         if (this.sessionsBySlot[assignment.timeSlotId]) {
@@ -47,7 +47,7 @@ export class MobileScheduleComponent implements OnInit, OnChanges {
   }
 
   getTrackName(trackId: string): string {
-    const track = this.tracks.find(t => t.id === trackId);
+    const track = this.tracks.find((t) => t.id === trackId);
     return track ? track.name : 'Unknown Track';
   }
 }

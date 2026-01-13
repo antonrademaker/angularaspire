@@ -44,14 +44,14 @@ var privateApi = builder.AddProject<Projects.PrivateApi>("privateapi")
 var publicApp = builder.AddNpmApp("publicapp", "../PublicApp", "start")
     .WithReference(publicApi)
     .WaitFor(publicApi)
-    .WithHttpEndpoint(port: 4200, env: "PORT")
+    .WithHttpEndpoint(port: 4200, env: "PORT", isProxied: false)
     .WithExternalHttpEndpoints();
 
 // PrivateApp - admin Angular frontend on port 4201
 var privateApp = builder.AddNpmApp("privateapp", "../PrivateApp", "start")
     .WithReference(privateApi)
     .WaitFor(privateApi)
-    .WithHttpEndpoint(port: 4201, targetPort: 4201, env: "PORT", isProxied: false)
+    .WithHttpEndpoint(port: 4201, env: "PORT", isProxied: false)
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();

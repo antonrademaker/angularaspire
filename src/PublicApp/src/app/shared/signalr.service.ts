@@ -37,7 +37,7 @@ export interface NotificationMessage {
 })
 export class SignalRService implements OnDestroy {
   private hubConnection?: signalR.HubConnection;
-  private readonly baseUrl = environment.publicApiUrl || 'https://localhost:7001';
+  private readonly baseUrl = environment.publicApiUrl;
 
   // Connection state
   private readonly connectionStateSubject = new BehaviorSubject<signalR.HubConnectionState>(

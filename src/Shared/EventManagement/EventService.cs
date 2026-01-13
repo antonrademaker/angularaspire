@@ -30,9 +30,8 @@ public class EventService : IEventService
 
     public async Task<EventSearchResult> SearchEventsAsync(EventSearchRequest searchRequest)
     {
-
-        var searchText = (searchRequest.SearchText ?? string.Empty).Replace(Environment.NewLine, "");
-        _logger.LogInformation("Searching events with criteria: {SearchText}", searchRequest.SearchText);
+        var searchTextSafe = (searchRequest.SearchText ?? string.Empty).Replace(Environment.NewLine, string.Empty);
+        _logger.LogInformation("Searching events with criteria: {SearchText}", searchTextSafe);
 
         IQueryable<Event> query = _eventContext.Events.AsQueryable();
 

@@ -54,7 +54,6 @@ export class EventListComponent implements OnInit {
       case EventStatus.Published: return 'Published';
       case EventStatus.Cancelled: return 'Cancelled';
       case EventStatus.Completed: return 'Completed';
-      case EventStatus.Postponed: return 'Postponed';
       default: return 'Unknown';
     }
   }

@@ -1,0 +1,61 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+  schedule:
+    - cron: '25 10 * * 5'
+
+env:
+  DOTNET_VERSION: '10.0.x'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp', 'javascript-typescript' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Java 21 is required for the latest CodeQL Action, but usually available on ubuntu-latest.
+    # explicit setup is good if we run into issues, but standard action implies it handles deps.
+    # However, we DO need to setup .NET for the C# build.
+    
+    - name: Setup .NET
+      if: matrix.language == 'csharp'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Build .NET
+      if: matrix.language == 'csharp'
+      run: |
+        dotnet restore EventManagement.sln
+        dotnet build EventManagement.sln --configuration Release --no-restore
+
+    - name: Autobuild JS/TS
+      if: matrix.language == 'javascript-typescript'
+      uses: github/codeql-action/autobuild@v3
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"

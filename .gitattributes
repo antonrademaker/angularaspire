@@ -1,7 +1,7 @@
 # Help git determine what is a text file and what is binary
 # http://git-scm.com/docs/gitattributes
 
-# Force all text files to be normalized to LF in the repo, 
+# Force all text files to be normalized to LF in the repo,
 # and use the native EOL on checkout (CRLF on Windows, LF on Linux)
 * text=auto
 

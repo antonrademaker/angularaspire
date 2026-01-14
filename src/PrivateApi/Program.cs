@@ -98,16 +98,26 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
+    var context = services.GetRequiredService<AppDbContext>();
     
     try
     {
+        // In development, check if database reset is requested
+        var resetDb = builder.Configuration.GetValue<bool>("ResetDatabase");
+        if (app.Environment.IsDevelopment() && resetDb)
+        {
+            logger.LogWarning("Resetting database as requested by configuration");
+            await context.Database.EnsureDeletedAsync();
+            logger.LogInformation("Database deleted successfully");
+        }
+        
         // Apply consolidated database migrations
-        var context = services.GetRequiredService<AppDbContext>();
         var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
         if (pendingMigrations.Any())
         {
             logger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count());
             await context.Database.MigrateAsync();
+            logger.LogInformation("Migrations applied successfully");
         }
         else
         {
@@ -119,6 +129,14 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         logger.LogError(ex, "An error occurred while setting up the database");
+        
+        // In development, provide helpful guidance
+        if (app.Environment.IsDevelopment())
+        {
+            logger.LogError("To reset the database, set 'ResetDatabase=true' in appsettings.Development.json or environment variables");
+            logger.LogError("Or manually drop the database and restart the application");
+        }
+        
         throw;
     }
 }

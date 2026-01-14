@@ -160,35 +160,8 @@ builder.Services.AddOpenApi("v1", openApi =>
 
 var app = builder.Build();
 
-// Apply database migrations on startup
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    
-    try
-    {
-        // Apply consolidated database migrations
-        var context = services.GetRequiredService<AppDbContext>();
-        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-        if (pendingMigrations.Any())
-        {
-            logger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count());
-            await context.Database.MigrateAsync();
-        }
-        else
-        {
-            logger.LogInformation("Database is up to date");
-        }
-        
-        logger.LogInformation("Database setup completed successfully");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "An error occurred while setting up the database");
-        throw;
-    }
-}
+// Note: Database migrations are handled by PrivateApi on startup
+// PublicApi only needs read access to the database
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())

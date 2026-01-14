@@ -1,6 +1,10 @@
-const ASPIRE_ENDPOINT = process.env['services__privateapi__https__0'] || process.env['services__privateapi__http__0'] || 'https://localhost:7038';
+const ASPIRE_ENDPOINT = process.env['services__privateapi__https__0'] || process.env['services__privateapi__http__0'] || 'http://localhost:59765';
 
 console.log('PrivateApp proxy configured for:', ASPIRE_ENDPOINT);
+console.log('Environment variables:', {
+  https: process.env['services__privateapi__https__0'],
+  http: process.env['services__privateapi__http__0']
+});
 
 const config = {
   '/api': {

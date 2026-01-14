@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Shared.ApiManagement;
 using Shared.Common;
+using Shared.Data;
 using Shared.EventManagement;
 using Shared.Registration;
 using Shared.SessionManagement;
@@ -33,14 +34,14 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
             // Remove ALL DbContext-related registrations to avoid provider conflicts
             // This is more aggressive - we remove everything that could conflict
             var descriptorsToRemove = services.Where(d =>
-                d.ServiceType == typeof(UserDbContext) ||
-                d.ServiceType == typeof(EventDbContext) ||
-                d.ServiceType == typeof(SessionDbContext) ||
+                d.ServiceType == typeof(AppDbContext) ||
+                d.ServiceType == typeof(AppDbContext) ||
+                d.ServiceType == typeof(AppDbContext) ||
                 d.ServiceType == typeof(RegistrationDbContext) ||
                 d.ServiceType == typeof(ApiKeyDbContext) ||
-                d.ServiceType == typeof(DbContextOptions<UserDbContext>) ||
-                d.ServiceType == typeof(DbContextOptions<EventDbContext>) ||
-                d.ServiceType == typeof(DbContextOptions<SessionDbContext>) ||
+                d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
+                d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
+                d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
                 d.ServiceType == typeof(DbContextOptions<RegistrationDbContext>) ||
                 d.ServiceType == typeof(DbContextOptions<ApiKeyDbContext>) ||
                 d.ServiceType == typeof(DbContextOptions) ||
@@ -56,7 +57,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 
             // Add InMemory DbContexts - use completely isolated service providers
             // to avoid any provider conflicts
-            services.AddDbContext<UserDbContext>(options =>
+            services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseInMemoryDatabase($"{_databaseName}_users");
                 options.EnableSensitiveDataLogging();
@@ -64,14 +65,14 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
                 options.UseInternalServiceProvider(null);
             });
 
-            services.AddDbContext<EventDbContext>(options =>
+            services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseInMemoryDatabase($"{_databaseName}_events");
                 options.EnableSensitiveDataLogging();
                 options.UseInternalServiceProvider(null);
             });
 
-            services.AddDbContext<SessionDbContext>(options =>
+            services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseInMemoryDatabase($"{_databaseName}_sessions");
                 options.EnableSensitiveDataLogging();
@@ -122,3 +123,4 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Development");
     }
 }
+

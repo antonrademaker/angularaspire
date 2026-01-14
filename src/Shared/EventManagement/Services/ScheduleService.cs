@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Shared.Data;
 using Shared.EventManagement.Entities;
 
 namespace Shared.EventManagement.Services;
 
 public class ScheduleService : IScheduleService
 {
-    private readonly EventDbContext _context;
+    private readonly AppDbContext _context;
 
-    public ScheduleService(EventDbContext context)
+    public ScheduleService(AppDbContext context)
     {
         _context = context;
     }

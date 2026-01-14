@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Shared.Data;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 
@@ -8,7 +9,7 @@ namespace Shared.Tests.EventManagement;
 
 public class SocialEventServiceTests : IDisposable
 {
-    private readonly EventDbContext _context;
+    private readonly AppDbContext _context;
     private readonly Mock<ILogger<SocialEventService>> _mockLogger;
     private readonly SocialEventService _service;
     private readonly Guid _testEventId;
@@ -16,11 +17,11 @@ public class SocialEventServiceTests : IDisposable
 
     public SocialEventServiceTests()
     {
-        var options = new DbContextOptionsBuilder<EventDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        _context = new EventDbContext(options);
+        _context = new AppDbContext(options);
         _mockLogger = new Mock<ILogger<SocialEventService>>();
         _service = new SocialEventService(_context, _mockLogger.Object);
         _testEventId = Guid.NewGuid();

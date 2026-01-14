@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Shared.Common;
+using Shared.Data;
 using Shared.EventManagement.Entities;
 
 namespace Shared.EventManagement;
@@ -12,16 +13,16 @@ namespace Shared.EventManagement;
 /// </summary>
 public class EventService : IEventService
 {
-    private readonly EventDbContext _eventContext;
+    private readonly AppDbContext _context;
     private readonly ILogger<EventService> _logger;
     private readonly bool _isInMemory;
 
     public EventService(
-        EventDbContext eventContext,
+        AppDbContext context,
         ILogger<EventService> logger,
         IOptions<DatabaseOptions>? databaseOptions = null)
     {
-        _eventContext = eventContext;
+        _context = context;
         _logger = logger;
         _isInMemory = databaseOptions?.Value?.UseInMemoryDatabase ?? false;
     }
@@ -33,7 +34,7 @@ public class EventService : IEventService
         var searchTextSafe = (searchRequest.SearchText ?? string.Empty).Replace("\r", "").Replace("\n", "");
         _logger.LogInformation("Searching events with criteria: {SearchText}", searchTextSafe);
 
-        IQueryable<Event> query = _eventContext.Events.AsQueryable();
+        IQueryable<Event> query = _context.Events.AsQueryable();
 
         // Only include user navigation when not using InMemory (avoids cross-context issues in tests)
         if (!_isInMemory)
@@ -99,7 +100,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Getting event by ID: {EventId}", eventId);
 
-        IQueryable<Event> query = _eventContext.Events.AsQueryable();
+        IQueryable<Event> query = _context.Events.AsQueryable();
 
         // Only include user navigation when not using InMemory and includeDetails is true
         if (includeDetails && !_isInMemory)
@@ -114,7 +115,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Getting event by slug: {Slug}", slug.Replace("\r", "").Replace("\n", ""));
 
-        IQueryable<Event> query = _eventContext.Events.AsQueryable();
+        IQueryable<Event> query = _context.Events.AsQueryable();
 
         // Only include user navigation when not using InMemory and includeDetails is true
         if (includeDetails && !_isInMemory)
@@ -129,7 +130,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Getting upcoming events (limit: {Limit})", limit);
 
-        IQueryable<Event> query = _eventContext.Events
+        IQueryable<Event> query = _context.Events
             .Where(e => e.StartDate > DateTime.UtcNow)
             .Where(e => e.Status == EventStatus.Published);
 
@@ -145,7 +146,7 @@ public class EventService : IEventService
         _logger.LogInformation("Getting events by tags: {Tags}", string.Join(", ", tags));
 
         // PostgreSQL JSON queries for tag matching
-        List<Event> events = await _eventContext.Events
+        List<Event> events = await _context.Events
             .Where(e => e.Status == EventStatus.Published)
             .Where(e => e.Visibility == EventVisibility.Public)
             .Where(e => e.Tags != null)
@@ -168,7 +169,7 @@ public class EventService : IEventService
         _logger.LogInformation("Creating new event: {Title}", eventData.Title.Replace("\r", "").Replace("\n", ""));
 
         // Validate slug uniqueness
-        Event? existingEvent = await _eventContext.Events
+        Event? existingEvent = await _context.Events
             .FirstOrDefaultAsync(e => e.Slug == eventData.Slug);
         if (existingEvent != null)
         {
@@ -193,8 +194,8 @@ public class EventService : IEventService
             UpdatedAt = DateTime.UtcNow
         };
 
-        _eventContext.Events.Add(newEvent);
-        await _eventContext.SaveChangesAsync();
+        _context.Events.Add(newEvent);
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Created event with ID: {EventId}", newEvent.Id);
         return newEvent;
@@ -204,7 +205,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Updating event: {EventId}", eventId);
 
-        Event? existingEvent = await _eventContext.Events.FindAsync(eventId);
+        Event? existingEvent = await _context.Events.FindAsync(eventId);
         if (existingEvent == null)
         {
             return null;
@@ -213,7 +214,7 @@ public class EventService : IEventService
         // Validate slug uniqueness (excluding current event)
         if (existingEvent.Slug != eventData.Slug)
         {
-            var slugExists = await _eventContext.Events
+            var slugExists = await _context.Events
                 .AnyAsync(e => e.Slug == eventData.Slug && e.Id != eventId);
             if (slugExists)
             {
@@ -235,7 +236,7 @@ public class EventService : IEventService
         existingEvent.UpdatedBy = updatedByUserId;
         existingEvent.UpdatedAt = DateTime.UtcNow;
 
-        await _eventContext.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Updated event: {EventId}", eventId);
         return existingEvent;
@@ -243,7 +244,7 @@ public class EventService : IEventService
 
     public async Task<Shared.Common.Result> UpdateEventStatusAsync(Guid eventId, EventStatus newStatus, Guid userId)
     {
-        var evt = await _eventContext.Events.FindAsync(eventId);
+        var evt = await _context.Events.FindAsync(eventId);
         if (evt == null)
             return Shared.Common.Result.Failure("Event not found");
 
@@ -257,7 +258,7 @@ public class EventService : IEventService
         evt.UpdatedAt = DateTime.UtcNow;
         evt.UpdatedBy = userId;
 
-        await _eventContext.SaveChangesAsync();
+        await _context.SaveChangesAsync();
         return Shared.Common.Result.Success();
     }
 
@@ -265,14 +266,14 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Deleting event: {EventId} by user: {UserId}", eventId, deletedByUserId);
 
-        Event? existingEvent = await _eventContext.Events.FindAsync(eventId);
+        Event? existingEvent = await _context.Events.FindAsync(eventId);
         if (existingEvent == null)
         {
             return false;
         }
 
-        _eventContext.Events.Remove(existingEvent);
-        await _eventContext.SaveChangesAsync();
+        _context.Events.Remove(existingEvent);
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Deleted event: {EventId}", eventId);
         return true;
@@ -282,7 +283,7 @@ public class EventService : IEventService
     {
         _logger.LogInformation("Changing event status: {EventId} to {Status}", eventId, newStatus);
 
-        Event? existingEvent = await _eventContext.Events.FindAsync(eventId);
+        Event? existingEvent = await _context.Events.FindAsync(eventId);
         if (existingEvent == null)
         {
             return null;
@@ -291,7 +292,7 @@ public class EventService : IEventService
         existingEvent.Status = newStatus;
         existingEvent.UpdatedAt = DateTime.UtcNow;
 
-        await _eventContext.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         _logger.LogInformation("Changed event status: {EventId} to {Status}", eventId, newStatus);
         return existingEvent;
@@ -302,7 +303,7 @@ public class EventService : IEventService
     /*
     public async Task<bool> IsRegistrationAvailableAsync(Guid eventId)
     {
-        Event? eventItem = await _eventContext.Events.FindAsync(eventId);
+        Event? eventItem = await _context.Events.FindAsync(eventId);
         if (eventItem == null)
         {
             return false;
@@ -332,7 +333,7 @@ public class EventService : IEventService
 
     public async Task<int> UpdateAttendeeCountAsync(Guid eventId, int increment)
     {
-        Event? eventItem = await _eventContext.Events.FindAsync(eventId);
+        Event? eventItem = await _context.Events.FindAsync(eventId);
         if (eventItem == null)
         {
             throw new InvalidOperationException($"Event with ID {eventId} not found");
@@ -341,7 +342,7 @@ public class EventService : IEventService
         eventItem.CurrentAttendees = Math.Max(0, eventItem.CurrentAttendees + increment);
         eventItem.UpdatedAt = DateTime.UtcNow;
 
-        await _eventContext.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return eventItem.CurrentAttendees;
     }
@@ -351,7 +352,7 @@ public class EventService : IEventService
 
     public async Task<IEnumerable<Event>> GetEventsByOrganizerAsync(Guid organizerUserId, bool includeStats = false)
     {
-        IOrderedQueryable<Event> query = _eventContext.Events
+        IOrderedQueryable<Event> query = _context.Events
             .Where(e => e.CreatedBy == organizerUserId)
             .OrderByDescending(e => e.CreatedAt);
 
@@ -361,7 +362,7 @@ public class EventService : IEventService
     /*
     public async Task<EventRegistrationStats?> GetEventStatsAsync(Guid eventId)
     {
-        Event? eventItem = await _eventContext.Events.FindAsync(eventId);
+        Event? eventItem = await _context.Events.FindAsync(eventId);
         if (eventItem == null)
         {
             return null;
@@ -415,3 +416,5 @@ public class EventService : IEventService
     }
     */
 }
+
+

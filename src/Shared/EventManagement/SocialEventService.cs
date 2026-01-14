@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Common;
+using Shared.Data;
 
 namespace Shared.EventManagement;
 
@@ -12,10 +13,10 @@ namespace Shared.EventManagement;
 /// </summary>
 public class SocialEventService : ISocialEventService
 {
-    private readonly EventDbContext _context;
+    private readonly AppDbContext _context;
     private readonly ILogger<SocialEventService> _logger;
 
-    public SocialEventService(EventDbContext context, ILogger<SocialEventService> logger)
+    public SocialEventService(AppDbContext context, ILogger<SocialEventService> logger)
     {
         _context = context;
         _logger = logger;

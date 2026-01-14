@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Shared.Data;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 using Shared.EventManagement.Services;
@@ -7,16 +8,16 @@ namespace Shared.Tests.EventManagement;
 
 public class SessionSwapTests : IDisposable
 {
-    private readonly EventDbContext _context;
+    private readonly AppDbContext _context;
     private readonly EventSessionService _service;
 
     public SessionSwapTests()
     {
-        var options = new DbContextOptionsBuilder<EventDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        _context = new EventDbContext(options);
+        _context = new AppDbContext(options);
         _service = new EventSessionService(_context);
     }
 
@@ -52,7 +53,7 @@ public class SessionSwapTests : IDisposable
             TimeSlotId = timeSlot2Id
         };
 
-        _context.Sessions.AddRange(session1, session2);
+        _context.Set<Shared.EventManagement.Entities.Session>().AddRange(session1, session2);
         _context.SessionAssignments.AddRange(assignment1, assignment2);
         await _context.SaveChangesAsync();
 
@@ -93,7 +94,7 @@ public class SessionSwapTests : IDisposable
             TimeSlotId = timeSlotId
         };
 
-        _context.Sessions.AddRange(session1, session2);
+        _context.Set<Shared.EventManagement.Entities.Session>().AddRange(session1, session2);
         _context.SessionAssignments.Add(assignment1);
         await _context.SaveChangesAsync();
 
@@ -131,7 +132,7 @@ public class SessionSwapTests : IDisposable
             TimeSlotId = timeSlotId
         };
 
-        _context.Sessions.AddRange(session1, session2);
+        _context.Set<Shared.EventManagement.Entities.Session>().AddRange(session1, session2);
         _context.SessionAssignments.Add(assignment2);
         await _context.SaveChangesAsync();
 
@@ -159,7 +160,7 @@ public class SessionSwapTests : IDisposable
         var session1 = new Session { Id = Guid.NewGuid(), EventId = eventId, Title = "Session 1", ShortCode = "s1" };
         var session2 = new Session { Id = Guid.NewGuid(), EventId = eventId, Title = "Session 2", ShortCode = "s2" };
 
-        _context.Sessions.AddRange(session1, session2);
+        _context.Set<Shared.EventManagement.Entities.Session>().AddRange(session1, session2);
         await _context.SaveChangesAsync();
 
         // Act
@@ -173,3 +174,4 @@ public class SessionSwapTests : IDisposable
         Assert.Null(updatedAssignment2);
     }
 }
+

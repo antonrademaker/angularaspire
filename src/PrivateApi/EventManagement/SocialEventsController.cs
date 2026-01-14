@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrivateApi.SessionManagement;
 using Shared.Common;
+using Shared.Data;
 using Shared.EventManagement;
 
 namespace PrivateApi.EventManagement;
@@ -448,3 +449,4 @@ public record CancelSocialEventRequest
 {
     public string? Reason { get; init; }
 }
+

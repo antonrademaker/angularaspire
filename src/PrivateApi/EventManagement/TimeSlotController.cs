@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shared.Data;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 using Shared.EventManagement.Services;
@@ -10,9 +11,9 @@ namespace PrivateApi.EventManagement;
 [Route("api/events/{eventId}/time-slots")]
 public class TimeSlotController : ControllerBase
 {
-    private readonly EventDbContext _context;
+    private readonly AppDbContext _context;
 
-    public TimeSlotController(EventDbContext context)
+    public TimeSlotController(AppDbContext context)
     {
         _context = context;
     }
@@ -92,3 +93,4 @@ public class TimeSlotController : ControllerBase
 public record CreateTimeSlotRequest(string Name, DateTimeOffset StartTime, DateTimeOffset EndTime, TimeSlotType Type, bool IsEventLevel);
 public record UpdateTimeSlotRequest(string Name, DateTimeOffset StartTime, DateTimeOffset EndTime, TimeSlotType Type, bool IsEventLevel);
 public record CopyDayScheduleRequest(DateTimeOffset SourceDate, DateTimeOffset TargetDate);
+

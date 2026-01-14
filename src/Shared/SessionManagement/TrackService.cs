@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Common;
+using Shared.Data;
 using Shared.EventManagement.Entities;
 
 namespace Shared.SessionManagement;
@@ -11,10 +12,10 @@ namespace Shared.SessionManagement;
 /// </summary>
 public class TrackService : ITrackService
 {
-    private readonly SessionDbContext _context;
+    private readonly AppDbContext _context;
     private readonly ILogger<TrackService> _logger;
 
-    public TrackService(SessionDbContext context, ILogger<TrackService> logger)
+    public TrackService(AppDbContext context, ILogger<TrackService> logger)
     {
         _context = context;
         _logger = logger;

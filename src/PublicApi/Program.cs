@@ -1,13 +1,14 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PublicApi.Hubs;
 using PublicApi.Middleware;
+using Shared;
 using Shared.ApiManagement;
-using Shared.EventManagement;
+using Shared.Data;
 using Shared.Notifications;
 using Shared.Registration;
-using Shared.UserManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,11 +74,8 @@ builder.Services.AddAuthorization(options =>
             context.User.Identity.IsAuthenticated));
 });
 
-// Add user management services
-builder.Services.AddUserManagement();
-
-// Add event management services
-builder.Services.AddEventManagement();
+// Add all shared services (database + business logic)
+builder.Services.AddSharedServices(builder.Configuration);
 
 // Add registration services
 builder.Services.AddRegistrationServices(builder.Configuration);
@@ -161,6 +159,36 @@ builder.Services.AddOpenApi("v1", openApi =>
 });
 
 var app = builder.Build();
+
+// Apply database migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    
+    try
+    {
+        // Apply consolidated database migrations
+        var context = services.GetRequiredService<AppDbContext>();
+        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+        if (pendingMigrations.Any())
+        {
+            logger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count());
+            await context.Database.MigrateAsync();
+        }
+        else
+        {
+            logger.LogInformation("Database is up to date");
+        }
+        
+        logger.LogInformation("Database setup completed successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while setting up the database");
+        throw;
+    }
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())

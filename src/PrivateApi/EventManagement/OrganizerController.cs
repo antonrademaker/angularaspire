@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shared.Data;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 
@@ -9,9 +10,9 @@ namespace PrivateApi.EventManagement;
 [Route("api/events/{eventId}/organizers")]
 public class OrganizerController : ControllerBase
 {
-    private readonly EventDbContext _context;
+    private readonly AppDbContext _context;
 
-    public OrganizerController(EventDbContext context)
+    public OrganizerController(AppDbContext context)
     {
         _context = context;
     }
@@ -98,3 +99,4 @@ public class OrganizerController : ControllerBase
 
 public record EventOrganizerDto(Guid PersonId, string FirstName, string LastName, string Email, OrganizerRole Role, string? PhotoUrl);
 public record AddOrganizerRequest(string Email, string FirstName, string LastName, OrganizerRole Role);
+

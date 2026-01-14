@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shared.Data;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 using Shared.EventManagement.Services;
+using EventSession = Shared.EventManagement.Entities.Session;
 
 namespace PrivateApi.EventManagement;
 
@@ -10,19 +12,19 @@ namespace PrivateApi.EventManagement;
 [Route("api/events/{eventId}/sessions")]
 public class SessionController : ControllerBase
 {
-    private readonly EventDbContext _context;
+    private readonly AppDbContext _context;
     private readonly IEventSessionService _sessionService;
 
-    public SessionController(EventDbContext context, IEventSessionService sessionService)
+    public SessionController(AppDbContext context, IEventSessionService sessionService)
     {
         _context = context;
         _sessionService = sessionService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Session>>> GetSessions(Guid eventId)
+    public async Task<ActionResult<IEnumerable<EventSession>>> GetSessions(Guid eventId)
     {
-        return await _context.Sessions
+        return await _context.Set<EventSession>()
             .Include(s => s.Assignments)
             .Where(s => s.EventId == eventId)
             .OrderBy(s => s.Title)
@@ -30,9 +32,9 @@ public class SessionController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Session>> CreateSession(Guid eventId, CreateSessionRequest request)
+    public async Task<ActionResult<EventSession>> CreateSession(Guid eventId, CreateSessionRequest request)
     {
-        var session = new Session
+        var session = new EventSession
         {
             EventId = eventId,
             Title = request.Title,
@@ -46,7 +48,7 @@ public class SessionController : ControllerBase
             SubmissionStatus = SubmissionStatus.NotSubmitted
         };
 
-        _context.Sessions.Add(session);
+        _context.Set<EventSession>().Add(session);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetSessions), new { eventId }, session);
@@ -55,7 +57,7 @@ public class SessionController : ControllerBase
     [HttpPut("{sessionId}")]
     public async Task<IActionResult> UpdateSession(Guid eventId, Guid sessionId, UpdateSessionRequest request)
     {
-        var session = await _context.Sessions.FirstOrDefaultAsync(s => s.Id == sessionId && s.EventId == eventId);
+        var session = await _context.Set<EventSession>().FirstOrDefaultAsync(s => s.Id == sessionId && s.EventId == eventId);
         if (session == null)
         {
             return NotFound();
@@ -78,13 +80,13 @@ public class SessionController : ControllerBase
     [HttpDelete("{sessionId}")]
     public async Task<IActionResult> DeleteSession(Guid eventId, Guid sessionId)
     {
-        var session = await _context.Sessions.FirstOrDefaultAsync(s => s.Id == sessionId && s.EventId == eventId);
+        var session = await _context.Set<EventSession>().FirstOrDefaultAsync(s => s.Id == sessionId && s.EventId == eventId);
         if (session == null)
         {
             return NotFound();
         }
 
-        _context.Sessions.Remove(session);
+        _context.Set<EventSession>().Remove(session);
         await _context.SaveChangesAsync();
 
         return NoContent();
@@ -93,7 +95,7 @@ public class SessionController : ControllerBase
     [HttpPost("{sessionId}/assign")]
     public async Task<IActionResult> AssignSession(Guid eventId, Guid sessionId, AssignSessionRequest request)
     {
-        var session = await _context.Sessions.FirstOrDefaultAsync(s => s.Id == sessionId && s.EventId == eventId);
+        var session = await _context.Set<EventSession>().FirstOrDefaultAsync(s => s.Id == sessionId && s.EventId == eventId);
         if (session == null)
         {
             return NotFound();
@@ -140,7 +142,7 @@ public class SessionController : ControllerBase
     [HttpDelete("{sessionId}/assign")]
     public async Task<IActionResult> UnassignSession(Guid eventId, Guid sessionId)
     {
-        var session = await _context.Sessions.FirstOrDefaultAsync(s => s.Id == sessionId && s.EventId == eventId);
+        var session = await _context.Set<EventSession>().FirstOrDefaultAsync(s => s.Id == sessionId && s.EventId == eventId);
         if (session == null)
         {
             return NotFound();
@@ -164,3 +166,4 @@ public record CreateSessionRequest(string Title, string ShortCode, string? Abstr
 public record UpdateSessionRequest(string Title, string ShortCode, string? Abstract, int Duration, SessionLevel Level, string? Language, int? Capacity);
 public record AssignSessionRequest(Guid TrackId, Guid TimeSlotId, Guid? RoomConfigurationId);
 public record SwapSessionsRequest(Guid FirstSessionId, Guid SecondSessionId);
+

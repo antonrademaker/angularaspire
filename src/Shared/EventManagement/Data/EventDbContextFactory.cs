@@ -1,15 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Shared.Data;
 
 namespace Shared.EventManagement.Data;
 
-public class EventDbContextFactory : IDesignTimeDbContextFactory<EventDbContext>
+public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
-    public EventDbContext CreateDbContext(string[] args)
+    public AppDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<EventDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseNpgsql("Host=localhost;Database=eventdb;Username=postgres;Password=postgres");
 
-        return new EventDbContext(optionsBuilder.Options);
+        return new AppDbContext(optionsBuilder.Options);
     }
 }

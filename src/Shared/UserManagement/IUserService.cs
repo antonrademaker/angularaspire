@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Shared.Data;
 
 namespace Shared.UserManagement;
 
@@ -53,9 +54,9 @@ public interface IUserService
 /// </summary>
 public class UserService : IUserService
 {
-    private readonly UserDbContext _context;
+    private readonly AppDbContext _context;
 
-    public UserService(UserDbContext context)
+    public UserService(AppDbContext context)
     {
         _context = context;
     }

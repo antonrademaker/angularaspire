@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Data;
 using Shared.EventManagement;
 using Shared.EventManagement.Entities;
 
@@ -127,3 +128,4 @@ public class EventController : ControllerBase
 }
 
 public record UpdateEventStatusRequest(EventStatus Status);
+

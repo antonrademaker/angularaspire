@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Shared.Data;
 using Shared.EventManagement.Entities;
 
 namespace Shared.EventManagement.Services;
@@ -10,9 +11,9 @@ public interface IEventSessionService
 
 public class EventSessionService : IEventSessionService
 {
-    private readonly EventDbContext _context;
+    private readonly AppDbContext _context;
 
-    public EventSessionService(EventDbContext context)
+    public EventSessionService(AppDbContext context)
     {
         _context = context;
     }

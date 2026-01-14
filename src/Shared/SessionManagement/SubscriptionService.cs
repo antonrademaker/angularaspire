@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Common;
+using Shared.Data;
 
 namespace Shared.SessionManagement;
 
@@ -9,10 +10,10 @@ namespace Shared.SessionManagement;
 /// </summary>
 public class SubscriptionService : ISubscriptionService
 {
-    private readonly SessionDbContext _context;
+    private readonly AppDbContext _context;
     private readonly ILogger<SubscriptionService> _logger;
 
-    public SubscriptionService(SessionDbContext context, ILogger<SubscriptionService> logger)
+    public SubscriptionService(AppDbContext context, ILogger<SubscriptionService> logger)
     {
         _context = context;
         _logger = logger;

@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Common;
+using Shared.Data;
 
 namespace Shared.SessionManagement;
 
@@ -10,10 +11,10 @@ namespace Shared.SessionManagement;
 /// </summary>
 public class SpeakerService : ISpeakerService
 {
-    private readonly SessionDbContext _context;
+    private readonly AppDbContext _context;
     private readonly ILogger<SpeakerService> _logger;
 
-    public SpeakerService(SessionDbContext context, ILogger<SpeakerService> logger)
+    public SpeakerService(AppDbContext context, ILogger<SpeakerService> logger)
     {
         _context = context;
         _logger = logger;

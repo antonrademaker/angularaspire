@@ -3,23 +3,24 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Shared.Common;
+using Shared.Data;
 using Shared.EventManagement;
 
 namespace Shared.Tests.EventManagement;
 
 public class EventServiceTests : IDisposable
 {
-    private readonly EventDbContext _context;
+    private readonly AppDbContext _context;
     private readonly Mock<ILogger<EventService>> _mockLogger;
     private readonly EventService _eventService;
 
     public EventServiceTests()
     {
-        var options = new DbContextOptionsBuilder<EventDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        _context = new EventDbContext(options);
+        _context = new AppDbContext(options);
         _mockLogger = new Mock<ILogger<EventService>>();
 
         // Configure DatabaseOptions to indicate InMemory mode

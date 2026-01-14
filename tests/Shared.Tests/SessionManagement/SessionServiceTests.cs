@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Shared.Data;
 using Shared.EventManagement.Entities;
 using Shared.SessionManagement;
 using Session = Shared.SessionManagement.Session;
@@ -11,18 +12,18 @@ namespace Shared.Tests.SessionManagement;
 
 public class SessionServiceTests : IDisposable
 {
-    private readonly SessionDbContext _context;
+    private readonly AppDbContext _context;
     private readonly Mock<ILogger<SessionService>> _mockLogger;
     private readonly SessionService _sessionService;
     private readonly Guid _testEventId;
 
     public SessionServiceTests()
     {
-        var options = new DbContextOptionsBuilder<SessionDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        _context = new SessionDbContext(options);
+        _context = new AppDbContext(options);
         _mockLogger = new Mock<ILogger<SessionService>>();
         _sessionService = new SessionService(_context, _mockLogger.Object);
         _testEventId = Guid.NewGuid();
@@ -854,3 +855,4 @@ public class SessionServiceTests : IDisposable
         _context.Dispose();
     }
 }
+
